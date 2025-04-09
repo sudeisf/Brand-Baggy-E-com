@@ -2,7 +2,7 @@ from django.urls import path
 from accounts.views import (
     RegisterView,
     CustomTokenObtainPairView,
-    ProtectedView
+    ProtectedView,
 )
 
 urlpatterns = [
@@ -14,4 +14,5 @@ urlpatterns = [
     
     # Protected endpoint example
     path('protected/', ProtectedView.as_view(), name='protected'),
+  
 ]
