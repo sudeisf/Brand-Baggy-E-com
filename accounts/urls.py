@@ -3,6 +3,9 @@ from accounts.views import (
     RegisterView,
     CustomTokenObtainPairView,
     ProtectedView,
+    UserDetailView,
+    UserUpdateView,
+    LogOutView
 )
 
 urlpatterns = [
@@ -14,5 +17,9 @@ urlpatterns = [
     
     # Protected endpoint example
     path('protected/', ProtectedView.as_view(), name='protected'),
-  
+
+    # User profile endpoints
+    path('profile/', UserDetailView.as_view(), name='user-profile'),
+    path('profile/update/', UserUpdateView.as_view(), name='user-profile-update'),
+    path('logout/', LogOutView.as_view(), name='logout'),
 ]

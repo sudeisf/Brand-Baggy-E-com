@@ -93,23 +93,23 @@ LOGIN_REDIRECT_URL = 'http://localhost:5173/home'  # your React app
 
 
 SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'APP': {
-            'client_id': os.getenv('GOOGLE_CLIENT_ID'),
-            'secret': os.getenv('GOOGLE_CLIENT_SECRET'),
-            'key': ''
-        },
-        'SCOPE': ['profile', 'email'],
-        'AUTH_PARAMS': {'access_type': 'online'},
-    },
-    'github': {
-        'APP': {
-            'client_id': os.getenv('GITHUB_CLIENT_ID'),
-            'secret': os.getenv('GITHUB_CLIENT_SECRET'),
-            'key': ''
-        },
-        'SCOPE': ['user', 'read:user', 'user:email'],
-    }
+    # 'google': {
+    #     'APP': {
+    #         'client_id': '133179609677-nd6mg0lfdgbecpbn223f63i98kf7miti.apps.googleusercontent.com',
+    #         'secret': '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',
+    #         'key': ''
+    #     },
+    #     'SCOPE': ['profile', 'email'],
+    #     'AUTH_PARAMS': {'access_type': 'online'},
+    # },
+    # 'github': {
+    #     'APP': {
+    #         'client_id': '133179609677-nd6mg0lfdgbecpbn223f63i98kf7miti.apps.googleusercontent.com',
+    #         'secret': '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',
+    #         'key': ''
+    #     },
+    #     'SCOPE': ['user', 'read:user', 'user:email'],
+    # }
 }
 
 
@@ -223,3 +223,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'accounts.CustomUser'

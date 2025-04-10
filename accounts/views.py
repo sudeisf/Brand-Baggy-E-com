@@ -12,7 +12,6 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.contrib.auth import get_user_model
-from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
@@ -48,8 +47,60 @@ class ProtectedView(generics.RetrieveAPIView):
                'user': serializer.data
           })
 
+class LogOutView(APIView):
+     permission_classes = [IsAuthenticated]
+
+     def post(self, request):
+          try:
+               refresh_token = request.data.get('refresh')
+               if not refresh_token:
+                    return Response(
+                         {"error": "Refresh token is required"},
+                         status=status.HTTP_400_BAD_REQUEST
+                    )
+               
+               token = RefreshToken(refresh_token)
+               token.blacklist()
+               
+               return Response(
+                    {"message": "Successfully logged out"},
+                    status=status.HTTP_205_RESET_CONTENT
+               )
+          except Exception as e:
+               return Response(
+                    {"error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+               )
+
+class UserDetailView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserSerializer
+
+    def get_object(self):
+        return self.request.user
+
+class UserUpdateView(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserSerializer
+
+    def get_object(self):
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response({
+            "message": "Profile updated successfully",
+            "user": serializer.data
+        })
+
 # import os
 # from dotenv import load_dotenv   
+# load_dotenv()
+
 # class GoogleApiView(APIView):
 #     permission_classes = [AllowAny]
 
@@ -64,20 +115,22 @@ class ProtectedView(generics.RetrieveAPIView):
 #             )
         
 #         try:
-#             idinfo = id_token.verify_oauth2_token(token,requests.Request() , os.getenv('GOOGLE_CLIENT_ID'))
+#             idinfo = id_token.verify_oauth2_token(token,requests.Request() ,
+#                     '133179609677-nd6mg0lfdgbecpbn223f63i98kf7miti.apps.googleusercontent.com')
 #             email = idinfo['email']
-#             first_name = idinfo.get('given_name', '')
-#             last_name = idinfo.get('family_name', '')
+           
 
-#             user , created  = User.objects.get_or_create(email = email , defaults= {
-#                 "first_name" : first_name,
-#                 "last_name": last_name
-#             })
+#             user, created = User.objects.get_or_create(email=email, defaults={
+#                 'username': email.split('@')[0],  # or any default username strategy
+#                 'is_verified': True,
+#                })
 
 #             refresh = RefreshToken.for_user(user)
 
 #             return Response(
 #                  {
+#                       'message': "User authenticated successfully",
+#                       'user': UserSerializer(user).data,
 #                       'refresh': str(refresh),
 #                       'access' : str(refresh.access_token)
 #                  }
@@ -85,4 +138,3 @@ class ProtectedView(generics.RetrieveAPIView):
          
 #         except Exception as e :
 #             return Response({"error": "Invalid token", "details": str(e)}, status=400)
-    
