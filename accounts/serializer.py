@@ -4,6 +4,14 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
 from django.contrib.auth import authenticate
+from django.core  import signing
+import random 
+from .models import OTP
+from .services import sendEmail
+from django.utils import timezone
+from datetime import timedelta
+from django.conf import settings
+
 User = get_user_model()
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -74,4 +82,52 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # data['is_verified'] = user.is_verified  # Uncomment if needed
 
         return data
+
+
+
+class OtpSerializer(serializers.Serializer):
+    class Meta: 
+        model = OTP
+
+
+
+class Email_varify_OTP_generate_serializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, email):
+        if not User.objects.filter(email=email).exists():
+            raise serializers.ValidationError("Email not found")
+        return email
+    
+    def create(self, validated_data):
+        email = validated_data['email']
+        otp_code = random.randint(100000, 999999)
+        expires_at = timezone.now() + timedelta(minutes=15)
+        # encode otp
+        encoded_otp = signing.dumps(otp_code, key=settings.SECRET_KEY)
+        
+        otp = OTP.objects.create(
+            email = email,
+            otp=encoded_otp,
+            expires_at=expires_at
+        )
+
+        emailEncoded = signing.dumps(email, key=settings.SECRET_KEY)
+       
+        # encode otp
+        sendEmail(
+            "OTP varification Code",
+            email,
+            f"Your OTP is: {otp_code}\nExpires in 15 minutes."
+        )
+        return {
+            'email': email,
+            'message': 'OTP sent to email',
+            "expires_at": otp.expires_at,
+            "emailEncoded": emailEncoded
+        }
+    
+    
+         
+
 

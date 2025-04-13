@@ -4,6 +4,7 @@ from rest_framework import generics , status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated , AllowAny
 from .serializer import (
+    Email_varify_OTP_generate_serializer,
     UserCreateSerializer, 
     UserSerializer,
     CustomTokenObtainPairSerializer  # Make sure this is imported
@@ -13,7 +14,9 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from .services import sendEmail
+import random
+from .models import OTP
 User = get_user_model()
 
 
@@ -97,44 +100,66 @@ class UserUpdateView(generics.UpdateAPIView):
             "user": serializer.data
         })
 
-# import os
-# from dotenv import load_dotenv   
-# load_dotenv()
+class ForgotPasswordView(APIView):
+     permission_classes = [AllowAny]
 
-# class GoogleApiView(APIView):
-#     permission_classes = [AllowAny]
+     def post(self, request):
 
-#     def post(self, request):
-#         token  = request.data.get('id_token')
-#         if not token:
-#             return Response(
-#                 {
-#                     "error" : "No ID token provided"
-#                 },
-#                 status=400
-#             )
-        
-#         try:
-#             idinfo = id_token.verify_oauth2_token(token,requests.Request() ,
-#                     '133179609677-nd6mg0lfdgbecpbn223f63i98kf7miti.apps.googleusercontent.com')
-#             email = idinfo['email']
-           
+          email = request.data.get('email')
+          if not email:
+               return Response(
+                    {
+                         'error': 'Email is required'
+                    },
+                    status = status.HTTP_400_BAD_REQUEST               
+                    )
 
-#             user, created = User.objects.get_or_create(email=email, defaults={
-#                 'username': email.split('@')[0],  # or any default username strategy
-#                 'is_verified': True,
-#                })
+          try:
+               user = User.objects.get(email = email)
+              
+               OTP_CODE = random.randint(100000, 999999)
+               OTP.objects.create(
+                    email = email,
+                    otp = OTP_CODE
+               )
+               sendEmail(
+                    'Reset Password',
+                    email,
+                    f'Click the link to reset your password: http://localhost:8000/otp/{OTP_CODE}'
+                    f'OTP CODE: {OTP_CODE}'
+               )
+               return Response(
+                    {
+                         'message': 'Email sent successfully'
+                    },
+                    status = status.HTTP_200_OK
+               )
+          except User.DoesNotExist:
+               return Response(
+                    {
+                         'error': 'User does not exist'
+                    },
+                    status = status.HTTP_400_BAD_REQUEST
+               )
+          
 
-#             refresh = RefreshToken.for_user(user)
 
-#             return Response(
-#                  {
-#                       'message': "User authenticated successfully",
-#                       'user': UserSerializer(user).data,
-#                       'refresh': str(refresh),
-#                       'access' : str(refresh.access_token)
-#                  }
-#             )
-         
-#         except Exception as e :
-#             return Response({"error": "Invalid token", "details": str(e)}, status=400)
+
+
+     
+class Email_varify_OTP_generate_view(generics.CreateAPIView):
+    
+     permission_classes = [AllowAny]
+
+     def post(self,request):
+          serializer = Email_varify_OTP_generate_serializer(data=request.data)
+          if serializer.is_valid():
+               result = serializer.save()
+               return Response({
+                "message": "OTP sent to email",
+                "expires_at": result["expires_at"],
+                "emailEncoded": result["emailEncoded"]
+            }, status=status.HTTP_201_CREATED)
+          
+          return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+          

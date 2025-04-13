@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-8__#a0r#&cfj-8l8w7eq+_45dl74#u^^3bz0l-!w^%*6+&l$mq
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+SECRET_KEY = os.getenv('SECRET_KEY')
 
  
 # Application definition
@@ -92,25 +92,12 @@ ACCOUNT_SIGNUP_FIELDS = ['username*', 'email', 'password1*', 'password2*']
 LOGIN_REDIRECT_URL = 'http://localhost:5173/home'  # your React app
 
 
-SOCIALACCOUNT_PROVIDERS = {
-    # 'google': {
-    #     'APP': {
-    #         'client_id': '133179609677-nd6mg0lfdgbecpbn223f63i98kf7miti.apps.googleusercontent.com',
-    #         'secret': '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',
-    #         'key': ''
-    #     },
-    #     'SCOPE': ['profile', 'email'],
-    #     'AUTH_PARAMS': {'access_type': 'online'},
-    # },
-    # 'github': {
-    #     'APP': {
-    #         'client_id': '133179609677-nd6mg0lfdgbecpbn223f63i98kf7miti.apps.googleusercontent.com',
-    #         'secret': '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',
-    #         'key': ''
-    #     },
-    #     'SCOPE': ['user', 'read:user', 'user:email'],
-    # }
-}
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
 
 

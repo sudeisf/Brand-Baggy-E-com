@@ -1,5 +1,6 @@
 from django.urls import path
 from accounts.views import (
+    Email_varify_OTP_generate_view,
     RegisterView,
     CustomTokenObtainPairView,
     ProtectedView,
@@ -22,4 +23,5 @@ urlpatterns = [
     path('profile/', UserDetailView.as_view(), name='user-profile'),
     path('profile/update/', UserUpdateView.as_view(), name='user-profile-update'),
     path('logout/', LogOutView.as_view(), name='logout'),
+    path('otp/generate/', Email_varify_OTP_generate_view.as_view(), name='otp-generate'),
 ]
