@@ -163,3 +163,6 @@ class Email_varify_OTP_generate_view(generics.CreateAPIView):
           
           return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
           
+
+# class OTP_verify_view(generics.CreateAPIView):
+     

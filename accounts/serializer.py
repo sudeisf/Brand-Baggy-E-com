@@ -128,6 +128,64 @@ class Email_varify_OTP_generate_serializer(serializers.Serializer):
         }
     
     
-         
+class OTP_verify_serializer(serializers.Serializer):
+    token  = serializers.CharField()
+    otp = serializers.CharField()
+    is_validate_otp = serializers.BooleanField(read_only=True)
+
+    def validate_token(self, token):
+        try: 
+            email = signing.loads(token , key=settings.SECRET_KEY)
+            if not OTP.objects.filter(email=email).exists():
+                raise serializers.ValidationError("Invalid token")
+            return email
+        except signing.BadSignature:
+            raise serializers.ValidationError("Invalid token")
+        
+    def is_validate_otp(self, otp):
+        try:
+            otp_decode = signing.loads(otp, key=settings.SECRET_KEY)
+
+            if not OTP.objects.filter(otp=otp_decode).exists():
+                raise serializers.ValidationError("Invalid OTP")
+            
+            otp_obj = OTP.objects.get(otp=otp_decode)
+            time_elapsed = timezone.now() - otp_obj.created_at
+            expiration_time = timezone.timedelta(minutes=15)
+        
+            # Check if OTP is expired
+            if time_elapsed > expiration_time:
+                otp_obj.delete()  # Clean up expired OTP
+                raise serializers.ValidationError("OTP expired")
+            return True
+        
+        except signing.BadSignature:
+            raise serializers.ValidationError("Invalid OTP")
+        
+    def create(self, validated_data):
+            if self.validate_token(validated_data['token']):
+                raise serializers.ValidationError("Invalid token")
+            
+            if self.is_validate_otp(validated_data['otp']):
+                raise serializers.ValidationError("Invalid OTP")
+            
+            try:
+                email = signing.loads(validated_data['token'], key=settings.SECRET_KEY)
+                user = User.objects.get(email=email)
+                user.is_verified = True
+                user.save()
+            except User.DoesNotExist:
+                raise serializers.ValidationError("User not found")
+            
+            return {
+                'message': 'OTP verified successfully',
+                'is_validate_otp': True,
+                'email': email,
+                'success': True
+            }
+            
+
+        
+
 
 
