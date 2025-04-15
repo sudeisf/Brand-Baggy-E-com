@@ -111,10 +111,6 @@ class Email_varify_OTP_generate_serializer(serializers.Serializer):
             otp=encoded_otp,
             expires_at=expires_at
         )
-
-        emailEncoded = signing.dumps(email, key=settings.SECRET_KEY)
-       
-        # encode otp
         sendEmail(
             "OTP varification Code",
             email,
@@ -124,32 +120,34 @@ class Email_varify_OTP_generate_serializer(serializers.Serializer):
             'email': email,
             'message': 'OTP sent to email',
             "expires_at": otp.expires_at,
-            "emailEncoded": emailEncoded
+            "emailEncoded": email
         }
     
     
 class OTP_verify_serializer(serializers.Serializer):
-    token  = serializers.CharField()
+
+    email= serializers.EmailField()
     otp = serializers.CharField()
     is_validate_otp = serializers.BooleanField(read_only=True)
 
-    def validate_token(self, token):
-        try: 
-            email = signing.loads(token , key=settings.SECRET_KEY)
-            if not OTP.objects.filter(email=email).exists():
-                raise serializers.ValidationError("Invalid token")
-            return email
-        except signing.BadSignature:
-            raise serializers.ValidationError("Invalid token")
+    def validate_email(self, email):
+        if not OTP.objects.filter(email=email).exists():
+             raise serializers.ValidationError("Invalid email")
+        return email
         
-    def is_validate_otp(self, otp):
-        try:
-            otp_decode = signing.loads(otp, key=settings.SECRET_KEY)
+    def validate(self, data):
+        recieved_otp = data['otp']
+        recieved_email = data['email']
 
-            if not OTP.objects.filter(otp=otp_decode).exists():
-                raise serializers.ValidationError("Invalid OTP")
+        try:
+            encoded_otp = OTP.objects.filter(email__iexact=recieved_email).first().otp
+            otp_decode = signing.loads(encoded_otp, key=settings.SECRET_KEY)
+            recived_otp_str = int(recieved_otp)
             
-            otp_obj = OTP.objects.get(otp=otp_decode)
+            if otp_decode != recived_otp_str:
+                raise serializers.ValidationError("Invalid OTP")
+
+            otp_obj = OTP.objects.get(email=recieved_email)
             time_elapsed = timezone.now() - otp_obj.created_at
             expiration_time = timezone.timedelta(minutes=15)
         
@@ -157,25 +155,36 @@ class OTP_verify_serializer(serializers.Serializer):
             if time_elapsed > expiration_time:
                 otp_obj.delete()  # Clean up expired OTP
                 raise serializers.ValidationError("OTP expired")
-            return True
+            return data
         
         except signing.BadSignature:
             raise serializers.ValidationError("Invalid OTP")
         
     def create(self, validated_data):
-            if self.validate_token(validated_data['token']):
-                raise serializers.ValidationError("Invalid token")
-            
-            if self.is_validate_otp(validated_data['otp']):
-                raise serializers.ValidationError("Invalid OTP")
+            email = validated_data['email']
+
+            #remove the old ones 
+            OTP.objects.filter(
+                email__iexact = email,
+                expires_at__lt = timezone.now()
+            ).delete()
             
             try:
-                email = signing.loads(validated_data['token'], key=settings.SECRET_KEY)
                 user = User.objects.get(email=email)
+                otp_obj = OTP.objects.get(email=email)
+
+                otp_obj.is_used = True
                 user.is_verified = True
+
                 user.save()
+                otp_obj.save()
+
             except User.DoesNotExist:
                 raise serializers.ValidationError("User not found")
+            
+            except OTP.DoesNotExist:
+                raise serializers.ValidationError("OTP not found")
+            
             
             return {
                 'message': 'OTP verified successfully',
@@ -185,7 +194,54 @@ class OTP_verify_serializer(serializers.Serializer):
             }
             
 
+class reset_password_serializer(serializers.Serializer):
+    email = serializers.EmailField()
+    new_password = serializers.CharField()
+    confirm_password = serializers.CharField()
+
+    def validate_email(self, email):
+        if not User.objects.filter(email=email).exists():
+            raise serializers.ValidationError("Email not found")
+        return email
+    
+    def validate_new_password(self, password):
+        try:
+            validate_password(password)
+        except exceptions.ValidationError as e:
+            raise serializers.ValidationError(str(e))
+        return password 
+    
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({"password": "Password fields didn't match."})
+        return attrs
+    
+    def create(self, validated_data):
+        email = validated_data['email']
+        new_password = validated_data['new_password']       
+
+        try:
+            user = User.objects.get(email=email)
+            user.set_password(new_password)
+            user.save()
+            return {
+                'message': 'Password reset successfully',
+                'success': True
+            }
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User not found")
         
+        return {
+            "message" : "Password reset successfully",
+            "success" : True
+        }
+        
+        
+        
+
+        
+        
+            
 
 
 

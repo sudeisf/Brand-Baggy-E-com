@@ -5,9 +5,11 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated , AllowAny
 from .serializer import (
     Email_varify_OTP_generate_serializer,
+    OTP_verify_serializer,
     UserCreateSerializer, 
     UserSerializer,
-    CustomTokenObtainPairSerializer  # Make sure this is imported
+    CustomTokenObtainPairSerializer,
+    reset_password_serializer  # Make sure this is imported
 )
 from rest_framework_simplejwt.views import TokenObtainPairView
 from google.oauth2 import id_token
@@ -164,5 +166,28 @@ class Email_varify_OTP_generate_view(generics.CreateAPIView):
           return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
           
 
-# class OTP_verify_view(generics.CreateAPIView):
+class OTP_verify_view(generics.CreateAPIView):
+     serializer_class = OTP_verify_serializer
+     permission_classes = [AllowAny]
+
+     def post(self, request, *args, **kwargs):
+          serializer = self.get_serializer(data=request.data)
+          if serializer.is_valid():
+               result = serializer.save()
+               return Response(result, status=status.HTTP_200_OK)
+          
+          return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
      
+
+class reset_password_view(generics.CreateAPIView):
+     serializer_class = reset_password_serializer
+     permission_classes = [AllowAny]
+
+     def post(self, request, *args, **kwargs):
+          serializer = self.get_serializer(data=request.data)
+          if serializer.is_valid():
+               result = serializer.save()
+               return Response(result, status=status.HTTP_200_OK)
+          
+          return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

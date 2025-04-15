@@ -1,12 +1,14 @@
 from django.urls import path
 from accounts.views import (
     Email_varify_OTP_generate_view,
+    OTP_verify_view,
     RegisterView,
     CustomTokenObtainPairView,
     ProtectedView,
     UserDetailView,
     UserUpdateView,
-    LogOutView
+    LogOutView,
+    reset_password_view
 )
 
 urlpatterns = [
@@ -24,4 +26,6 @@ urlpatterns = [
     path('profile/update/', UserUpdateView.as_view(), name='user-profile-update'),
     path('logout/', LogOutView.as_view(), name='logout'),
     path('otp/generate/', Email_varify_OTP_generate_view.as_view(), name='otp-generate'),
+    path('otp/verify/', OTP_verify_view.as_view(), name='otp-verify'),
+    path('reset-password/', reset_password_view.as_view(), name='reset-password'),
 ]
