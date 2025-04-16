@@ -1,11 +1,10 @@
+from django.urls import path
+from rest_framework.routers import DefaultRouter
 
-
-import django.urls as urls
-from .views import ItemList, Product , ProductDetail
-
+router = DefaultRouter()
 
 urlpatterns = [
-    urls.path('items/', ItemList.as_view(), name='item-list'),
-    urls.path('products/', ProductDetail.as_view(), name='product-detail'),
-    urls.path('products/<int:pk>/', ProductDetail.as_view(), name='product-detail'),
+    # Add your API endpoints here
 ]
+
+urlpatterns += router.urls 
