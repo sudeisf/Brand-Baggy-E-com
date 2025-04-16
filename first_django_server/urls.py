@@ -23,6 +23,7 @@ urlpatterns = [
     path('api/', include('api.urls')),
     path('accounts/', include('accounts.urls')),
     path('social/',include('allauth.urls')),
-    path('auth/', include('dj_rest_auth.urls')),  # Login, logout, password reset
-    
+    path('auth/', include('dj_rest_auth.urls')),
+    path('product/' , include('product.urls'))
+
 ]
