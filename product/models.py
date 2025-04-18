@@ -29,7 +29,7 @@ class Product(models.Model):
     model_number = models.CharField(max_length=200 , null=True , blank=True)
     product_code = models.CharField(max_length=200 , null=True , blank=True)
     product_id = models.CharField(max_length=200 , null=True , blank=True)
-
+    quantity = models.PositiveBigIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

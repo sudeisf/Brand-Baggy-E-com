@@ -3,8 +3,8 @@ from requests import request
 from rest_framework.views import APIView
 from rest_framework import generics , status , filters
 from rest_framework.decorators import api_view
-from .serializers import ProductSerialier ,ProductDetailSerializer
-from .models import Product , FavoriteProduct
+from .serializers import ProductSerialier ,ProductDetailSerializer ,ProductReviewSerializer
+from .models import Product , FavoriteProduct , ProductReview
 from accounts.models import CustomUser
 from rest_framework.permissions import IsAuthenticated , AllowAny
 from rest_framework.response import Response
@@ -22,7 +22,7 @@ class ProductDetailView(generics.RetrieveAPIView):
     queryset = Product.objects.prefetch_related('images').all()
     permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend,filters.SearchFilter]
-    filterset_fields = ['category', 'brand', 'price']
+    filterset_fields = ['category', 'brand']
     search_fields = ['name', "description"]
 
     def get_serializer_context(self):
@@ -64,4 +64,20 @@ class RemoveFavouriteProductView(APIView):
             return Response({'message': 'Product was not in favorites'}, status=status.HTTP_400_BAD_REQUEST)
     
 
+class ProductReviewListCreateView(generics.ListAPIView):
+    serializer_class = ProductReviewSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        product = self.kwargs['product_id']
+        return ProductReview.objects.get_or_create(user = self.request.user , product=product)
     
+    def perform_create(self ,serializer):
+        product = get_object_or_404(Product , id=self.kwargs['product_id'])
+        serializer.save(user=self.request.user , product= Product)
+
+
+    
+
+
+

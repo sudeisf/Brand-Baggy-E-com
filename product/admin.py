@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, ProductImage, ProductReview, FavoriteProduct
+from .models import Category, Product, ProductImage, ProductReview, FavoriteProduct , ProductVariants , ProductSize
 from django.utils.html import format_html
 
 # Register your models here.
@@ -33,5 +33,14 @@ class ProductReviewAdmin(admin.ModelAdmin):
 @admin.register(FavoriteProduct)                
 class FavoriteProductAdmin(admin.ModelAdmin):
     list_display = ['product', 'user']  
+
+@admin.register(ProductSize)
+class ProductSizeAdmin(admin.ModelAdmin):
+    list_display = ['name' , 'code']
+
+@admin.register(ProductVariants)
+class ProductVariantsAdmin(admin.ModelAdmin):
+    list_display = ['product' , 'size' , 'price' , 'stock']
+
 
 
