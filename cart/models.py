@@ -5,15 +5,22 @@ from product.models import Product
 # Create your models here.
 
 class Cart(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='carts')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='carts')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='carts' , null=True , blank=True)
     session_id = models.CharField(max_length=255)
-
-    quantity = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.product.name}"
+        if self.user:
+            return f"Cart of {self.user.username}"
+        return f"Cart for session {self.session_id}"
+    
 
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart ,on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product.name}"
 
