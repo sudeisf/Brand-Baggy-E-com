@@ -24,7 +24,7 @@ class GetOrderSerializer(serializers.Serializer):
     pass
 
 
-class ListUserOrdersSerializer :
+class ListUserOrdersSerializer(serializers.Serializer):
     pass
 
 
