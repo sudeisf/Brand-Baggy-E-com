@@ -34,3 +34,9 @@ class UpdateOrderSerializer(serializers.Serializer):
 
 class CancelOrderSerializer(serializers.Serializer):
     pass 
+
+class UpdateOrderItemStatusSerializer(serializers.Serializer):
+    pass
+
+class AdminOrderListViewSerializer(serializers.Serializer):
+    pass
