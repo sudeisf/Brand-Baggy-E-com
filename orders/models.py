@@ -7,6 +7,7 @@ from cart.models import Cart
 class Order(models.Model):
     class OrderStatus(models.TextChoices):
         PENDING = 'pending'
+        PAID = 'paid'
         PROCESSING = 'processing'
         SHIPPED = 'shipped'
         DELIVERED = 'delivered'

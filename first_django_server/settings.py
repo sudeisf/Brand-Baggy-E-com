@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'api',
     'cart',
     'orders',
+    'payment'
 ]
 
 # CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
@@ -126,8 +127,11 @@ CLOUDINARY_STORAGE = {
 
 
 
-
-
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
+PAYPAL_CLIENT_ID = os.getenv('PAYPAL_CLIENT_ID')
+PAYPAL_CLIENT_SECRET = os.getenv('PAYPAL_CLIENT_SECRET')
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
+PAYPA_WEBHOOK_ID = os.getenv('PAYPA_WEBHOOK_ID')
 
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
