@@ -6,7 +6,7 @@ from django.core import exceptions
 from django.contrib.auth import authenticate
 from django.core  import signing
 import random 
-from .models import OTP
+from .models import OTP , CustomUser
 from .services import sendEmail
 from django.utils import timezone
 from datetime import timedelta
@@ -17,6 +17,7 @@ User = get_user_model()
 class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
+    role = serializers.ChoiceField(choices=CustomUser.Role)
     class Meta:
         model = User
         fields = '__all__'
@@ -40,8 +41,9 @@ class UserCreateSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
-            password=validated_data['password']
-
+            password=validated_data['password'],
+            role = validated_data['role']
+            
         )
         return user
 

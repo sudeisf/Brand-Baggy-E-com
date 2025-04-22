@@ -6,6 +6,12 @@ from django.utils.translation import gettext_lazy as _
 
 
 class CustomUser(AbstractUser):
+
+    class Role(models.TextChoices):
+        SELLER = 'seller'
+        BUYER = 'buyer'
+        ADMIN = 'admin'
+    
     
     groups = models.ManyToManyField(
         Group, 
@@ -21,6 +27,7 @@ class CustomUser(AbstractUser):
 
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=30 , unique=True)
+    user_role =  models.CharField(max_length=200, choices=Role.choices, default=Role.BUYER)
     
     is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -28,6 +35,12 @@ class CustomUser(AbstractUser):
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
+
+    def is_seller(self):
+        return self.user_role == self.Role.SELLER
+
+    def is_buyer(self):
+        return self.user_role == self.Role.BUYER
 
     def __str__(self):
         return self.username

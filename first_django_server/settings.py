@@ -58,7 +58,6 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'cloudinary',
     'cloudinary_storage',
-    'api',
     'cart',
     'orders',
     'payment'

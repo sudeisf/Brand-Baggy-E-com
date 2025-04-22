@@ -1,8 +1,9 @@
+import paypalrestsdk.exceptions
 from rest_framework import status 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .serilizers import PaymentSerializer, PaymentRequestSerializer
+from .serilizers import PaymentSerializer, PaymentRequestSerializer , PayPalSuccessSerializer
 from orders.models import Order
 from .models import Payment
 import stripe
@@ -96,9 +97,8 @@ class PayPalPaymentAPIView(APIView):
                     "intent": "sale",
                     "payer": {"payment_method": "paypal"},
                     "redirect_urls": {
-                        "return_url": "http://localhost:8000/payment/success",  # Update later
-                        "cancel_url": "http://localhost:8000/payment/cancel"
-                    },
+                        "return_url": "https://741f-102-208-97-146.ngrok-free.app/payment/success/",
+                        "cancel_url": "https://741f-102-208-97-146.ngrok-free.app/payment/cancel/" },
                     "transactions": [{
                         "item_list": {
                             "items": [{
@@ -152,7 +152,7 @@ def stripe_webhook_view(request):
         return HttpResponse(status=400)
 
     if event["type"] == "payment_intent.succeeded":
-        print("✅ Payment received!")
+        print(" Payment received!")
 
     return HttpResponse(status=200)
 
@@ -223,3 +223,52 @@ class PayPalWebhookAPIView(APIView):
                 return Response({'error': 'Payment not found'}, status=404)
 
         return Response({'status': 'Ignored event'}, status=200)
+
+
+class PayPalSuccessAPIView(APIView):
+    def get(self , request):
+        serializer = PayPalSuccessSerializer(data=request.GET)
+        if not serializer.is_valid():
+            return Response({'error': serializer.errors}, status=400)
+        # Get validated data
+        payment_id = serializer.validated_data['payment_id']
+        payer_id = serializer.validated_data['payer_id']
+
+        try: 
+            payment = paypalrestsdk.Payment.find(payment_id)
+            if payment.execute({"payer_id": payer_id}):
+                try:
+                    db_payment = Payment.objects.get(transaction_id = payment_id)
+                    if db_payment.status != Payment.Status.COMPLETED:
+                        db_payment.status = Payment.Status.COMPLETED
+                        db_payment.provider_status = payment.to_dict()
+                        db_payment.save()
+
+                        order = db_payment.order
+                        order.status = Order.OrderStatus.PAID
+                        order.save()
+
+                        return Response({'status': 'Payment completed', 'order_id': order.id}, status=200)
+                    else:
+                        return Response({
+                            "status " : "Payment already have been completed."                        
+                            } , status=200)
+                except Payment.DoesNotExist:
+                    return Response({
+                            "status " : "Payment does not exist in the data base."                        
+                            } , status=400)
+            else:
+                return Response({'error': 'Payment execution failed'}, status=400)
+        except paypalrestsdk.exceptions.ResourceNotFound:
+             return Response({'Resource is not found'})
+        except Exception as e:
+            return Response({
+                'error' : f" the system found {e}"
+            })
+
+class PayPalCancelAPIView(APIView):
+    def get(self, request):
+        order_id  = request.GET.get('order_id')
+        return Response({'status': 'Payment cancelled', 'order_id': order_id or None}, status=200)
+
+
