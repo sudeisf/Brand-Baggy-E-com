@@ -40,7 +40,7 @@ class ProductSizeAdmin(admin.ModelAdmin):
 
 @admin.register(ProductVariants)
 class ProductVariantsAdmin(admin.ModelAdmin):
-    list_display = ['product' , 'size' , 'price' , 'stock']
+    list_display = ['product' , 'size' , 'stock']
 
 
 

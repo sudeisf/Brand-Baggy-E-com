@@ -1,5 +1,6 @@
 from django.db import models
 from cloudinary.models import CloudinaryField
+from django.forms import ValidationError
 from accounts.models import CustomUser
 
 
@@ -23,18 +24,21 @@ class Product(models.Model):
     description = models.TextField()
     in_stock = models.BooleanField(default=True)
     main_image = CloudinaryField('image')
+    seller  = models.ForeignKey(CustomUser,on_delete=models.CASCADE, related_name='product_role' , limit_choices_to={'user_role': CustomUser.Role.SELLER} , null=True , blank=True)
 
-   
+    price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     brand = models.CharField(max_length=200 , null=True , blank=True)
     model_number = models.CharField(max_length=200 , null=True , blank=True)
     product_code = models.CharField(max_length=200 , null=True , blank=True)
-    product_id = models.CharField(max_length=200 , null=True , blank=True)
     quantity = models.PositiveBigIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['category']),
+            models.Index(fields=['price']),
+        ]
 
     def __str__(self):
         return self.name
@@ -56,7 +60,10 @@ class ProductReview(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    
+    def clean(self):
+        if not 1 <= self.rating <= 5:
+            raise ValidationError("Rating must be between 1 and 5.")
+
 
     class Meta:
         ordering = ['-created_at']
@@ -82,7 +89,7 @@ class ProductVariants(models.Model):
     product  = models.ForeignKey(Product,on_delete=models.CASCADE,related_name="variants")
     size = models.ForeignKey(ProductSize, on_delete=models.PROTECT)
     stock = models.PositiveIntegerField(default=0)
-    price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    
     sku = models.CharField(max_length=50, unique=True)
 
 
@@ -92,6 +99,11 @@ class ProductVariants(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - {self.size.name}"
+    
+    def save(self, *args, **kwargs):
+        if not self.sku:
+            self.sku = f"{self.product.id}-{self.size.code}"  # Automatically generate SKU
+        super().save(*args, **kwargs)
 
 
 class FavoriteProduct(models.Model):

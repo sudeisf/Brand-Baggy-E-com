@@ -1,7 +1,6 @@
-from rest_framework import permissions
+from rest_framework.permissions import BasePermission
 
-
-class isSeller(permissions.BasePermission):
-
+class IsSeller(BasePermission):
     def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated and request.user.role == 'SELLER'
+        # Check if the user's role is 'SELLER'
+        return request.user.is_seller()

@@ -42,7 +42,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
             username=validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password'],
-            role = validated_data['role']
+            user_role = validated_data['role']
             
         )
         return user
@@ -51,18 +51,14 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email']
-
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
-        # Extract email and password from request
         email = attrs.get('email')
         password = attrs.get('password')
 
-        # Check if both fields are present
         if not email or not password:
             raise serializers.ValidationError("Both 'email' and 'password' are required.")
 
-        # Authenticate using email and password
         user = authenticate(
             request=self.context.get('request'),
             email=email,
@@ -72,18 +68,26 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         if user is None:
             raise serializers.ValidationError("Invalid email or password.")
 
-        # Map email-login to username since JWT expects `username`
         attrs['username'] = user.username
-
-        # Call super to get token data
         data = super().validate(attrs)
 
-        # Add custom claims (extra data to send with token response)
+        # Add custom claims
         data['email'] = user.email
         data['username'] = user.username
-        # data['is_verified'] = user.is_verified  # Uncomment if needed
+        data['role'] = user.user_role  # Use the correct field (user_role)
 
         return data
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims to the token
+        token['username'] = user.username
+        token['email'] = user.email
+        token['role'] = user.user_role  # Add role to the token
+
+        return token
 
 
 

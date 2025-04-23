@@ -3,10 +3,11 @@ from requests import request
 from rest_framework.views import APIView
 from rest_framework import generics , status , filters
 from rest_framework.decorators import api_view
-from .serializers import ProductSerialier ,ProductDetailSerializer ,ProductReviewSerializer
+from .serializers import ProductSerialier ,ProductDetailSerializer ,ProductReviewSerializer , CreateProductSerializer , DeleteProdctSerilizer , UpdateProductSerializer ,ListProductSerializer
 from .models import Product , FavoriteProduct , ProductReview
 from accounts.models import CustomUser
-from rest_framework.permissions import IsAuthenticated , AllowAny
+from rest_framework.permissions import IsAuthenticated , AllowAny 
+from accounts.permisions import IsSeller 
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -76,6 +77,45 @@ class ProductReviewListCreateView(generics.ListAPIView):
         product = get_object_or_404(Product , id=self.kwargs['product_id'])
         serializer.save(user=self.request.user , product= Product)
 
+class CreateProductView(APIView):
+    permission_classes = [IsAuthenticated, IsSeller]
+    def post(self , request):
+        serializer = CreateProductSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        product = serializer.save()
+        return Response({"message": "Product created successfully.", "product_id": product.id}, status=status.HTTP_201_CREATED)
+
+class ListSellerProductAPIView(APIView):
+    permission_classes = [IsSeller]
+    def get(self , request):
+        products = Product.objects.filter(seller=request.user)
+        serializer = ListProductSerializer(products, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class UpdateSellerProdctAPIView(APIView):
+    permission_classes = [IsSeller]
+    def put(self , request):
+        try:
+            product = Product.objects.get(id=pk, seller=request.user)
+        except Product.DoesNotExist:
+            return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = UpdateProductSerializer(product, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class DeleteSellerProductAPIVIew(APIView):
+    permission_classes = [IsSeller]
+    def Delete(self  , request):
+        try:
+            product = Product.objects.get(id=pk, seller=request.user)
+        except Product.DoesNotExist:
+            return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        product.delete()
+        return Response({'message': 'Product deleted'}, status=status.HTTP_204_NO_CONTENT)
 
     
 
