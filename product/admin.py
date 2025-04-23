@@ -11,7 +11,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'in_stock', 'image_preview' ,)
+    list_display = ('id' ,'name', 'in_stock', 'image_preview' ,)
 
     def image_preview(self, obj):
         if obj.main_image:
