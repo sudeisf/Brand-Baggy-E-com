@@ -3,7 +3,7 @@ from requests import request
 from rest_framework.views import APIView
 from rest_framework import generics , status , filters
 from rest_framework.decorators import api_view
-from .serializers import ProductSerialier ,ProductDetailSerializer ,ProductReviewSerializer , CreateProductSerializer , DeleteProdctSerilizer , UpdateProductSerializer ,SellerProductListSerializer
+from .serializers import ProductSerialier ,ProductDetailSerializer ,ProductReviewSerializer , CreateProductSerializer  , UpdateProductSerializer ,SellerProductListSerializer
 from .models import Product , FavoriteProduct , ProductReview
 from accounts.models import CustomUser
 from rest_framework.permissions import IsAuthenticated , AllowAny 

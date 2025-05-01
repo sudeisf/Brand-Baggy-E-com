@@ -21,7 +21,7 @@ urlpatterns =[
 
     #seller URL-PATTERNS
     path('seller/dashboard/',SellerProductDashboardView.as_view(),name="list-of-seller-products"),
-    path('seller/<int:id/update',UpdateSellerProductAPIView.as_view(), name="update-product"),
+    path('seller/<int:id>/update',UpdateSellerProductAPIView.as_view(), name="update-product"),
     path('seller/create-product/', CreateProductView.as_view(), name='create-product'),
     path('seller/<int:id>/delete/',DeleteSellerProductAPIVIew.as_view(),name="delete-product")
 
