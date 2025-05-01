@@ -160,14 +160,80 @@ class CreateProductSerializer(serializers.Serializer):
             )
             
         return product
-class ListProductSerializer(serializers.Serializer):
-    pass
+    
+class SellerProductListSerializer(serializers.ModelSerializer):
+    category = CatagorySerializer(read_only=True)
+    main_image_url = serializers.SerializerMethodField()
+    total_variants = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'name',
+            'price',
+            'quantity',
+            'in_stock',
+            'category',
+            'main_image_url',
+            'created_at',
+            'total_variants'
+        ]
+    
+    def get_main_image_url(self, obj):
+        return obj.main_image.url if obj.main_image else None
+    
+    def get_total_variants(self, obj):
+        return obj.variants.count()
+      
 
-class UpdateProductSerializer(serializers.Serializer):
-    pass
+class UpdateProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        feilds = [
+            'name',
+            'description',
+            'price',
+            'quantity',
+            'in_stock',
+            'brand',
+            'model_number',
+            'product_code',
+            'main_image'  # Only image field that can be updated
+        ]
+        extra_kwargs = {
+            # All fields optional for partial updates
+            'name': {'required': False},
+            'description': {'required': False},
+            'price': {'required': False, 'min_value': 0.01},
+            'quantity': {'required': False, 'min_value': 0},
+            'main_image': {
+                'required': False,
+                'write_only': True  # Never show in API responses
+            },
+            'in_stock' :{'required': False},
+            'brand' : {'required': False},
+            'model_number' : {'required': False},
+            'product_code' : {'required': False}
+        }
 
-class DeleteProdctSerilizer(serializers.Serializer):
-    pass
+        def update(self, instance, validated_data):
+            """Handle partial updates with image replacement"""
+            new_image = validated_data.pop('main_image', None)
+            
+            # Update all other fields
+            instance = super().update(instance, validated_data)
+            
+            # Handle image replacement if provided
+            if new_image:
+                if instance.main_image:  # Delete old image if exists
+                    instance.main_image.delete()
+                instance.main_image = new_image
+                instance.save()
+            
+            return instance
+
+
     
     
 

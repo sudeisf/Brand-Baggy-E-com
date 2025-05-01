@@ -3,7 +3,7 @@ from requests import request
 from rest_framework.views import APIView
 from rest_framework import generics , status , filters
 from rest_framework.decorators import api_view
-from .serializers import ProductSerialier ,ProductDetailSerializer ,ProductReviewSerializer , CreateProductSerializer , DeleteProdctSerilizer , UpdateProductSerializer ,ListProductSerializer
+from .serializers import ProductSerialier ,ProductDetailSerializer ,ProductReviewSerializer , CreateProductSerializer , DeleteProdctSerilizer , UpdateProductSerializer ,SellerProductListSerializer
 from .models import Product , FavoriteProduct , ProductReview
 from accounts.models import CustomUser
 from rest_framework.permissions import IsAuthenticated , AllowAny 
@@ -85,37 +85,61 @@ class CreateProductView(APIView):
         product = serializer.save()
         return Response({"message": "Product created successfully.", "product_id": product.id}, status=status.HTTP_201_CREATED)
 
-class ListSellerProductAPIView(APIView):
-    permission_classes = [IsSeller]
-    def get(self , request):
-        products = Product.objects.filter(seller=request.user)
-        serializer = ListProductSerializer(products, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+class SellerProductDashboardView(generics.ListAPIView):
+    serializer_class = SellerProductListSerializer
+    permission_classes = [IsAuthenticated , IsSeller]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['in_stock', 'category']
+    
+    def get_queryset(self):
+        return Product.objects.filter(
+            seller=self.request.user
+        ).select_related('category').prefetch_related('variants')
 
-class UpdateSellerProdctAPIView(APIView):
+class UpdateSellerProductAPIView(APIView):
     permission_classes = [IsSeller]
-    def put(self , request):
+    
+    def patch(self, request, product_id):  # Changed from put to patch for semantic correctness
         try:
-            product = Product.objects.get(id=pk, seller=request.user)
+            product = Product.objects.get(id=product_id, seller=request.user)
         except Product.DoesNotExist:
             return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = UpdateProductSerializer(product, data=request.data)
+        # Add partial=True here ↓
+        serializer = UpdateProductSerializer(
+            product, 
+            data=request.data, 
+            partial=True  # ← This is the critical change
+        )
+        
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
 class DeleteSellerProductAPIVIew(APIView):
     permission_classes = [IsSeller]
-    def Delete(self  , request):
+    def delete(self,request,pk):
         try:
             product = Product.objects.get(id=pk, seller=request.user)
+            self._delete_related_objects(product)
+            product.delete()
+            return Response({'message': 'Product deleted'}, status=status.HTTP_204_NO_CONTENT)
         except Product.DoesNotExist:
             return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        product.delete()
-        return Response({'message': 'Product deleted'}, status=status.HTTP_204_NO_CONTENT)
+    def _delete_related_objects(self, product):
+
+        for image in product.images.all():
+            image.image.delete() 
+            image.delete()  
+        
+        # Delete all variants
+        product.variants.all().delete()
+        
+        # Delete all favorites referencing this product
+        product.favorites.all().delete()
 
     
 

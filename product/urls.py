@@ -5,7 +5,10 @@ from .views import (
     ProductReviewListCreateView ,
     AddFavoriteProductView,
     RemoveFavouriteProductView,
-    CreateProductView
+    CreateProductView,
+    SellerProductDashboardView,
+    UpdateSellerProductAPIView,
+    DeleteSellerProductAPIVIew
     )
 
 
@@ -15,5 +18,11 @@ urlpatterns =[
     path('products/<int:product_id>/reviews/', ProductReviewListCreateView.as_view(), name='product-reviews'),
     path('favorites/add/<int:product_id>/', AddFavoriteProductView.as_view(), name='add-favorite'),
     path('favorites/remove/<int:product_id>/', RemoveFavouriteProductView.as_view(), name='remove-favorite'),
-    path('seller/create-product/', CreateProductView.as_view(), name='create-product')
+
+    #seller URL-PATTERNS
+    path('seller/dashboard/',SellerProductDashboardView.as_view(),name="list-of-seller-products"),
+    path('seller/<int:id/update',UpdateSellerProductAPIView.as_view(), name="update-product"),
+    path('seller/create-product/', CreateProductView.as_view(), name='create-product'),
+    path('seller/<int:id>/delete/',DeleteSellerProductAPIVIew.as_view(),name="delete-product")
+
 ]   
