@@ -8,25 +8,28 @@ export const metadata = {
   };
 
 
-export default function AuthLayout({
-    children
-} :{ children : React.ReactNode }) {
+  export default function AuthLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="min-h-svh flex items-center justify-center ">
-          <div className="w-1/2 ">
+      <div className="min-h-screen flex flex-col md:flex-row">
+        {/* Left side - Form Content (always full width on mobile) */}
+        <div className="w-full md:w-1/2 p-6 flex items-center justify-center">
+          <div className="w-full max-w-md">
             {children}
           </div>
-          <div className="w-1/2 bg-black min-h-screen relative">
-            <Image
-                src={auth} // Make sure 'auth' is properly imported
-                alt="Authentication illustration" // Required for accessibility
-                fill // Makes image fill the container
-                className="object-cover" // Ensures proper image scaling
-                priority // If this is above-the-fold image
-                quality={85} // Optimizes image quality
-            />
         </div>
-
+  
+        {/* Right side - Image (hidden on mobile, shown on md+) */}
+        <div className="hidden md:block md:w-1/2 relative bg-black">
+          <Image
+            src={auth}
+            alt="Authentication illustration"
+            fill
+            className="object-cover"
+            priority
+            quality={85}
+            sizes="(max-width: 768px) 0px, 50vw" // Optimizes image loading
+          />
         </div>
+      </div>
     );
-}
+  }

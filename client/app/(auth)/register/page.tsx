@@ -58,10 +58,10 @@ export default function RegisterPage() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-full max-w-md mx-auto p-10 font-inter">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-full max-w-md mx-auto p-5 md:p-10 font-inter">
         <div className="flex flex-col space-y-2.5 mb-10">
-            <h1 className="font-semibold text-[#3A3D44] text-4xl">Welcome back</h1>
-            <p className="text-[#999ba0]">welcome back! Please enter your details</p>
+            <h1 className="font-semibold text-[#3A3D44] text-4xl">Welcome</h1>
+            <p className="text-[#999ba0]">Welcome, Experience new ways and views</p>
         </div>
         <FormField
           control={form.control}
@@ -101,7 +101,7 @@ export default function RegisterPage() {
               <FormLabel className="font-medium">Password</FormLabel>
               <FormControl>
                 <Input
-                 className="rounded-sm text-xl"
+                 className="rounded-sm text-xl tracking-widest"
                  type="password"
                  placeholder="••••••••"  
                  {...field} />
@@ -119,7 +119,7 @@ export default function RegisterPage() {
               <FormLabel className="font-medium">Confirm Password</FormLabel>
               <FormControl>
                 <Input
-                 className="rounded-sm text-xl"
+                 className="rounded-sm text-xl tracking-widest"
                  type="password"
                  placeholder="••••••••"  
                  {...field} />

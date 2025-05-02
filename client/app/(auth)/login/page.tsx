@@ -47,8 +47,8 @@ export default function LoginPage() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-full max-w-md mx-auto p-10 font-inter">
-        <div className="flex flex-col space-y-2.5 mb-10">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-full max-w-md mx-auto p-2 md:p-10 font-inter ">
+        <div className="flex flex-col space-y-2.5 mt-10 mb-15 md:mb-10 font-inter">
             <h1 className="font-semibold text-[#3A3D44] text-4xl">Welcome back</h1>
             <p className="text-[#999ba0]">welcome back! Please enter your details</p>
         </div>
@@ -57,10 +57,10 @@ export default function LoginPage() {
           name="email"
           render={({ field }) => (
             <FormItem className="space-y-1.5">
-              <FormLabel className="font-medium">Email</FormLabel>
+              <FormLabel className="font-medium text-md">Email</FormLabel>
               <FormControl>
                 <Input
-                className="rounded-sm"
+                className="rounded-sm text-md"
                  placeholder="Enter your email" {...field} />
               </FormControl>
               <FormMessage />
@@ -72,10 +72,10 @@ export default function LoginPage() {
           name="password"
           render={({ field }) => (
             <FormItem className="space-y-1.5">
-              <FormLabel className="font-medium">Password</FormLabel>
+              <FormLabel className="font-medium text-md">Password</FormLabel>
               <FormControl>
                 <Input
-                 className="rounded-sm text-md"
+                 className="rounded-sm text-md tracking-widest"
                  type="password"
                  placeholder="••••••••"  
                  {...field} />
@@ -88,12 +88,12 @@ export default function LoginPage() {
         <div className="flex justify-between ">
             <div className="flex items-center gap-2">
                 <Checkbox />
-                <p className=" text-sm text-slate-600 font-medium">Remeber me</p>
+                <p className=" text-md text-slate-600 font-medium">Remeber me</p>
             </div>
             <div>
             <Link 
                 href="/forgot-password" 
-                className="font-medium text-sm text-[#47307d]"
+                className="font-bold text-sm text-[#47307d]"
                 >
                 Forgot password
             </Link>
@@ -103,7 +103,7 @@ export default function LoginPage() {
         <Button className="w-full bg-[#47307d] hover:bg-[#665292] h-10 font-medium" type="submit">Sign In</Button>
         <div className="flex justify-center gap-0.5">
             <div className="flex items-center gap-2">
-                <p className=" text-sm text-slate-600 ">Don't Have an account ?</p>
+                <p className=" text-md text-slate-600 ">Don't Have an account ?</p>
             </div>
             <div>
             <Link 

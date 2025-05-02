@@ -44,8 +44,8 @@ const router = useRouter()
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full max-w-md mx-auto p-10 font-inter">
-        <div className="flex flex-col space-y-2.5 mb-5">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full max-w-md mx-auto p-2 md:p-10 font-inter">
+        <div className="flex flex-col space-y-2.5 mb-10 mt-10 md:mt-0 md:mb-5">
             <h1 className="font-semibold text-[#3A3D44] text-4xl">Reset Your Password</h1>
             <p className="text-[#999ba0]">Please enter your email and we will send you an otp code to reset your password in the next step</p>
         </div>
@@ -76,7 +76,7 @@ const router = useRouter()
         <div className="flex justify-center">
             <Link
             href = "/login"
-            className="text-sm text-[#47307d] font-medium font-inter"
+            className="text-md  text-[#47307d]  font-inter"
             >Remembered password ?</Link>
         </div>
       </form>
