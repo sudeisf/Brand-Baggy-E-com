@@ -93,7 +93,7 @@ export default function LoginPage() {
             <div>
             <Link 
                 href="/forgot-password" 
-                className="font-medium text-sm text-[#623EBA]"
+                className="font-medium text-sm text-[#47307d]"
                 >
                 Forgot password
             </Link>
