@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import api from '@/lib/axios';
 import axios from 'axios';
+import { promises } from 'dns';
 type User = {
     id: string,
     email: string;
@@ -17,6 +18,7 @@ type AuthState = {
     isAuthenticated: boolean;
     isLoading: boolean;
     error: string | null;
+    otpEmail : string | null;
     login: (email: string, password: string) => Promise<{ error?: string } | void>;
     register: (
         email: string,
@@ -34,6 +36,10 @@ type AuthState = {
         success?: boolean;
         error?: string; 
         fieldErrors?: Record<string, string> } | void>;
+    otpVerify : (otp : string) => Promise<{
+        success?: boolean;
+        error?: string; 
+        fieldErrors?: Record<string, string> } | void>;
     refreshAccessToken: () => Promise<void>;
     checkAuth: () => Promise<void>;
     hasRole: (role: User['role']) => boolean;
@@ -48,6 +54,7 @@ export const useAuthStore = create<AuthState>()(
                 isAuthenticated : false,
                 isLoading : false,
                 error :null,
+                otpEmail:null,
 
                 login: async (email , password) => {
                     try{
@@ -143,10 +150,13 @@ export const useAuthStore = create<AuthState>()(
                             "accounts/otp/generate/", 
                             { email }
                         );
+                      
                         set({
                             isLoading:false,
-                            error:null
+                            error:null,
+                            otpEmail : email
                         });
+
                         return { success: true };
                     } catch (error: any){
                         let errorMsg = "sending email failed";
@@ -178,6 +188,70 @@ export const useAuthStore = create<AuthState>()(
                         };
 
 
+                    }
+                },
+                otpVerify : async (otp) => {
+                    const {otpEmail} = get();
+                    if (!otpEmail) {
+                        set({ 
+                            isLoading: false,
+                            error: "No email associated with this OTP request" 
+                        });
+                        return { 
+                            error: "No email associated with this OTP request" 
+                        };
+                    }
+                    try{
+                        set({isLoading: true, error: null});
+                        const response  = await api.post('accounts/otp/verify/',
+                            {
+                               email : otpEmail,
+                               otp
+                            }
+                        );
+                       
+                        set({
+                            isLoading: false,
+                            error: null,
+                        });
+                        return {
+                            sucess :true,
+                            email: response.data.email
+                        }
+                    }catch(error : any){
+                        let errorMsg = "OTP verification failed";
+                        const fieldErrors: Record<string, string> = {};
+                
+                        if (error?.response?.data) {
+                            // Handle OTP-specific errors first
+                            if (error.response.data.otp) {
+                                fieldErrors.otp = Array.isArray(error.response.data.otp) 
+                                    ? error.response.data.otp.join(', ')
+                                    : error.response.data.otp;
+                            }
+                            
+                            // Then handle email errors
+                            if (error.response.data.email) {
+                                fieldErrors.email = Array.isArray(error.response.data.email) 
+                                    ? error.response.data.email.join(', ')
+                                    : error.response.data.email;
+                            }
+                
+                            // Fallback to general errors
+                            errorMsg = error.response.data.detail || 
+                                      error.response.data.message || 
+                                      errorMsg;
+                        }
+                
+                        set({ 
+                            error: errorMsg, 
+                            isLoading: false 
+                        });
+                        
+                        return { 
+                            error: errorMsg,
+                            fieldErrors 
+                        };
                     }
                 }
                 ,refreshAccessToken : async () => {

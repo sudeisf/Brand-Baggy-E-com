@@ -137,12 +137,11 @@ class Email_varify_OTP_generate_serializer(serializers.Serializer):
         email = validated_data['email']
         otp_code = random.randint(100000, 999999)
         expires_at = timezone.now() + timedelta(minutes=15)
-        # encode otp
-        encoded_otp = signing.dumps(otp_code, key=settings.SECRET_KEY)
+        
         
         otp = OTP.objects.create(
             email = email,
-            otp=encoded_otp,
+            otp=otp_code,
             expires_at=expires_at
         )
         sendEmail(
@@ -162,7 +161,6 @@ class OTP_verify_serializer(serializers.Serializer):
 
     email= serializers.EmailField()
     otp = serializers.CharField()
-    is_validate_otp = serializers.BooleanField(read_only=True)
 
     def validate_email(self, email):
         if not OTP.objects.filter(email=email).exists():
@@ -170,29 +168,33 @@ class OTP_verify_serializer(serializers.Serializer):
         return email
         
     def validate(self, data):
-        recieved_otp = data['otp']
-        recieved_email = data['email']
+        received_otp = data['otp']
+        received_email = data['email'].lower()  # Fixed spelling and ensure lowercase
 
         try:
-            encoded_otp = OTP.objects.filter(email__iexact=recieved_email).first().otp
-            otp_decode = signing.loads(encoded_otp, key=settings.SECRET_KEY)
-            recived_otp_str = int(recieved_otp)
+            # Get the most recent OTP for this email
+            otp_obj = OTP.objects.filter(email__iexact=received_email).order_by('-created_at').first()
             
-            if otp_decode != recived_otp_str:
+            if not otp_obj:
+                raise serializers.ValidationError("OTP not found")
+
+            # Debug prints
+            print(f'Stored OTP: {otp_obj.otp}')
+            print(f'Received OTP: {received_otp}')
+
+            # Compare OTPs
+            if str(otp_obj.otp) != str(received_otp):
                 raise serializers.ValidationError("Invalid OTP")
 
-            otp_obj = OTP.objects.get(email=recieved_email)
-            time_elapsed = timezone.now() - otp_obj.created_at
-            expiration_time = timezone.timedelta(minutes=15)
-        
-            # Check if OTP is expired
-            if time_elapsed > expiration_time:
-                otp_obj.delete()  # Clean up expired OTP
+            # Check expiration using expires_at field
+            if timezone.now() > otp_obj.expires_at:
+                otp_obj.delete()
                 raise serializers.ValidationError("OTP expired")
+
             return data
-        
+
         except signing.BadSignature:
-            raise serializers.ValidationError("Invalid OTP")
+            raise serializers.ValidationError("Invalid OTP signature")
         
     def create(self, validated_data):
             email = validated_data['email']
@@ -222,7 +224,6 @@ class OTP_verify_serializer(serializers.Serializer):
             
             return {
                 'message': 'OTP verified successfully',
-                'is_validate_otp': True,
                 'email': email,
                 'success': True
             }
