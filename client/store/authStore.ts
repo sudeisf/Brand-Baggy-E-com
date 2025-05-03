@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import api from '@/lib/axios';
 import axios from 'axios';
-
 type User = {
     id: string,
     email: string;
@@ -30,7 +29,11 @@ type AuthState = {
         error?: string; 
         fieldErrors?: Record<string, string> 
       }>;
-      logout: () => Promise<void>;
+    logout: () => Promise<void>;
+    sendEmail : (email :string) => Promise<{
+        success?: boolean;
+        error?: string; 
+        fieldErrors?: Record<string, string> } | void>;
     refreshAccessToken: () => Promise<void>;
     checkAuth: () => Promise<void>;
     hasRole: (role: User['role']) => boolean;
@@ -133,7 +136,51 @@ export const useAuthStore = create<AuthState>()(
                     }
 
                 },
-                refreshAccessToken : async () => {
+                sendEmail: async (email) =>{
+                    try{
+                        set({isLoading:true , error:null});
+                        const response = await api.post(
+                            "accounts/otp/generate/", 
+                            { email }
+                        );
+                        set({
+                            isLoading:false,
+                            error:null
+                        });
+                        return { success: true };
+                    } catch (error: any){
+                        let errorMsg = "sending email failed";
+                        const fieldErrors : Record<string,string> = {}
+
+                        if(error?.response?.data){
+
+                            // Handle array format errors (like {"email": ["Error message"]})
+                            if (Array.isArray(error.response.data.email)) {
+                                fieldErrors.email = error.response.data.email.join(', ');
+                            }
+                            // Handle object format errors (like {"email": "Error message"})
+                            else if (typeof error.response.data.email === 'string') {
+                                fieldErrors.email = error.response.data.email;
+                            }
+                            // Handle general message
+                            else if (error.response.data.message) {
+                                errorMsg = error.response.data.message;
+                            }
+                            // Handle non-field errors
+                            else if (error.response.data.detail) {
+                                errorMsg = error.response.data.detail;
+                            }
+                        }
+                        set({ error: errorMsg, isLoading: false });
+                        return { 
+                            error: errorMsg,
+                            fieldErrors 
+                        };
+
+
+                    }
+                }
+                ,refreshAccessToken : async () => {
                     const { refreshToken } = get();
                     try {
                         const response = await api.post('/accounts/token/refresh/', { refresh: refreshToken });

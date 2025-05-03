@@ -49,7 +49,7 @@ class CustomUser(AbstractUser):
 
 
 class OTP(models.Model):
-    email = models.EmailField(unique=True)
+    email = models.EmailField()
     otp = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()

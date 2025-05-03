@@ -115,11 +115,9 @@ export default function LoginPage() {
             {form.formState.errors.root.message}
           </div>
         )}
-        <Button
-          disabled = {isLoading}
-         className="w-full bg-[#47307d] hover:bg-[#665292] h-10 font-medium" type="submit">
-          {
-            isLoading ? <LoaderCircle className="animate-spin" /> : "Sign In"
+        <Button disabled={isLoading || !form.formState.isValid} className="w-full bg-[#47307d] hover:bg-[#665292] h-10 font-medium" type="submit">
+        {
+            isLoading ? <LoaderCircle className="animate-spin" /> : "Sign Up"
           }
         </Button>
         <div className="flex justify-center gap-0.5">
