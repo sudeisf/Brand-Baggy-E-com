@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework.views import APIView
+from rest_framework.views import APIView 
 from rest_framework import generics , status 
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated , AllowAny
@@ -10,8 +10,9 @@ from .serializer import (
     UserSerializer,
     CustomTokenObtainPairSerializer,
     reset_password_serializer  # Make sure this is imported
+    ,CustomTokenRefreshSerilizer
 )
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView , TokenRefreshView
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.contrib.auth import get_user_model
@@ -199,3 +200,17 @@ class reset_password_view(generics.CreateAPIView):
           
           return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class CustomTokenRefreshView(TokenRefreshView):
+     serializer_class = CustomTokenRefreshSerilizer
+
+class GetMe(APIView):
+     def get(self, request):
+          if request.user and request.user.is_authenticated:
+               serializer = UserSerializer(request.user)
+               return Response({
+                    "user" : serializer.data},
+                    status=status.HTTP_200_OK)
+          else:
+                 return Response({
+                    "error": "User is not authenticated"
+               }, status=status.HTTP_401_UNAUTHORIZED)

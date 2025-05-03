@@ -10,7 +10,7 @@ export const metadata = {
 
   export default function AuthLayout({ children }: { children: React.ReactNode }) {
     return (
-      <div className="min-h-screen flex flex-col md:flex-row">
+      <div className="h-svh flex flex-col md:flex-row">
         {/* Left side - Form Content (always full width on mobile) */}
         <div className="w-full md:w-1/2 p-6 flex items-center justify-center">
           <div className="w-full max-w-md">

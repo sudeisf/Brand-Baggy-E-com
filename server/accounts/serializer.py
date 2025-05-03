@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer , TokenRefreshSerializer
 from django.contrib.auth.password_validation import validate_password
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.core import exceptions
 from django.contrib.auth import authenticate
 from django.core  import signing
@@ -13,39 +14,65 @@ from datetime import timedelta
 from django.conf import settings
 
 User = get_user_model()
-
 class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
-    role = serializers.ChoiceField(choices=CustomUser.Role)
+    role = serializers.ChoiceField(choices=User.Role.choices)  # enum-like roles
+
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ['username', 'email', 'password', 'confirm_password', 'role']
 
-    def validate_password(self, password):  # Expecting string, not a dictionary
+    # ✅ Field-level validation
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError({
+                "message": "A user with this username already exists.",
+                "code": "username_exists"
+            })
+        return value
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError({
+                "message": "A user with this email already exists.",
+                "code": "email_exists"
+            })
+        return value
+
+    def validate_password(self, value):
         try:
-            validate_password(password)
+            validate_password(value)
         except exceptions.ValidationError as e:
-            raise serializers.ValidationError(str(e))
-        return password
-    
+            raise serializers.ValidationError({
+                "message": list(e.messages),
+                "code": "invalid_password"
+            })
+        return value
+
+    # ✅ Object-level validation
     def validate(self, attrs):
         if attrs['password'] != attrs['confirm_password']:
-            raise serializers.ValidationError({"password": "Password fields didn't match."})
+            raise serializers.ValidationError({
+                "password": {
+                    "message": "Password and confirm password do not match.",
+                    "code": "password_mismatch"
+                }
+            })
         return attrs
 
+    # ✅ Create method
     def create(self, validated_data):
-          # Corrected variable name
         validated_data.pop('confirm_password')
 
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password'],
-            user_role = validated_data['role']
-            
+            user_role=validated_data['role']
         )
         return user
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -72,6 +99,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data = super().validate(attrs)
 
         # Add custom claims
+        data['id'] = str(user.id)
         data['email'] = user.email
         data['username'] = user.username
         data['role'] = user.user_role  # Use the correct field (user_role)
@@ -242,8 +270,24 @@ class reset_password_serializer(serializers.Serializer):
             "success" : True
         }
         
+
+class CustomTokenRefreshSerilizer(TokenRefreshSerializer):
+    def validate(self, attrs):
+        data = super.valdiate(attrs)
+        refresh  = RefreshToken(attrs['refresh'])
+        user_id  = refresh['user_id']
+
+        try: 
+            user  = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User not found")
         
-        
+        data['email'] = user.email
+        data["username"] = user.username
+        data['role'] = user.user_role
+
+        return data
+
 
         
         

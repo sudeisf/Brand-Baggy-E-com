@@ -3,8 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { Checkbox } from "@/components/ui/checkbox"
-
+import { useAuthStore } from "@/store/authStore"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -17,6 +16,9 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { LoaderCircle } from "lucide-react"
+import { Combobox } from "@/components/ui/combobox"
 
 const formSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -29,6 +31,7 @@ const formSchema = z.object({
     confirmPassword : z.string()
     .min(8, "Password must be at least 8 characters")
     .max(32, "Password must be less than 32 characters"),
+    role: z.string().min(1, "Role is required"), 
   }).refine((data) =>data.password === data.confirmPassword ,{
     message: "Passwords don't match",
     path: ["confirmPassword"]
@@ -37,22 +40,74 @@ const formSchema = z.object({
 export default function RegisterPage() {
   
 
+  const isLoading  = useAuthStore((state)=> state.isLoading);
+  const error  = useAuthStore((state)=> state.error);
+  const register = useAuthStore((state)=> state.register);
+  const router = useRouter()
+
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver : zodResolver(formSchema),
     defaultValues : {
         email : "",
         username: "",
         password: "",
-        confirmPassword : ""
+        confirmPassword : "",
+        role: ""
     },
     mode: "onBlur"
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
+ const { setError} = form;
+ async function onSubmit(values: z.infer<typeof formSchema>) {
+  // Clear previous errors
+  form.clearErrors();
+  
+  const result = await register(
+    values.email,
+    values.username,
+    values.password,
+    values.confirmPassword,
+    values.role
+  );
+
+  if (!result) return; // Handle undefined case
+
+  if ('fieldErrors' in result && result.fieldErrors) {
+    // Map backend field names to form field names
+    const fieldMapping: Record<string, keyof typeof values> = {
+      username: 'username',
+      email: 'email',
+      password: 'password',
+      confirm_password: 'confirmPassword',
+      role: 'role'
+    };
+
+    // Set errors for each field
+    Object.entries(result.fieldErrors).forEach(([field, message]) => {
+      const formField = fieldMapping[field];
+      if (formField) {
+        form.setError(formField, {
+          type: 'server',
+          message: message
+        });
+      } else {
+        // If field doesn't exist in our form, show as root error
+        form.setError("root", { 
+          message: `${field}: ${message}` 
+        });
+      }
+    });
   }
+
+  if (result.error && (!result.fieldErrors || Object.keys(result.fieldErrors).length === 0)) {
+    form.setError("root", { message: result.error });
+  }
+
+  if (!result.error && (!result.fieldErrors || Object.keys(result.fieldErrors).length === 0)) {
+    router.push('/login');
+  }
+}
 
 
 
@@ -128,7 +183,31 @@ export default function RegisterPage() {
             </FormItem>
           )}
         />
-        <Button className="w-full bg-[#47307d] hover:bg-[#665292] h-10 font-medium" type="submit">Sign Up</Button>
+        <FormField
+            control={form.control}
+            name="role"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="font-medium">Role</FormLabel>
+                <FormControl>
+                  <Combobox {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          {form.formState.errors.root && (
+            <div className="p-3 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
+              {form.formState.errors.root.message}
+            </div>
+          )}
+
+        <Button disabled={isLoading || !form.formState.isValid} className="w-full bg-[#47307d] hover:bg-[#665292] h-10 font-medium" type="submit">
+        {
+            isLoading ? <LoaderCircle className="animate-spin" /> : "Sign Up"
+          }
+        </Button>
         <div className="flex justify-center gap-0.5 align-bottom">
             <div className="flex items-center gap-2">
                 <p className=" text-md text-slate-600 ">Already have an account ?</p>
@@ -147,10 +226,4 @@ export default function RegisterPage() {
   )
 }
 
-
-function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
-  }
 
