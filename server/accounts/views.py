@@ -151,13 +151,9 @@ class ForgotPasswordView(APIView):
                          'error': 'User does not exist'
                     },
                     status = status.HTTP_400_BAD_REQUEST
-               )
+               )   
           
-
-
-
-
-     
+          
 class Email_varify_OTP_generate_view(generics.CreateAPIView):
     
      permission_classes = [AllowAny]
