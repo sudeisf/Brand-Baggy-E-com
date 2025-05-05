@@ -138,7 +138,7 @@ class Email_varify_OTP_generate_serializer(serializers.Serializer):
         otp_code = random.randint(100000, 999999)
         expires_at = timezone.now() + timedelta(minutes=15)
         
-        
+        OTP.objects.filter(email=email).delete()
         otp = OTP.objects.create(
             email = email,
             otp=otp_code,
@@ -266,10 +266,6 @@ class reset_password_serializer(serializers.Serializer):
         except User.DoesNotExist:
             raise serializers.ValidationError("User not found")
         
-        return {
-            "message" : "Password reset successfully",
-            "success" : True
-        }
         
 
 class CustomTokenRefreshSerilizer(TokenRefreshSerializer):

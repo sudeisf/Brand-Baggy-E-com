@@ -46,8 +46,10 @@ export default function OtpPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log("Submitting OTP:", values.otp);
+    const inputValue = String(values.otp)
+    console.log("Input Value:", inputValue);
     try {
-      const result = await otpVerify(values.otp);
+      const result = await otpVerify(inputValue);
       
       if (result?.success) {
         router.push('/new-password');
@@ -72,12 +74,6 @@ export default function OtpPage() {
     }
   }
 
-  const handleOTPChange = (value: string) => {
-    // Only allow numeric input
-    const numericValue = value.replace(/\D/g, '');
-    form.setValue('otp', numericValue, { shouldValidate: true });
-  };
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full max-w-md mx-auto p-2 md:p-10 font-inter">
@@ -95,7 +91,11 @@ export default function OtpPage() {
                 <InputOTP 
                   maxLength={6}
                   value={field.value}
-                  onChange={handleOTPChange}
+                  onChange={e => {
+                    // Only allow numeric input
+                    const numericValue = e.replace(/\D/g, '');
+                    field.onChange(numericValue);
+                  }}
                   onBlur={field.onBlur}
                   ref={field.ref}
                 >

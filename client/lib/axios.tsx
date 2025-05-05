@@ -10,16 +10,23 @@ const api = axios.create({
     }
 })
 
-// api.interceptors.request.use(
-//     (config) =>{
-//         const accessToken  = useAuthStore.getState().accessToken;
-//         if(accessToken){
-//             config.headers.Authorization = `Bearer ${accessToken}`;
-//         }
-//         return config
-//     }, 
-//     (error) => Promise.reject(error)
-// )
+api.interceptors.request.use(
+
+    (config) =>{
+        // Skip interceptor logic if skipAuth is set
+        if ((config as any).skipAuth) {
+          return config;
+        }
+
+        const accessToken  = useAuthStore.getState().accessToken;
+        if(accessToken){
+            config.headers.Authorization = `Bearer ${accessToken}`;
+        }
+        return config
+    }, 
+    (error) => Promise.reject(error)
+ );
+
 api.interceptors.response.use(
     (response) => response,
     async (error) => {

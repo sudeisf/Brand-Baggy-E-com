@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useRouter } from "next/navigation"
+import { useAuthStore } from "@/store/authStore"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -18,6 +19,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
+import { LoaderCircle } from "lucide-react"
 
 const formSchema = z.object({
     password:  z.string()
@@ -33,7 +35,10 @@ const formSchema = z.object({
 
 export default function NewPasswordPage() {
   
-    const router = useRouter()
+  const router = useRouter();
+  const newPassword = useAuthStore((state) => state.newPassword);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const error = useAuthStore((state) => state.error);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver : zodResolver(formSchema),
@@ -44,11 +49,36 @@ export default function NewPasswordPage() {
     mode: "onBlur"
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
-    router.push('/login')
+   async function onSubmit(values: z.infer<typeof formSchema>) {
+    try{
+      const result = await newPassword(values.password, values.confirmPassword);
+      if (result?.success) {
+        router.push('/login');
+      }else{
+        if (result?.fieldErrors?.password) {
+          form.setError("password", {
+            type: 'server',
+            message: result.fieldErrors.password
+          });
+        }
+        if (result?.fieldErrors?.confirmPassword) {
+          form.setError("confirmPassword", {
+            type: 'server',
+            message: result.fieldErrors.confirmPassword
+          });
+        }
+        if (result?.error) {
+          form.setError("root", {
+            message: result.error
+          });
+        }
+      }
+    }catch(error){
+      console.error("Submission error:", error);
+      form.setError("root", {
+        message: "An unexpected error occurred"
+      });
+    }
   }
 
 
@@ -93,7 +123,13 @@ export default function NewPasswordPage() {
             </FormItem>
           )}
         />
-        <Button className="w-full bg-[#47307d] hover:bg-[#665292] h-10 font-medium" type="submit">Confirm</Button>
+        <Button
+         className="w-full bg-[#47307d] hover:bg-[#665292] h-10 font-medium" 
+         type="submit"
+         disabled={isLoading}
+         >
+          {isLoading ?<LoaderCircle className="animate-spin" /> : "Confirm"}
+        </Button>
       </form>
     </Form>
   )

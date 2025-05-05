@@ -40,6 +40,10 @@ type AuthState = {
         success?: boolean;
         error?: string; 
         fieldErrors?: Record<string, string> } | void>;
+    newPassword : (password : string , confirm_password : string) => Promise<{
+        success?: boolean;
+        error?: string; 
+        fieldErrors?: Record<string, string> } | void>;
     refreshAccessToken: () => Promise<void>;
     checkAuth: () => Promise<void>;
     hasRole: (role: User['role']) => boolean;
@@ -59,7 +63,10 @@ export const useAuthStore = create<AuthState>()(
                 login: async (email , password) => {
                     try{
                         set({isLoading:true , error:null});
-                        const response = await api.post('/accounts/login/' , {email ,password});
+                        const response = await api.post('/accounts/login/' , {email ,password},
+                        {
+                            skipAuth: true
+                        } as any);
                         const {access , refresh , user} = response.data;
                         set(
                             {
@@ -91,7 +98,10 @@ export const useAuthStore = create<AuthState>()(
                         password, 
                         confirm_password,
                         role
-                      });
+                      },
+                      {
+                        skipAuth: true
+                      } as any);
                       const { user } = response.data;
                       set({
                         user,
@@ -148,7 +158,10 @@ export const useAuthStore = create<AuthState>()(
                         set({isLoading:true , error:null});
                         const response = await api.post(
                             "accounts/otp/generate/", 
-                            { email }
+                            { email },
+                            {
+                                skipAuth: true
+                            } as any
                         );
                       
                         set({
@@ -197,6 +210,7 @@ export const useAuthStore = create<AuthState>()(
                             isLoading: false,
                             error: "No email associated with this OTP request" 
                         });
+                        console.log("No email associated with this OTP request");
                         return { 
                             error: "No email associated with this OTP request" 
                         };
@@ -207,15 +221,19 @@ export const useAuthStore = create<AuthState>()(
                             {
                                email : otpEmail,
                                otp
-                            }
+                            },
+                            {
+                                skipAuth: true
+                            } as any
                         );
                        
                         set({
                             isLoading: false,
                             error: null,
+                            otpEmail: otpEmail
                         });
                         return {
-                            sucess :true,
+                            success: true,
                             email: response.data.email
                         }
                     }catch(error : any){
@@ -253,7 +271,76 @@ export const useAuthStore = create<AuthState>()(
                             fieldErrors 
                         };
                     }
-                }
+                },
+                newPassword : async (password , confirm_password) => {
+                    const {otpEmail} = get();
+                    if (!otpEmail) {
+                        set({ 
+                            isLoading: false,
+                            error: "No email associated with this OTP request" 
+                        });
+                        console.log("No email associated with this OTP request");
+                    }
+                    
+                    try{
+                        set({isLoading: true, error: null});
+                        const response = await api.post('accounts/reset-password/', {
+                            email: otpEmail,
+                            new_password: password,
+                            confirm_password: confirm_password
+                            },
+                        {
+                            skipAuth: true
+                        } as any);
+                        set({
+                            isLoading: false,
+                            error: null,
+                            otpEmail: null
+                        });
+                        return {
+                            success: true,  
+                            email: response.data.email
+                        }
+                    }catch(error : any){
+                        let errorMsg = "New password failed";
+                        const fieldErrors: Record<string, string> = {};
+                
+                        if (error?.response?.data) {
+                            // Handle OTP-specific errors first
+                            if (error.response.data.password) {
+                                fieldErrors.password = Array.isArray(error.response.data.password) 
+                                    ? error.response.data.password.join(', ')
+                                    : error.response.data.password;
+                            }
+                            if (error.response.data.new_password) {
+                                fieldErrors.new_password = Array.isArray(error.response.data.new_password) 
+                                    ? error.response.data.new_password.join(', ')
+                                    : error.response.data.new_password;
+                            }
+                            
+                            // Then handle email errors
+                            if (error.response.data.email) {
+                                fieldErrors.email = Array.isArray(error.response.data.email) 
+                                    ? error.response.data.email.join(', ')
+                                    : error.response.data.email;
+                            }
+                
+                            // Fallback to general errors
+                            errorMsg = error.response.data.detail || 
+                                      error.response.data.message || 
+                                      errorMsg;
+                        }
+                
+                        set({ 
+                            error: errorMsg, 
+                            isLoading: false 
+                        });
+                        
+                        return { 
+                            error: errorMsg,
+                            fieldErrors 
+                        };}
+                    }
                 ,refreshAccessToken : async () => {
                     const { refreshToken } = get();
                     try {
