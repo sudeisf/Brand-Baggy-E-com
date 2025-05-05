@@ -169,7 +169,7 @@ class OTP_verify_serializer(serializers.Serializer):
         
     def validate(self, data):
         received_otp = data['otp']
-        received_email = data['email'].lower()  # Fixed spelling and ensure lowercase
+        received_email = data['email'].lower() 
 
         try:
             # Get the most recent OTP for this email
