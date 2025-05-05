@@ -9,7 +9,7 @@ from accounts.views import (
     UserUpdateView,
     LogOutView,
     reset_password_view
-    ,CustomTokenRefreshView,GetMe
+    ,CustomTokenRefreshView,GetMe,TokenTestView
 )
 
 urlpatterns = [
@@ -23,6 +23,7 @@ urlpatterns = [
     path('otp/verify/', OTP_verify_view.as_view(), name='otp-verify'),
     path('reset-password/', reset_password_view.as_view(), name='reset-password'),
     path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
-    path('/me' , GetMe.as_view() , name="get-me")
+    path('me/' , GetMe.as_view() , name="get-me"),
+    path('token/test/', TokenTestView.as_view(), name='token-test'),
     
 ]

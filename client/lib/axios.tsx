@@ -2,7 +2,6 @@ import axios from "axios";
 import { useAuthStore } from "@/store/authStore";
 
 
-
 const api = axios.create({
     baseURL : process.env.NEXT_PUBLIC_API_URL,
     headers : {
@@ -13,11 +12,9 @@ const api = axios.create({
 api.interceptors.request.use(
 
     (config) =>{
-        // Skip interceptor logic if skipAuth is set
         if ((config as any).skipAuth) {
           return config;
         }
-
         const accessToken  = useAuthStore.getState().accessToken;
         if(accessToken){
             config.headers.Authorization = `Bearer ${accessToken}`;

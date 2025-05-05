@@ -15,9 +15,7 @@ cloudinary==1.44.0
 colorama==0.4.6
 cron-descriptor==1.4.5
 cryptography==44.0.2
-dj-rest-auth==7.0.1
 Django==5.2
-django-allauth==65.7.0
 django-celery-beat==2.8.0
 django-cloudinary-storage==0.3.0
 django-cors-headers==4.7.0

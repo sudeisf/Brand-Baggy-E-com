@@ -1,8 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import api from '@/lib/axios';
-import axios from 'axios';
-import { promises } from 'dns';
 type User = {
     id: string,
     email: string;
@@ -31,7 +29,10 @@ type AuthState = {
         error?: string; 
         fieldErrors?: Record<string, string> 
       }>;
-    logout: () => Promise<void>;
+    logout: () =>  Promise<{
+        success?: boolean;
+        error?: string; 
+        fieldErrors?: Record<string, string> } | void>;
     sendEmail : (email :string) => Promise<{
         success?: boolean;
         error?: string; 
@@ -59,7 +60,6 @@ export const useAuthStore = create<AuthState>()(
                 isLoading : false,
                 error :null,
                 otpEmail:null,
-
                 login: async (email , password) => {
                     try{
                         set({isLoading:true , error:null});
@@ -139,19 +139,24 @@ export const useAuthStore = create<AuthState>()(
                     }
                   },
                 logout : async () => {
-                    try{
-                        set({isLoading:true , error: null});
-                        const response = await api.post('accounts/logout/')
+                    const { refreshToken } = get();
+                    console.log(refreshToken);
+                    try {
+                        set({ isLoading: true, error: null });
+                       const response = await api.post('accounts/logout/', { refresh: refreshToken });
+                       if(response.status === 205){
                         set({
-                            isAuthenticated:false,
+                            isLoading: false,
+                            isAuthenticated: false,
                             accessToken: null,
-                            refreshToken:null,
-                            isLoading:false,
-                        })
-                    }catch(error : any) {
-                        set({error: error.response?.data?.message || "logout failed" , isLoading :false});
+                            refreshToken: null,
+                            user: null,
+                        });
+                        return { success: true };
+                       }
+                    } catch (error: any) {
+                        return { error: error.response?.data?.message || "Logout failed" };
                     }
-
                 },
                 sendEmail: async (email) =>{
                     try{
@@ -344,7 +349,7 @@ export const useAuthStore = create<AuthState>()(
                 ,refreshAccessToken : async () => {
                     const { refreshToken } = get();
                     try {
-                        const response = await api.post('/accounts/token/refresh/', { refresh: refreshToken });
+                        const response = await api.post('accounts/token/refresh/', { refresh: refreshToken });
                         const { access } = response.data;
                         set({ accessToken: access });
                     } catch (err: any) {

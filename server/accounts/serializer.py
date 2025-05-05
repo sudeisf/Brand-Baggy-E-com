@@ -270,7 +270,7 @@ class reset_password_serializer(serializers.Serializer):
 
 class CustomTokenRefreshSerilizer(TokenRefreshSerializer):
     def validate(self, attrs):
-        data = super().valdiate(attrs)
+        data = super().validate(attrs)
         refresh  = RefreshToken(attrs['refresh'])
         user_id  = refresh['user_id']
 

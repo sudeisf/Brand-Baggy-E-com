@@ -214,3 +214,12 @@ class GetMe(APIView):
                  return Response({
                     "error": "User is not authenticated"
                }, status=status.HTTP_401_UNAUTHORIZED)
+
+class TokenTestView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({
+            'message': 'Token is valid',
+            'user': request.user.username
+        })
