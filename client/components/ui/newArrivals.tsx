@@ -58,6 +58,7 @@ const products = [
 ]   
 export default function NewArrivals() {
     const containerRef = useRef<HTMLDivElement>(null);
+    const [selectedCategory, setSelectedCategory] = useState<string>("Men");
   
     const scroll = (direction: string) => {
       if (containerRef.current) {
@@ -68,11 +69,15 @@ export default function NewArrivals() {
         });
       }
     };
+
+    const handleCategoryChange = (category: string) => {
+        setSelectedCategory(category);
+    };
   
     return (
-      <div className="flex mt-2 flex-col items-start justify-start max-w-[1350px] mb-5 mx-auto py-2 *:font-inter min-h-screen px-4 sm:px-6 lg:px-8">
+      <div className="flex mt-2 flex-col items-start justify-start max-w-[1350px] mb-5 mx-auto py-10 *:font-inter min-h-screen px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <h1 className="text-2xl md:text-3xl py-4 font-medium text-center items-center w-full mb-2 md:mb-2 tracking-tight font-roboto text-[#331d67] relative">
+        <h1 className="text-2xl md:text-4xl py-4 font-bold text-center items-center w-full mb-2 md:mb-2 tracking-tight font-roboto text-[#331d67] relative">
           New Arrivals
           <span className="block mx-auto mt-2 w-16 md:w-24 h-1 bg-gradient-to-r from-[#331d67] via-[#6c47c6] to-[#331d67] rounded"></span>
         </h1>
@@ -81,9 +86,36 @@ export default function NewArrivals() {
         <div className="w-full max-w-[1350px]">
           <h1 className="text-xl md:text-2xl font-semibold font-inter text-[#331d67] text-left mb-2">Explore the items you'll love</h1>
           <div className="flex items-start py-4 gap-3 md:gap-5 *:font-roboto *:tracking-tight *:font-bold mb-3 *:text-[#331d67] overflow-x-auto scrollbar-hide">
-            <div className="border-2 border-[#5f5283] px-3 md:px-4 py-1  rounded-sm flex-shrink-0 flex items-center gap-2">For Men</div>
-            <div className=" px-3 md:px-4 py-1  rounded-full flex-shrink-0 flex items-center gap-2">For Women</div>
-            <div className=" px-3 md:px-4 py-1  rounded-full flex-shrink-0 flex items-center gap-2">For Kids</div>
+            <div 
+              onClick={() => handleCategoryChange("Men")} 
+              className={`px-3 border-2  md:px-4 py-1 cursor-pointer rounded-sm flex-shrink-0 flex items-center gap-2  ${
+                selectedCategory === "Men" 
+                  ? "border-2  border-[#331d67] border-solid " 
+                  : "bg-transparent border-transparent"
+              }`}
+            >
+              For Men
+            </div>
+            <div 
+              onClick={() => handleCategoryChange("Women")} 
+              className={`px-3 border-2 md:px-4 py-1 cursor-pointer rounded-sm flex-shrink-0 flex items-center gap-2  ${
+                selectedCategory === "Women" 
+                  ? "border-2 border-[#331d67] border-solid" 
+                  : "bg-transparent border-transparent"
+              }`}
+            >
+              For Women
+            </div>
+            <div 
+              onClick={() => handleCategoryChange("Kids")} 
+              className={`px-3 border-2  md:px-4 py-1 cursor-pointer rounded-sm flex-shrink-0 flex items-center gap-2  ${
+                selectedCategory === "Kids" 
+                  ? "border-2 border-[#331d67] border-solid" 
+                  : "bg-transparent border-transparent"
+              }`}
+            >
+              For Kids
+            </div>
           </div>
         </div>
   
@@ -98,7 +130,7 @@ export default function NewArrivals() {
                 key={product.id}
                 className="bg-inherit rounded-md transition-shadow duration-300 w-64 md:w-80 h-[22rem] md:h-[24rem] flex flex-col flex-shrink-0 snap-start group border items-start border-gray-200"
               >
-                <div className="overflow-hidden rounded-r-sm ronded-l-sm w-full h-48 md:h-56">
+                <div className="overflow-hidden rounded-t-md w-full h-48 md:h-56">
                   <Image
                     src={product.image}
                     alt={product.name}

@@ -20,7 +20,7 @@ export default function Hero(){
                 <p className="text-white text-2xl md:text-3xl mb-8 max-w-2xl drop-shadow">
                     Elevate your look. Unbeatable deals. <span className="font-bold">Shop the new you!</span>
                 </p>
-                <Button className="bg-white font-roboto tracking-tighter text-[#331d67] border-2 border-[#331d67]  font-bold px-8 py-5 rounded-lg shadow-lg hover:bg- hover:text-white transition-colors duration-300">
+                <Button className="bg-white font-roboto tracking-tighter text-[#331d67] border-2 border-[#331d67]  font-bold px-8 py-5 rounded-lg shadow-lg hover:bg-[#331d67] hover:text-white transition-colors duration-300">
                     Start Shopping
                 </Button>
             </div>
