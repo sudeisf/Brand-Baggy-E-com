@@ -50,14 +50,14 @@ export default function Header(){
             {/* Desktop Navigation - Hidden on mobile */}
             <div className="hidden lg:flex items-center gap-10">
                 <div className="flex items-center gap-4">
-                    <Link href="/" className="text-[#331d67] font-semibold hover:text-[#6c47c6] transition-colors">Products</Link>
+                    <Link href="/products" className="text-[#331d67] font-semibold hover:text-[#6c47c6] transition-colors">Products</Link>
                     <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-                        <DropdownMenuTrigger className="text-[#331d67] font-semibold outline-none flex items-center gap-1 hover:text-[#6c47c6] transition-colors">
+                        <DropdownMenuTrigger className="text-[#331d67] font-semibold outline-none flex justify-center items-center gap-2 hover:text-[#6c47c6] transition-colors">
                             Categories
                             {dropdownOpen ? (
-                                <ChevronUp className="w-4 h-4" />
+                                <ChevronUp className="w-4 h-4 mt-1" />
                             ) : (
-                                <ChevronDown className="w-4 h-4" />
+                                <ChevronDown className="w-4 h-4 mt-1" />
                             )}
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="rounded-sm">
