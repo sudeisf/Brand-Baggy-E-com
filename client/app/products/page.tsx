@@ -10,11 +10,11 @@ export default function ProductsPage(){
         <>
             <div className="container mx-auto px-4 py-2 *:font-roboto">
                 <ProductBanner />
-                <div>
+                <div className="flex flex-col gap-4">
                     <ProductCrum />
-                    <div className="flex">
+                    <div className="flex flex-row ">
                         <SideMenu />
-                        <div className="w-full flex flex-col gap-4">
+                        <div className="w-1/2 flex flex-col gap-4 border border-gray-200">
                             <p>product list and sidbar list</p>
                             <p>product list pagination</p>
                         </div>
