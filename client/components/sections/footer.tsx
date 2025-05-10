@@ -3,7 +3,7 @@ import { FaGithub, FaTwitter, FaLinkedin } from 'react-icons/fa';
 
 const Footer = () => {
   return (
-    <footer className=" text-gray-300 mb-5 rounded-lg w-full">
+    <footer className=" text-gray-300 mb-2 rounded-lg w-full">
       <div className=" max-w-[1500px] bg-gray-900 rounded-lg mx-auto px-10 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}

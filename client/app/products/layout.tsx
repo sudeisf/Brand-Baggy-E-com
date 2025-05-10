@@ -1,0 +1,21 @@
+"use client"
+
+import ProductBanner from "./components/ProductBanner"
+import { ProductCrum } from "./components/ProductCrum"
+import { SideMenu } from "./components/SideMenu"
+
+export default function ProductsLayout({children}: {children: React.ReactNode}){
+    return(
+        <>
+        <div className="container mx-auto px-4 py-2 *:font-roboto">
+        <ProductBanner />
+        <div className="flex flex-col gap-4">
+            <ProductCrum />
+            <div>
+                {children}
+            </div>
+        </div>
+        </div>
+        </>
+    )
+}

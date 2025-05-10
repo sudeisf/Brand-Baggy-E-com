@@ -44,7 +44,7 @@ export default function Header(){
 
             {/* Brand Logo */}
             <div className="flex items-center">
-                <h1 className={`${jersey10.className} text-[#331d67] font-bold text-xl sm:text-2xl`}>Brand-Baggy</h1>
+                <h1 className={`${jersey10.className} text-[#331d67] font-bold font-m text-xl sm:text-2xl`}>Brand-Baggy</h1>
             </div>
 
             {/* Desktop Navigation - Hidden on mobile */}

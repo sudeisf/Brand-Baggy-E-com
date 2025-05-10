@@ -1,4 +1,8 @@
-import {  ChevronRight } from "lucide-react"
+"use client"
+
+import { ChevronRight } from "lucide-react"
+import { usePathname } from "next/navigation"
+import Link from "next/link"
 
 import {
   Breadcrumb,
@@ -10,25 +14,47 @@ import {
 } from "@/components/ui/breadcrumb"
 
 export function ProductCrum() {
+  const pathname = usePathname(); // e.g., "/products/category/shoes"
+  const segments = pathname.split("/").filter(Boolean); // ['products', 'category', 'shoes']
+
+  const createPath = (index: number) =>
+    "/" + segments.slice(0, index + 1).join("/");
+
   return (
     <Breadcrumb className="*:text-md py-5 px-8 border-b border-gray-200">
       <BreadcrumbList>
         <BreadcrumbItem>
-          <BreadcrumbLink href="/">Home</BreadcrumbLink>
+          <BreadcrumbLink asChild>
+            <Link href="/">Home</Link>
+          </BreadcrumbLink>
         </BreadcrumbItem>
-        <BreadcrumbSeparator>
-          <ChevronRight />
-        </BreadcrumbSeparator>
-        <BreadcrumbItem>
-          <BreadcrumbLink href="/products">Products</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator>
-          <ChevronRight />
-        </BreadcrumbSeparator>
-        <BreadcrumbItem>
-          <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
-        </BreadcrumbItem>
+
+        {segments.map((segment, index) => {
+          const path = createPath(index);
+          const isLast = index === segments.length - 1;
+
+          return (
+            <div key={index} className="flex items-center">
+              <BreadcrumbSeparator>
+                <ChevronRight size={16} />
+              </BreadcrumbSeparator>
+              <BreadcrumbItem>
+                {isLast ? (
+                  <BreadcrumbPage className="capitalize">
+                    {decodeURIComponent(segment)}
+                  </BreadcrumbPage>
+                ) : (
+                  <BreadcrumbLink asChild>
+                    <Link href={path} className="capitalize">
+                      {decodeURIComponent(segment)}
+                    </Link>
+                  </BreadcrumbLink>
+                )}
+              </BreadcrumbItem>
+            </div>
+          );
+        })}
       </BreadcrumbList>
     </Breadcrumb>
-  )
+  );
 }
