@@ -48,7 +48,7 @@ const product = {
     name: "loose fit hoodie",
     price: 29.99,
     description: "This premium loose-fit zip hoodie combines streetwear style with everyday comfort. Designed with a relaxed silhouette, it offers unrestricted movement while maintaining a fashionable oversized look. The full-zip front allows for versatile styling options, making it perfect for layering or wearing solo.",
-    mainImage: "/assets/products/product1.jpg",
+    mainImage: "/assets/products/product4.jpg",
     images: [
         "/assets/products/product1.jpg",
         "/assets/products/product2.jpg",
@@ -60,9 +60,23 @@ const reviews = [
     {
       name: "John Doe",
       rating: 4.5,
-      date: "2024-01-01",
-      comment: "This product is great!",
+      date: "13 Oct 2024",
+      comment: "This product strikes a great balance between functionality and design. As someone who uses it daily in a professional setting, I appreciate the attention to detail and thoughtful features.",
       avatar: "https://github.com/shadcn.png"
+    },
+    {
+        name: "Jane Smith",
+        rating: 5,
+        date: "14 Oct 2024",
+        comment: "I've been using this product for a week now, and it's been a game-changer. The quality is top-notch, and the customer service is outstanding.",
+        avatar: "https://github.com/shadcn.png"
+    },
+    {
+        name: "John Doe",
+        rating: 4.5,
+        date: "13 Oct 2024",
+        comment: "This product strikes a great balance between functionality and design. As someone who uses it daily in a professional setting, I appreciate the attention to detail and thoughtful features.",
+        avatar: "https://github.com/shadcn.png"
     }
 ];
 

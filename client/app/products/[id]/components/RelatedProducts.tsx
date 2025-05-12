@@ -1,7 +1,8 @@
 "use client"
 
-import { Plus } from "lucide-react"
+import {  Plus } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 
 interface Product{
     id: number;
@@ -23,15 +24,17 @@ export default function RelatedProducts({products}:RelatedProductsProps){
                     {products.map((product) => (
                         <div
                             key={product.id}
-                            className="bg-inherit rounded-md transition-shadow duration-300 w-64 md:w-74 h-[22rem] md:h-[24rem] flex flex-col flex-shrink-0 justify-betweena snap-start group border items-start border-gray-200"
+                            className="bg-inherit rounded-md transition-shadow duration-300 w-64 md:w-74 h-[22rem] md:h-[24rem] flex flex-col flex-shrink-0 justify-between snap-start group border items-start border-gray-200"
                         >
                             <div className="overflow-hidden rounded-t-md w-full h-48 md:h-56">
+                                <Link href={`/products/${product.id}`}>
                                 <Image
                                     src={product.image}
                                     alt={product.name}
                                     width={220}
                                     height={220}
                                     className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300" />
+                                </Link>
                             </div>
                             <div className="flex flex-col items-start justify-start px-4 w-full">
                                 <h2 className="text-base md:text-lg font-semibold text-gray-900 py-2 mb-1 md:mb-2 text-left">{product.name}</h2>
