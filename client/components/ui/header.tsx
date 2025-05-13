@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation"
 import { Search, ShoppingCart, User, ChevronDown, ChevronUp } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { Jersey_10 } from "next/font/google";
+import { Jersey_10 , Rubik } from "next/font/google";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -15,6 +15,7 @@ import {
 import React, { useState } from "react"
 
 const jersey10 = Jersey_10({ subsets: ["latin"], weight: "400" });
+const rubik = Rubik({ subsets: ["latin"], weight: "500" });
 
 export default function Header(){
     const router = useRouter();
@@ -44,7 +45,7 @@ export default function Header(){
 
             {/* Brand Logo */}
             <div className="flex items-center">
-                <h1 className={`${jersey10.className} text-[#331d67] font-bold font-m text-xl sm:text-2xl`}>Brand-Baggy</h1>
+                <h1 className={`${rubik.className} text-[#331d67]   text-xl sm:text-2xl`}>Baggy-Brand</h1>
             </div>
 
             {/* Desktop Navigation - Hidden on mobile */}

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { ShieldCheck } from "lucide-react"
-
+import Link from "next/link"
 
 export default function OrderSummary() {
     return (
@@ -32,7 +32,9 @@ export default function OrderSummary() {
             </div>
 
             <div className="flex justify-center items-center ">
-                <Button className="w-full py-6 rounded-full font-roboto font-semibold tracking-wider bg-[#331d67] text-white hover:bg-[#331d67]/80">Checkout Now</Button>
+                <Link href="/shipping" className="w-full"> 
+                <Button className="w-full py-6 rounded-md font-roboto font-semibold tracking-wider bg-[#331d67] text-white hover:bg-[#331d67]/80">Checkout Now</Button>
+                </Link>
             </div>
 
 
