@@ -93,13 +93,16 @@ export default function Header(){
                         </Link>
                     </div>
                     
-                    <div className="bg-white rounded-full p-1 sm:p-2 border border-gray-400">
+                    <div className="bg-white rounded-full p-1 sm:p-2 border border-gray-400 relative">
                         <Link href="/cart" className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2">
                             <ShoppingCart className="text-[#2d1a4d] w-4 h-4 sm:w-5 sm:h-5" />
                             <span className="hidden sm:inline text-[#2d1a4d] text-sm font-semibold">
-                                $0.00
+                                $220.00
                             </span>
                         </Link>
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                            3
+                        </span>
                     </div>
                 </div>
             </div>
