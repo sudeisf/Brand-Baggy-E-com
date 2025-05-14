@@ -75,7 +75,7 @@ export default function Summery() {
             
 
             <div className="flex justify-center items-center ">
-                <Link href="/shipping" className="w-full"> 
+                <Link href="/payment" className="w-full"> 
                 <Button className="w-full py-6 rounded-md flex items-center justify-center gap-2 font-${rubik.className} font-medium tracking-wider bg-[#331d67] text-white hover:bg-[#331d67]/80">Place Order
                 <MoveRightIcon className="w-8 h-8 stroke-3" />
                 </Button>

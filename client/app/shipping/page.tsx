@@ -1,10 +1,6 @@
 "use client";
 
 import { ProductCrum } from "@/app/products/components/ProductCrum"
-import CartTable from "@/app/cart/Components/CartTable"
-import OrderSummary from "@/app/cart/Components/OrderCard"
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import BillingInformation from "./components/InputInformation";
 import ShippingInformation from "./components/ShippingInfrom";
 import PaymentMethod from "./components/PaymentMethod";
@@ -19,7 +15,7 @@ export default function ShippingPage() {
           <div className="w-[60%] border-2 border-gray-200 rounded-xl">
             <BillingInformation />
             <ShippingInformation />
-            <PaymentMethod />
+            {/* <PaymentMethod /> */}
           </div>
           <div className="w-[40%]">
             <Summery />
