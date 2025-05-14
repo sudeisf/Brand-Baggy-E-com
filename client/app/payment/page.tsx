@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { CardMethod } from "./components/CardMethod";
 import FinalSummery from "./components/FinalSummery";
+import CashOnDelivery from "./components/CodMethod";
 const rubik = Rubik({
     subsets: ['latin'],
     weight: ['400', '500', '700'],
@@ -24,14 +25,18 @@ export default function PaymentPage() {
     
 
   return (
-    <div className="container mx-auto px-4 py-5 mb-10">
+    <div className="container mx-auto px-4 py-5 mb-10 min-h-screen">
       <ProductCrum />
-      <div className="flex gap-4 justify-center p-4">
+
+       <div className="flex flex-col w-[1250px] mx-auto mb-4 ">
+            <h1 className={`text-4xl font-bold text-[#331d67] ${rubik.className} p-2 mt-2`}>Payment Method</h1>
+            <p className={`text-gray-500 text-md ${rubik.className} p-2 mt-2`}>Please select the payment method you want to use</p>
+       </div>
+
+      <div className="flex gap-4 justify-center px-4">
       <div>
         <div className="w-[700px] mx-auto">
-            <h1 className={`text-4xl font-bold text-[#331d67] ${rubik.className} p-2 mt-4`}>Payment Method</h1>
-        <p className={`text-gray-500 text-md ${rubik.className} p-2 mt-4`}>Please select the payment method you want to use</p>
-        <RadioGroup value={paymentMethod} onValueChange={handlePaymentMethodChange} className="flex gap-4 rounded-xl mt-4">
+           <RadioGroup value={paymentMethod} onValueChange={handlePaymentMethodChange} className="flex gap-4 rounded-xl ">
             <div
                 onClick={() => handlePaymentMethodChange("paypal")}
                 className={`w-1/3 border-2 rounded-xl p-4 cursor-pointer transition-colors ${
@@ -79,13 +84,11 @@ export default function PaymentPage() {
             <CardMethod />
         )}
         {paymentMethod === "cash" && (
-            <div>
-                <h1>Cash On Delivery</h1>
-            </div>
+            <CashOnDelivery />
         )}
       </div>
       </div>
-      <FinalSummery />
+      <FinalSummery paymentMethod={paymentMethod} />
      </div>
     </div>
 

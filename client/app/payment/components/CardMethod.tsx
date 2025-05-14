@@ -63,7 +63,7 @@ export function CardMethod() {
     }
 
     return (
-        <div className="w-[700px] mx-auto mt-10">
+        <div className="w-[700px] mx-auto mt-10 ">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                     <FormField
