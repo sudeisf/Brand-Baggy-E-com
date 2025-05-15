@@ -4,12 +4,14 @@ import { ProductCrum } from "@/app/products/components/ProductCrum"
 import { Rubik } from "next/font/google"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { Coins } from "lucide-react"
+import { ArrowLeft, Coins } from "lucide-react"
+import Link from "next/link";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { CardMethod } from "./components/CardMethod";
 import FinalSummery from "./components/FinalSummery";
 import CashOnDelivery from "./components/CodMethod";
+import { Button } from "@/components/ui/button";
 const rubik = Rubik({
     subsets: ['latin'],
     weight: ['400', '500', '700'],
@@ -87,9 +89,18 @@ export default function PaymentPage() {
             <CashOnDelivery />
         )}
       </div>
+      <div className="flex justify-start items-center border-t border-gray-200 pt-4">
+        <Button className="bg-[#331d67]/40 text-white h-10 rounded-md hover:bg-[#331d67]">
+            <Link href="/shipping" className="flex items-center  gap-2">
+                <ArrowLeft className="w-4 h-4" />
+                Edit Shipping Address
+            </Link>
+        </Button>   
+     </div>
       </div>
       <FinalSummery paymentMethod={paymentMethod} />
      </div>
+     
     </div>
 
   ) 

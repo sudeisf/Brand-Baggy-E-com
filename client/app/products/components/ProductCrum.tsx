@@ -25,7 +25,7 @@ export function ProductCrum() {
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link href="/" className="capitalize text-[1.1rem] font-medium">Home</Link>
+            <Link href="/" className="capitalize text-[1rem] font-normal">Home</Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
 
@@ -40,12 +40,12 @@ export function ProductCrum() {
               </BreadcrumbSeparator>
               <BreadcrumbItem>
                 {isLast ? (
-                  <BreadcrumbPage className="capitalize text-[#331d67] text-[1.1rem] font-medium ml-2">
+                  <BreadcrumbPage className="capitalize text-[#331d67] text-[1rem] font-normal ml-2">
                     {decodeURIComponent(segment)}
                   </BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild>
-                    <Link href={path} className="capitalize text-[#331d67] text-[1.1rem] font-medium ml-2">
+                    <Link href={path} className="capitalize text-[#331d67] text-[1rem] font-normal ml-2">
                       {decodeURIComponent(segment)}
                     </Link>
                   </BreadcrumbLink>

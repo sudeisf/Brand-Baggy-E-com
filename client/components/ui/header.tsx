@@ -3,7 +3,7 @@
 import { useAuthStore } from "@/store/authStore"
 import Link from "next/link";
 import { useRouter } from "next/navigation"
-import { Search, ShoppingCart, User, ChevronDown, ChevronUp } from "lucide-react"
+import { Search, ShoppingCart, User, ChevronDown, ChevronUp , Heart } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Jersey_10 , Rubik } from "next/font/google";
 import {
@@ -89,7 +89,7 @@ export default function Header(){
 
                 <div className="flex items-center gap-2 sm:gap-4">
                     <div className="bg-white rounded-full border border-gray-300 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
-                        <Link href="/login" className="flex items-center justify-center w-full h-full">
+                        <Link href="/profile" className="flex items-center justify-center w-full h-full">
                             <User className="text-[#2d1a4d] w-4 h-4 sm:w-5 sm:h-5" />
                         </Link>
                     </div>
@@ -100,6 +100,14 @@ export default function Header(){
                             <span className="hidden sm:inline text-[#2d1a4d] text-sm font-semibold">
                                 $220.00
                             </span>
+                        </Link>
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                            3
+                        </span>
+                    </div>
+                    <div className="bg-white rounded-full w-10 h-10 flex items-center justify-center border border-gray-400 relative">
+                        <Link href="/favorites" className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2">
+                            <Heart className="text-[#2d1a4d] w-4 h-4 sm:w-5 sm:h-5" />
                         </Link>
                         <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                             3
