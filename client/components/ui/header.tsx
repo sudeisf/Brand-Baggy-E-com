@@ -45,7 +45,7 @@ export default function Header(){
 
             {/* Brand Logo */}
             <div className="flex items-center">
-                <h1 className={`${rubik.className} text-[#331d67]   text-xl sm:text-2xl`}>Baggy-Brand</h1>
+                <h1 className={`${rubik.className} text-[#331d67]  tracking-tighter  text-md sm:text-2xl`}>Baggy-Brand</h1>
             </div>
 
             {/* Desktop Navigation - Hidden on mobile */}
