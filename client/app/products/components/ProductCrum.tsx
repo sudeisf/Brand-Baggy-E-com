@@ -21,7 +21,7 @@ export function ProductCrum() {
     "/" + segments.slice(0, index + 1).join("/");
 
   return (
-    <Breadcrumb className="*:text-md py-4 px-8  border-t border-gray-200">
+    <Breadcrumb className="*:text-md py-4 px-8  border-t border-gray-200 border-b ">
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink asChild>

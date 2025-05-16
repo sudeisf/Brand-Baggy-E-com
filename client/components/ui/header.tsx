@@ -73,7 +73,7 @@ export default function Header(){
             {/* Search and User Actions */}
             <div className="flex items-center gap-2 sm:gap-4">
                 {/* Search Bar - Hidden on small mobile */}
-                <div className="hidden sm:flex w-[10rem] md:w-[20rem] lg:w-[30rem] bg-white items-center justify-start gap-2 rounded-md px-3 py-1.5 border border-[#918c9e]">
+                <div className="hidden sm:flex w-[10rem] md:w-[20rem] lg:w-[30rem] bg-white items-center justify-start gap-2 rounded-sm px-3 py-1.5 border-2">
                     <Search className="text-black w-4 h-4 md:w-5 md:h-5" />
                     <input 
                         type="text" 
@@ -94,7 +94,7 @@ export default function Header(){
                         </Link>
                     </div>
                     
-                    <div className="bg-white rounded-full p-1 sm:p-2 border border-gray-400 relative">
+                    <div className="bg-white rounded-md p-1 sm:p-2  border-1 relative">
                         <Link href="/cart" className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2">
                             <ShoppingCart className="text-[#2d1a4d] w-4 h-4 sm:w-5 sm:h-5" />
                             <span className="hidden sm:inline text-[#2d1a4d] text-sm font-semibold">
