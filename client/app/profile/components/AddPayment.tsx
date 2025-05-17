@@ -63,34 +63,37 @@ export function AddPayment() {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+           
             <FormField
               control={form.control}
-              name="cardNumber"
+              name="cardHolder"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[#331d67] font-semibold">Card Number</FormLabel>
+                  <FormLabel className="text-[#331d67] font-medium">Card Holder</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="Card Number"
-                      className="border-gray-300 focus:ring-[#603ab8] focus:border-[#603ab8] rounded-md"
+                      placeholder="Card Holder"
+                      className="border shadow-none rounded-sm focus:ring-0 focus:border outline-none focus:outline-none focus:shadow-none"
+
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <FormField
+             <FormField
               control={form.control}
-              name="cardHolder"
+              name="cardNumber"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[#331d67] font-semibold">Card Holder</FormLabel>
+                  <FormLabel className="text-[#331d67] font-medium ">Card Number</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="Card Holder"
-                      className="border-gray-300 focus:ring-[#603ab8] focus:border-[#603ab8] rounded-md"
+                      placeholder="Card Number"
+                      className="border shadow-none rounded-sm focus:ring-0 focus:border outline-none focus:outline-none focus:shadow-none"
+
                     />
                   </FormControl>
                   <FormMessage />
@@ -103,12 +106,12 @@ export function AddPayment() {
                 name="expiryDate"
                 render={({ field }) => (
                   <FormItem>
-                        <FormLabel className="text-[#331d67] font-semibold">Expiry Date</FormLabel>
+                        <FormLabel className="text-[#331d67] font-medium">Expiry Date</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         placeholder="Expiry Date"
-                        className="border-gray-300 focus:ring-[#603ab8] focus:border-[#603ab8] rounded-md"
+                            className="border shadow-none rounded-sm focus:ring-0 focus:border outline-none focus:outline-none focus:shadow-none"
                       />
                     </FormControl>
                     <FormMessage />
@@ -120,12 +123,12 @@ export function AddPayment() {
                 name="cvv"
                 render={({ field }) => (
                   <FormItem>
-                            <FormLabel className="text-[#331d67] font-semibold">CVV</FormLabel>
+                            <FormLabel className="text-[#331d67] font-medium">CVV</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         placeholder="CVV"
-                        className="border-gray-300 focus:ring-[#603ab8] focus:border-[#603ab8] rounded-md"
+                        className="border shadow-none rounded-sm focus:ring-0 focus:border outline-none focus:outline-none focus:shadow-none"
                       />
                     </FormControl>
                     <FormMessage />
