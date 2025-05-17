@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Rubik } from "next/font/google"
 import Link from "next/link"
 import { EyeIcon } from "lucide-react"
-
+import ViewDetails from "../components/ViewDetails"
+import ViewInvoice from "../components/ViewInvoice"
 const rubik = Rubik({
     subsets: ["latin"],
     weight: ["400", "500", "600", "700"],
@@ -134,8 +135,8 @@ export default function Orders() {
                                         <span className="text-md font-bold text-[#331d67]">#{order.id}</span>
                                     </div>
                                     <div className="flex gap-2 w-full justify-end">
-                                        <Button variant="outline">View Invoice</Button>
-                                        <Button className="bg-[#331d67] text-white">View Order</Button>
+                                        <ViewInvoice />
+                                        <ViewDetails status={order.deliveryStatus} />
                                     </div>
                                   </div>
                                  
