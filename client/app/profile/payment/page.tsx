@@ -11,6 +11,8 @@ import { useState } from "react"
 })
 import { AddAddress } from "../components/AddAddress"
 import { AddPayment } from "../components/AddPayment"
+import { EditAddress } from "../components/EditAddress"
+import { EditPayment } from "../components/EditPayment"
 const paymentMethods = [
     {
         id: 1,
@@ -75,7 +77,13 @@ export default function Payment() {
                        <Button onClick={() => handleShowCvv(method.id)} variant="outline" className="rounded-full px-8 text-gray-500">
                             {showCvv.includes(method.id) ? "cvv" : "123"}
                        </Button>
-                        <Button variant="ghost" className="bg-none border-none">Edit</Button>
+                        <EditPayment payment={{
+                            id: method.id.toString(),
+                            cardholderName: method.holder,
+                            cardNumber: method.number,
+                            expiry: method.expiry,
+                            cvv: method.cvv,
+                        }} onUpdate={() => {}} />
                     </div>
                 ))}
             </div>
@@ -96,7 +104,15 @@ export default function Payment() {
                         <p className="text-md font-medium text-[#331d67]">John Doe</p>
                         <p className="text-sm text-gray-500">123 Main St, Anytown, USA</p>
                     </div>
-                    <Button variant="ghost" className="rounded-full px-8 text-[#331d67]">Edit</Button>
+                    <EditAddress address={{
+                        id: "1",
+                        name: "John Doe",
+                        address: "123 Main St",
+                        city: "Anytown",
+                        state: "CA",
+                        zip: "12345",
+                        country: "USA"
+                    }} onUpdate={() => {}} />
                 </div>
            </div>
            

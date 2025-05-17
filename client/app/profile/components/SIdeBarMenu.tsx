@@ -31,7 +31,7 @@ export default function SideBarMenu() {
                     <Settings className="w-4 h-4" />    
                     <h1>Settings</h1>
                 </Link>
-                <Link href="/profile/logout" className={`flex items-center gap-2 text-sm font-medium  rounded-md  px-4 py-2 ${isActive("/profile/logout") ? "bg-[#331d67]/5 text-[#4b3188] px-4 py-2" : "text-gray-500 px-4 py-2"}`}>
+                <Link href="/" className={`flex items-center gap-2 text-sm font-medium  rounded-md  px-4 py-2 ${isActive("/profile/logout") ? "bg-[#331d67]/5 text-[#4b3188] px-4 py-2" : "text-gray-500 px-4 py-2"}`}>
                     <LogOut className="w-4 h-4" />
                     <h1>Logout</h1>
                 </Link>
