@@ -17,7 +17,11 @@ export default function HeaderFooterWrapper({
     '/register',
     '/new-password/',
     '/forgot-password',
-    '/verify-otp'
+    '/verify-otp',
+    
+
+    //seler side
+    '/dashboard'
   ];
 
   const isAuthPage = authRoutes.some(route => 

@@ -15,10 +15,7 @@ export default function SideBarMenu() {
                     <User className="w-4 h-4" />
                     <h1>My details</h1>
                 </Link> 
-                {/* <Link href="/profile/addresses" className={`flex items-center gap-2 w-48 text-sm font-medium  rounded-md  px-4 py-2 ${isActive("/profile/addresses") ? "bg-[#331d67]/5 text-[#4b3188] px-4 py-2" : "text-gray-500 px-4 py-2"}`}>
-                    <MapPin className="w-4 h-4" />
-                    <h1>Addresses book</h1>
-                </Link> */}
+              
                 <Link href="/profile/orders" className={`flex items-center gap-2 w-48 text-sm font-medium  rounded-md  px-4 py-2 ${isActive("/profile/orders") ? "bg-[#331d67]/5 text-[#4b3188] px-4 py-2" : "text-gray-500 px-4 py-2"}`}>
                     <ShoppingBag className="w-4 h-4" />
                     <h1>My Orders</h1>
