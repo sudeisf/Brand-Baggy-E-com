@@ -5,6 +5,7 @@ import { Search ,Bell ,ArrowRight , AlignLeft , } from "lucide-react"
 import { Rubik } from "next/font/google"
 import { ArrowRightFromLine } from "lucide-react"
 import Dashheads from "./components/Dashheads"
+import { Notification } from "./components/Notficationsheet"
 
 const rubik = Rubik({
     subsets: ['latin'],
@@ -49,10 +50,9 @@ export default function Dashboard(){
                         className="rounded-md outline-none bg-white w-full text-sm md:text-base" 
                     />
                 </div>
-            <div className="flex border-1 py-2 gap-2 items-center px-2 rounded-sm">
-                <Bell className="w-5 h-5 text-gray-500" />
-                <p className="text-sm text-gray-700 font-inters font-medium">Notfication</p>
-            </div>
+            
+                <Notification />
+        
            </div>
             </div>
             <Dashheads />
