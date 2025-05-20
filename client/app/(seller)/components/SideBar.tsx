@@ -100,7 +100,7 @@ export default function AppSidbar(){
                                         >
                                             <a href={item.url}>
                                                 <item.icon className={isActive ? 'text-[#331d67]' : ''} />
-                                                <span className={`font-medium font-inter ${
+                                                <span className={`font-medium font-inter text-md ${
                                                     isActive ? 'text-[#6449a3] ' : ''
                                                 }`}>
                                                     {item.title}
