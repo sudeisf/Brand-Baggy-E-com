@@ -2,6 +2,7 @@
 import { TrendingDown , TrendingUp , DollarSign } from "lucide-react"
 import { DashChart } from "./Dashchart"
 import { RevenueChart } from "./Salesbar";
+import Recentactivity from "./Recentorders";
 const data = [
     {
       header: "Total Income",
@@ -91,8 +92,9 @@ const data = [
           </div>
         ))}
       </div>
-        <div className="flex w-full px-4">
+        <div className="flex w-full px-4 gap-4">
           <RevenueChart />
+          <Recentactivity/>
         </div>
       </div>
     )
