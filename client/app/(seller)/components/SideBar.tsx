@@ -114,7 +114,7 @@ export default function AppSidbar(){
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
-        <SidebarFooter className="bg-gray-50 flex flex-col  px-4 border-t-1 mx-4 ">
+        <SidebarFooter className="bg-gray-50 flex flex-col mx-4 ">
         
             <div className="flex items-center gap-3 pt-4 mb-2">
             <div className=" flex justify-center space-x-3 items-center">
@@ -129,11 +129,6 @@ export default function AppSidbar(){
                     <p className="text-sm text-gray-400 font-roboto">sudeisfedlu@gmail.com</p>
                 </div>
             </div>
-
-            {/* <Button variant="ghost" className="text-[#331d67] w-fit flex gap-2 items-center justify-center">
-                <LogOutIcon className="w-4 h-4" />
-                
-            </Button> */}
             </div>
             </SidebarFooter>
       </Sidebar>
