@@ -35,8 +35,8 @@ export default function Dashboard(){
                 </button>
             )}
                 
-                <div>
-                <h1 className={`font-inter text-2xl font-semibold  text-[#331d67] capitalize`}>Hello, Sudies!</h1>
+                <div className="p-2">
+                <h1 className={`font-roboto text-2xl font-semibold  text-[#331d67] capitalize`}>Hello, Sudies!</h1>
                 <p className="text-gray-400 ">Your current dashboard toady</p>
                 </div>
             

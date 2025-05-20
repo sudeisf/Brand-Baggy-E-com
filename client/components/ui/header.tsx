@@ -26,7 +26,7 @@ export default function Header(){
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return(
-        <header className="flex justify-between items-center px-4 sm:px-8 md:px-12 lg:px-20 py-2 bg-inherit w-full">
+        <header className="flex justify-between items-center px-4 sm:px-8 md:px-10 lg:px-10 py-2 bg-inherit w-full">
             {/* Mobile Menu Button (Hamburger) - Only shows on small screens */}
             <div className="lg:hidden">
                 <button 
@@ -73,7 +73,7 @@ export default function Header(){
             {/* Search and User Actions */}
             <div className="flex items-center gap-2 sm:gap-4">
                 {/* Search Bar - Hidden on small mobile */}
-                <div className="hidden sm:flex w-[10rem] md:w-[20rem] lg:w-[30rem] bg-white items-center justify-start gap-2 rounded-sm px-3 py-1.5 border-2">
+                <div className="hidden sm:flex w-[10rem] md:w-[20rem] lg:w-[30rem] bg-white items-center justify-start gap-2 rounded-sm px-3 py-1.5 border-1">
                     <Search className="text-black w-4 h-4 md:w-5 md:h-5" />
                     <input 
                         type="text" 

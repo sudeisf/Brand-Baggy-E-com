@@ -83,11 +83,9 @@ export function Notification() {
 
   return (
     <Sheet>
-      <SheetTrigger className="flex items-center border-1 px-2 rounded-sm">
+      <SheetTrigger className="flex items-center  border-gray-200 border-1 px-2 rounded-md py-2 gap-2">
         <Bell className="w-4 h-4 text-gray-500" />
-        <Button variant="ghost" className="text-[#331d67] font-roboto font-medium text-md">
           Notifications
-        </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
@@ -97,7 +95,7 @@ export function Notification() {
             variant="ghost"
             size="sm"
             onClick={markAllAsRead}
-            className="mt-2 text-[#331d67] hover:text-[#331d67]/80"
+            className="mt-2 text-[#331d67] hover:text-[#331d67]/80 font-roboto"
             disabled={notifications.every((n) => n.isRead)}
           >
             Mark All as Read
@@ -113,15 +111,15 @@ export function Notification() {
             >
               <div>{getNotificationIcon(notification.type)}</div>
               <div className="flex-1">
-                <h3 className="text-sm font-medium text-gray-900">{notification.title}</h3>
-                <p className="text-sm text-gray-600">{notification.message}</p>
-                <p className="text-xs text-gray-400">{notification.timestamp}</p>
+                <h3 className="text-sm font-medium font-roboto text-gray-900 mb-2">{notification.title}</h3>
+                <p className="text-sm text-gray-500 font-roboto">{notification.message}</p>
+                <p className="text-xs text-gray-400 font-robobto">{notification.timestamp}</p>
                 {!notification.isRead && (
                   <Button
                     variant="link"
                     size="sm"
                     onClick={() => markAsRead(notification.id)}
-                    className="mt-1 p-0 text-[#331d67] hover:text-[#331d67]/80"
+                    className="mt-1 p-0 text-[#331d67] hover:text-[#331d67]/80 font-roboto"
                   >
                     Mark as Read
                   </Button>
