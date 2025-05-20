@@ -11,10 +11,8 @@ export default function SellerLayotut({children}: {children:React.ReactNode}){
         return(
             <SidebarProvider>
                 <AppSidbar/>
-                <main>
-                <SidebarTrigger />
-                   
-                    <div>
+                <main className="w-full ">
+                    <div className="w-full">
                         {children}
                     </div>
                 </main>

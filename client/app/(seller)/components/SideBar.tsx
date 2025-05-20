@@ -12,10 +12,11 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
     SidebarTrigger,
+    useSidebar,
   } from "@/components/ui/sidebar"
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
 import { url } from "inspector"
-import { Calendar, Home, ShoppingCart,Package2, Settings, Search, Link , LogOutIcon, User } from "lucide-react"
+import { Calendar,Package, Home, ShoppingCart,Package2, Settings, Search, Link , LogOutIcon, User } from "lucide-react"
 
 
 
@@ -39,7 +40,7 @@ const items : Item[] = [
       {
         title: "Products",
         url: "#",
-        icon: Package2,
+        icon: Package,
       },
       {
         title: "Search",
@@ -69,36 +70,38 @@ export default function AppSidbar(){
 
     
     const pathname = usePathname();
-
+    
 
 
     return (
-        <Sidebar >
-        <SidebarContent className="bg-gray-100 text-[#331d67]  ">
-            <SidebarHeader className="flex flex-row items-center border-b-2 pb-5 justify-between mx-4 mt-2 ">
+        <Sidebar className="h-full">
+        <SidebarContent className="bg-gray-50 text-[#331d67] ">
+            <SidebarHeader className="flex flex-row items-center  pb-5 justify-between mx-4 mt-2 border-b-1 ">
                 <h1 className={`font-medium text-xl  tracking-tighter ${rubik.className}`}>Brand-Baggy</h1>
+                <SidebarTrigger />
+
             </SidebarHeader>
           <SidebarGroup>
             
-            <SidebarGroupContent className="px-2">
-            <SidebarGroupLabel className="uppercase text-gray-400 font-thin font-inter">Main menu</SidebarGroupLabel>
-            <SidebarMenu>
+            <SidebarGroupContent className="mt-5">
+            {/* <SidebarGroupLabel className="uppercase text-gray-400 font-thin font-inter">Main menu</SidebarGroupLabel> */}
+            <SidebarMenu className="mx-2">
                             {items.map((item) => {
                                 const isActive = pathname === item.url;
                                 return (
                                     <SidebarMenuItem key={item.title}>
                                         <SidebarMenuButton
-                                            className={`hover:bg-[#331d67]/5 rounded-sm py-5 ${
+                                            className={`hover:bg-[#331d67]/5 rounded-none px-5  mb-3 ${
                                                 isActive 
-                                                    ? 'bg-[#331d67]/10 border-r-4 border-[#331d67]' 
-                                                    : ''
+                                                    ? ' border-l-3 rounded-none text-md border-[#331d67] text-[#2d116d] font-bold ' 
+                                                    : 'text-gray-500'
                                             }`}
                                             asChild
                                         >
                                             <a href={item.url}>
                                                 <item.icon className={isActive ? 'text-[#331d67]' : ''} />
                                                 <span className={`font-medium font-inter ${
-                                                    isActive ? 'text-[#331d67] font-semibold' : ''
+                                                    isActive ? 'text-[#6449a3] ' : ''
                                                 }`}>
                                                     {item.title}
                                                 </span>
@@ -111,26 +114,26 @@ export default function AppSidbar(){
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
-        <SidebarFooter className="bg-gray-100 flex flex-col px-4 ">
-            <SidebarGroupLabel className="uppercase text-gray-400 font-thin font-inter">others</SidebarGroupLabel>
-            <div className="flex mb-4 items-center gap-3">
-            <div className=" flex justify-center space-x-2 items-center">
-                <Avatar className="w-8 h-8">
+        <SidebarFooter className="bg-gray-50 flex flex-col  px-4 border-t-1 mx-4 ">
+        
+            <div className="flex items-center gap-3 pt-4 mb-2">
+            <div className=" flex justify-center space-x-3 items-center">
+                <Avatar className="w-10 h-10">
                 <AvatarImage src="https://github.com/shadcn.png" className="rounded-full" />
                 <AvatarFallback>
-                    <User className="w-4 h-4" />
+                    <User className="w-5 h-5" />
                 </AvatarFallback>
                 </Avatar>
-                <div className="">
-                    <p className="font-roboto font-medium text-md  text-gray-600 capitalize">sudeis fedlu</p>
+                <div className=" flex flex-col gap-1 ">
+                    <p className="font-rubik font-semibold text-sm tracking-tight  text-[#331d67] capitalize">sudeis fedlu</p>
                     <p className="text-sm text-gray-400 font-roboto">sudeisfedlu@gmail.com</p>
                 </div>
             </div>
 
-            <Button variant="ghost" className="text-[#331d67] w-fit flex gap-2 items-center justify-center">
+            {/* <Button variant="ghost" className="text-[#331d67] w-fit flex gap-2 items-center justify-center">
                 <LogOutIcon className="w-4 h-4" />
                 
-            </Button>
+            </Button> */}
             </div>
             </SidebarFooter>
       </Sidebar>
