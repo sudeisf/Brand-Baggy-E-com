@@ -312,33 +312,25 @@ export default function RecentOrdersTable() {
                     />
                 </div>
 
-            <div className="flex gap-2">
-                     <DatePickerWithRange/>
-
+                    <div className="flex gap-2">
+                        <DatePickerWithRange/>
                     <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="ml-auto font-roboto rounded-sm font-medium text-gray-600">
-                         <span className="text-gray-500">Status :</span>All Status <ChevronDown />
-                        </Button>
+                    <DropdownMenuTrigger
+                        onClick={() => table.getColumn("status")?.setFilterValue(undefined)}
+                        className="ml-auto font-roboto border-1 flex items-center px-4 gap-2 rounded-sm text-gray-600 text-sm font-medium shadow-none z-10" 
+                    >
+                        <span className="text-gray-400 text-sm">Status :</span> All Status <ChevronDown className="w-4 h-4"/>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        {table
-                        .getAllColumns()
-                        .filter((column) => column.getCanHide())
-                        .map((column) => {
-                            return (
-                            <DropdownMenuCheckboxItem
-                                key={column.id}
-                                className="capitalize"
-                                checked={column.getIsVisible()}
-                                onCheckedChange={(value) =>
-                                column.toggleVisibility(!!value)
-                                }
-                            >
-                                {column.id}
-                            </DropdownMenuCheckboxItem>
-                            )
-                        })}
+                    <DropdownMenuContent className="bg-white border-1 p-2 rounded-b-md z-10">
+                    {["Pending", "Completed", "Shipped", "Cancelled"].map((status) => (
+                        <DropdownMenuItem
+                        key={status}
+                        onClick={() => table.getColumn("status")?.setFilterValue(status)}
+                        className="cursor-pointer hover:bg-gray-100 rounded-sm px-2 text-sm font-medium text-gray-600 py-1 mb-1 "
+                        >
+                        {status}
+                        </DropdownMenuItem>
+                    ))}
                     </DropdownMenuContent>
                     </DropdownMenu>
 
