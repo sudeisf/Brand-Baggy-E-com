@@ -2,7 +2,7 @@
 import { TrendingDown , TrendingUp , DollarSign } from "lucide-react"
 import { DashChart } from "./Dashchart"
 import { RevenueChart } from "./Salesbar";
-import Recentactivity from "./Recentorders";
+import Recentactivity from "./RecentActivities";
 const data = [
     {
       header: "Total Income",
