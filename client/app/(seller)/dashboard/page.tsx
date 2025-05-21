@@ -6,6 +6,7 @@ import { Rubik } from "next/font/google"
 import { ArrowRightFromLine } from "lucide-react"
 import Dashheads from "./components/Dashheads"
 import { Notification } from "./components/Notficationsheet"
+import RecentOrdersTable from "./components/Recentorders"
 
 const rubik = Rubik({
     subsets: ['latin'],
@@ -56,6 +57,7 @@ export default function Dashboard(){
            </div>
             </div>
             <Dashheads />
+            <RecentOrdersTable/>
             </div>
         )
 }
