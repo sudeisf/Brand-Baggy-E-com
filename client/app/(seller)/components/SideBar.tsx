@@ -114,10 +114,8 @@ export default function AppSidbar(){
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
-        <SidebarFooter className="bg-gray-50 flex flex-col mx-4 ">
-        
-            <div className="flex items-center gap-3 pt-4 mb-2">
-            <div className=" flex justify-center space-x-3 items-center">
+        <SidebarFooter className="bg-white flex mb-4 flex-col  ">
+            <div className=" flex justify-center bg-white space-x-3 items-center">
                 <Avatar className="w-10 h-10">
                 <AvatarImage src="https://github.com/shadcn.png" className="rounded-full" />
                 <AvatarFallback>
@@ -129,7 +127,7 @@ export default function AppSidbar(){
                     <p className="text-sm text-gray-400 font-roboto">sudeisfedlu@gmail.com</p>
                 </div>
             </div>
-            </div>
+           
             </SidebarFooter>
       </Sidebar>
     )
