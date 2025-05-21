@@ -21,7 +21,7 @@ import {
     TableRow,
   } from "@/components/ui/table"
   import { Button } from "@/components/ui/button"
-import { Dropdown } from "react-day-picker"
+import { DateRange, Dropdown } from "react-day-picker"
 import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuCheckboxItem } from "@radix-ui/react-dropdown-menu"
 import { AlignCenter, ChevronDown, ChevronDownIcon, Search } from "lucide-react"
 import { Span } from "next/dist/trace"
@@ -31,107 +31,107 @@ import { Input } from "@/components/ui/input"
 
 
 
-export const data : Order[] = [
+export const data: Order[] = [
     {
-        id: 1,
-        customer: "John Doe",
-        product: "Product 1",
-        orderDate: "2021-01-01 12:06",
-        status: "Pending",
-        image: "/assets/products/product1.jpg",
-        price: 200,
-        sold: 120,
-        invoice: "INV-001"
+      id: 1,
+      customer: "John Doe",
+      product: "Product 1",
+      orderDate: "2025-05-20 12:06",
+      status: "Pending",
+      image: "/assets/products/product1.jpg",
+      price: 200,
+      sold: 120,
+      invoice: "INV-001",
     },
     {
-        id: 2,
-        customer: "Jane Doe",
-        product: "Product 2",
-        image: "/assets/products/product2.jpg",
-        orderDate: "2021-01-02 12:06",
-        status: "Completed",
-        price: 200,
-        sold: 120,
-        invoice: "INV-002"
+      id: 2,
+      customer: "Jane Doe",
+      product: "Product 2",
+      orderDate: "2025-05-20 09:15",
+      status: "Completed",
+      image: "/assets/products/product2.jpg",
+      price: 200,
+      sold: 120,
+      invoice: "INV-002",
     },
     {
-        id: 3,
-        customer: "Jane Doe",
-        product: "Product 3",
-        image: "/assets/products/product3.jpg",
-        orderDate: "2021-01-02 12:06",
-        status: "Completed",
-        price: 200,
-        sold: 120,
-        invoice: "INV-002"
-        },
-    {
-        id: 4,
-        customer: "Jane Doe",
-        product: "Product 4",
-        image: "/assets/products/product4.jpg",
-        orderDate: "2021-01-02 12:06",
-        status: "Cancelled",
-        price: 200,
-        sold: 120,
-        invoice: "INV-002"
-    } ,
-    {
-        id: 5,
-        customer: "Jane Doe",
-        product: "Product 5",
-        orderDate: "2021-01-02 12:06",
-        image : "/assets/products/product5.jpg",
-        status: "Completed",
-        price: 200,
-        sold: 120,
-        invoice: "INV-002"
-    } ,
-    {
-        id: 6,
-        customer: "Jane Doe",
-        product: "Product 6",
-        orderDate: "2021-01-02 12:06",
-        image : "/assets/products/product6.jpg",
-        status: "Cancelled",
-        price: 200,
-        sold: 120,
-        invoice: "INV-002"
+      id: 3,
+      customer: "Jane Doe",
+      product: "Product 3",
+      orderDate: "2025-05-19 16:45",
+      status: "Completed",
+      image: "/assets/products/product3.jpg",
+      price: 200,
+      sold: 120,
+      invoice: "INV-002",
     },
     {
-        id: 7,
-        customer: "Jane Doe",
-        product: "Product 7",
-        orderDate: "2021-01-02 12:06",
-        image : "/assets/products/product7.jpg",
-        status: "Completed",
-        price: 200,
-        sold: 120,
-        invoice: "INV-002"
+      id: 4,
+      customer: "Jane Doe",
+      product: "Product 4",
+      orderDate: "2025-05-19 14:20",
+      status: "Cancelled",
+      image: "/assets/products/product4.jpg",
+      price: 200,
+      sold: 120,
+      invoice: "INV-002",
     },
     {
-        id: 8,
-        customer: "Jane Doe",
-        product: "Product 8",
-        orderDate: "2021-01-02 12:06",
-        image : "/assets/products/product8.jpg",
-        status: "Shipped",
-        price: 200,
-        sold: 120,
-        invoice: "INV-002"
+      id: 5,
+      customer: "Jane Doe",
+      product: "Product 5",
+      orderDate: "2025-05-18 10:30",
+      status: "Completed",
+      image: "/assets/products/product5.jpg",
+      price: 200,
+      sold: 120,
+      invoice: "INV-002",
     },
     {
-        id: 9,
-        customer: "Jane Doe",
-        product: "Product 9",
-        orderDate: "2021-01-02 12:06",
-        image : "/assets/products/product9.jpg",
-        status: "Shipped",
-        price: 200,
-        sold: 120,
-        invoice: "INV-002"
-    }
-]
+      id: 6,
+      customer: "Jane Doe",
+      product: "Product 6",
+      orderDate: "2025-05-18 08:00",
+      status: "Cancelled",
+      image: "/assets/products/product6.jpg",
+      price: 200,
+      sold: 120,
+      invoice: "INV-002",
+    },
+    {
+      id: 7,
+      customer: "Jane Doe",
+      product: "Product 7",
+      orderDate: "2025-05-17 15:10",
+      status: "Completed",
+      image: "/assets/products/product7.jpg",
+      price: 200,
+      sold: 120,
+      invoice: "INV-002",
+    },
+    {
+      id: 8,
+      customer: "Jane Doe",
+      product: "Product 8",
+      orderDate: "2025-05-17 11:25",
+      status: "Shipped",
+      image: "/assets/products/product8.jpg",
+      price: 200,
+      sold: 120,
+      invoice: "INV-002",
+    },
+    {
+      id: 9,
+      customer: "Jane Doe",
+      product: "Product 9",
+      orderDate: "2025-05-16 13:50",
+      status: "Shipped",
+      image: "/assets/products/product9.jpg",
+      price: 200,
+      sold: 120,
+      invoice: "INV-002",
+    },
+  ]
 
 
 export type Order = {
@@ -294,6 +294,47 @@ export default function RecentOrdersTable() {
         }
     })
 
+
+    const [dateRange, setDateRange] = useState<DateRange | undefined>({
+        from: new Date(2025, 4, 1), // May 1, 2025
+        to: new Date(2025, 4, 20), // May 20, 2025
+      })
+
+    const [searchValue, setSearchValue] = useState("")
+    const handleSearch = (value: string) => {
+    setSearchValue(value)
+    table.getColumn("product")?.setFilterValue(value)
+    }
+
+    const handleDateRange = (range: DateRange | undefined) => {
+        setDateRange(range);
+        
+        if (!range?.from || !range?.to) {
+          table.getColumn("orderDate")?.setFilterValue(undefined);
+          return;
+        }
+      
+        // Convert filter dates to start/end of day in local timezone
+        const fromDate = new Date(range.from);
+        fromDate.setHours(0, 0, 0, 0);
+        
+        const toDate = new Date(range.to);
+        toDate.setHours(23, 59, 59, 999);
+      
+        table.getColumn("orderDate")?.setFilterValue((value: string) => {
+          try {
+            const orderDate = new Date(value);
+            if (isNaN(orderDate.getTime())) return false;
+            
+            return orderDate >= fromDate && orderDate <= toDate;
+          } catch (error) {
+            console.error("Date filtering error:", error);
+            return false;
+          }
+        });
+      };
+    
+
  
 
     return (
@@ -303,17 +344,18 @@ export default function RecentOrdersTable() {
                 <h1 className="font-roboto font-medium">Recent Orders</h1>
             </div>
             <div className="flex justify-between items-center py-4">
-            <div className="hidden sm:flex w-[10rem] md:w-[20rem]  bg-white items-center justify-start gap-2 rounded-sm px-3 py-1.5 border-1">
-                    <Search className="text-black w-4 h-4 md:w-5 md:h-5" />
-                    <input 
-                        type="text" 
-                        placeholder="Search..." 
-                        className="rounded-md outline-none bg-white w-full text-sm md:text-base" 
+                    <div className="hidden sm:flex w-[10rem] md:w-[20rem] bg-white items-center justify-start gap-2 rounded-sm px-3 py-1.5 border-1">
+                    <Search className="text-[#331d67] w-4 h-4 md:w-5 md:h-5" />
+                    <input
+                        type="text"
+                        placeholder="Search products..."
+                        value={searchValue}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        className="rounded-md outline-none bg-white w-full text-sm md:text-base text-[#331d67]"
                     />
-                </div>
-
+                    </div>
                     <div className="flex gap-2">
-                        <DatePickerWithRange/>
+                    <DatePickerWithRange onDateChange={handleDateRange} />
                     <DropdownMenu>
                     <DropdownMenuTrigger
                         onClick={() => table.getColumn("status")?.setFilterValue(undefined)}
@@ -321,7 +363,14 @@ export default function RecentOrdersTable() {
                     >
                         <span className="text-gray-400 text-sm">Status :</span> All Status <ChevronDown className="w-4 h-4"/>
                     </DropdownMenuTrigger>
+
                     <DropdownMenuContent className="bg-white border-1 p-2 rounded-b-md z-10">
+                    <DropdownMenuItem
+                        onClick={() => table.getColumn("status")?.setFilterValue(undefined)}
+                        className="cursor-pointer hover:bg-gray-100 rounded-sm px-2 text-sm font-medium text-[#331d67] py-1 mb-1"
+                    >
+                        All
+                    </DropdownMenuItem>
                     {["Pending", "Completed", "Shipped", "Cancelled"].map((status) => (
                         <DropdownMenuItem
                         key={status}
