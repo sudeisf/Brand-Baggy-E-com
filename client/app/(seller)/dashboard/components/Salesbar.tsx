@@ -73,7 +73,7 @@ export function RevenueChart() {
     : { dataKey: "month", tickFormatter: (value: string) => value.slice(0, 3) }
 
   return (
-    <Card className="w-[700px] h-[350px] bg-gray-50 border-1 shadow-none">
+    <Card className="w-[700px] h-[350px] bg-white border-1 shadow-none">
       <CardHeader className="flex items-center justify-between px-4 mt-0">
         <CardTitle className="flex items-center gap-2 text-lg">
           <TrendingUp className="h-5 w-5 text-gray-500" />

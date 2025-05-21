@@ -23,7 +23,7 @@ import {
   import { Button } from "@/components/ui/button"
 import { Dropdown } from "react-day-picker"
 import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuCheckboxItem } from "@radix-ui/react-dropdown-menu"
-import { ChevronDown, ChevronDownIcon } from "lucide-react"
+import { AlignCenter, ChevronDown, ChevronDownIcon, Search } from "lucide-react"
 import { Span } from "next/dist/trace"
 import { Input } from "@/components/ui/input"
 
@@ -171,7 +171,7 @@ export const columns : ColumnDef<Order>[] = [
         header: "Invoice",
         cell: ({row}) => {
             return (
-                <div className="flex items-center gap-2 font-roboto">
+                <div className="flex text-left gap-2 font-roboto">
                     {row.original.invoice}
                 </div>
             )
@@ -182,7 +182,7 @@ export const columns : ColumnDef<Order>[] = [
         header: "Order date",
         cell: ({row}) => {
             return (
-                <div className="flex items-center gap-2 font-roboto">
+                <div className="flex text-left gap-2 font-roboto">
                     {row.original.orderDate}
                 </div>
             )
@@ -193,7 +193,7 @@ export const columns : ColumnDef<Order>[] = [
         header: "Customer",
         cell: ({row}) => {
             return (
-                <div className="flex items-center gap-2 font-roboto">
+                <div className="flex text-left gap-2 font-roboto">
                     {row.original.customer}
                 </div>
             )
@@ -204,7 +204,7 @@ export const columns : ColumnDef<Order>[] = [
         header: "Price",
         cell: ({row}) => {
             return (
-                <div className="flex items-center gap-2 font-roboto">
+                <div className="flex text-left gap-2  font-roboto">
                     ${row.original.price}
                 </div>
             )
@@ -215,7 +215,7 @@ export const columns : ColumnDef<Order>[] = [
         header: "Sold",
         cell: ({row}) => {
             return (
-                <div className="flex items-center gap-2 font-roboto">
+                <div className="flex text-left gap-2 font-roboto ">
                     {row.original.sold}
                 </div>
             )
@@ -226,13 +226,13 @@ export const columns : ColumnDef<Order>[] = [
         header: ({column}) => {
             return (
                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                            <span className="text-sm font-medium text-end">Satus</span>
-                            <ChevronDownIcon className="h-4 w-4" />
+                    <DropdownMenuTrigger className="text-left" asChild>
+                        <Button variant="ghost" className="items-center m-0" >
+                            <span className="text-sm font-medium text-left">Satus</span>
+                            <ChevronDownIcon className="h-2 w-2" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-gray-50 border-1 p-2 rounded-b-md">
+                    <DropdownMenuContent className="bg-gray-50 border-1 p-2  rounded-b-md">
                     {["Pending", "Completed", "Shipped", "Cancelled"].map((status) => (
                         <DropdownMenuItem
                             key={status}
@@ -248,7 +248,7 @@ export const columns : ColumnDef<Order>[] = [
         },
         cell: ({row}) => {
             return (
-                <div className={`flex items-left gap-2 font-roboto`}>
+                <div className={`flex text-left gap-2 font-roboto`}>
                     <span
                     className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
                         statusStyles[row.original.status] || "bg-gray-500 text-white"
@@ -263,6 +263,7 @@ export const columns : ColumnDef<Order>[] = [
 ]
 
 import { useState } from "react"
+import { DatePickerWithRange } from "./DateFilter"
 
 export default function RecentOrdersTable() {
     const [sorting, setSorting] = useState<SortingState>([])
@@ -296,56 +297,90 @@ export default function RecentOrdersTable() {
  
 
     return (
-        <div className="w-[1220px]  rounded-md mb-4 mx-auto mt-8">
+        <div className="w-[1220px] bg-white  rounded-md mb-4 mx-auto mt-8">
           <div className="p-4 border-x-1 border-t-1 rounded-t-md border-b-0">
             <div>
                 <h1 className="font-roboto font-medium">Recent Orders</h1>
             </div>
-            <div className="flex items-center py-4">
-            <Input
-              placeholder="Filter emails..."
-              value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-              onChange={(event) =>
-                table.getColumn("email")?.setFilterValue(event.target.value)
-              }
-              className="max-w-sm"
-            />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="ml-auto">
-                  Columns <ChevronDown />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {table
-                  .getAllColumns()
-                  .filter((column) => column.getCanHide())
-                  .map((column) => {
-                    return (
-                      <DropdownMenuCheckboxItem
-                        key={column.id}
-                        className="capitalize"
-                        checked={column.getIsVisible()}
-                        onCheckedChange={(value) =>
-                          column.toggleVisibility(!!value)
-                        }
-                      >
-                        {column.id}
-                      </DropdownMenuCheckboxItem>
-                    )
-                  })}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex justify-between items-center py-4">
+            <div className="hidden sm:flex w-[10rem] md:w-[20rem]  bg-white items-center justify-start gap-2 rounded-sm px-3 py-1.5 border-1">
+                    <Search className="text-black w-4 h-4 md:w-5 md:h-5" />
+                    <input 
+                        type="text" 
+                        placeholder="Search..." 
+                        className="rounded-md outline-none bg-white w-full text-sm md:text-base" 
+                    />
+                </div>
+
+            <div className="flex gap-2">
+                     <DatePickerWithRange/>
+
+                    <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="ml-auto font-roboto rounded-sm font-medium text-gray-600">
+                         <span className="text-gray-500">Status :</span>All Status <ChevronDown />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        {table
+                        .getAllColumns()
+                        .filter((column) => column.getCanHide())
+                        .map((column) => {
+                            return (
+                            <DropdownMenuCheckboxItem
+                                key={column.id}
+                                className="capitalize"
+                                checked={column.getIsVisible()}
+                                onCheckedChange={(value) =>
+                                column.toggleVisibility(!!value)
+                                }
+                            >
+                                {column.id}
+                            </DropdownMenuCheckboxItem>
+                            )
+                        })}
+                    </DropdownMenuContent>
+                    </DropdownMenu>
+
+
+                    <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="ml-auto font-roboto rounded-sm text-gray-600 shadow-none">
+                        <AlignCenter/>
+                         Filter
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        {table
+                        .getAllColumns()
+                        .filter((column) => column.getCanHide())
+                        .map((column) => {
+                            return (
+                            <DropdownMenuCheckboxItem
+                                key={column.id}
+                                className="capitalize"
+                                checked={column.getIsVisible()}
+                                onCheckedChange={(value) =>
+                                column.toggleVisibility(!!value)
+                                }
+                            >
+                                {column.id}
+                            </DropdownMenuCheckboxItem>
+                            )
+                        })}
+                    </DropdownMenuContent>
+                    </DropdownMenu>
+            </div>
             </div>
           </div>
           <div className="rounded-b-md border">
-            <Table>
+            <Table className="">
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {
                       return (
-                        <TableHead key={header.id} className="text-gray-500 text-left font-medium bg-gray-100 py-2 px-4">
+                        <TableHead key={header.id} className="text-gray-500 text-left font-medium  bg-gray-100 py-2 ">
                           {header.isPlaceholder
                             ? null
                             : flexRender(
@@ -363,7 +398,7 @@ export default function RecentOrdersTable() {
                   table.getRowModel().rows.map((row) => (
                     <TableRow
                       key={row.id}
-                      className="text-gray-600 font-medium py-2 px-4"
+                      className="text-gray-600 font-medium text-left py-2 px-4"
                       data-state={row.getIsSelected() && "selected"}
                     >
                       {row.getVisibleCells().map((cell) => (

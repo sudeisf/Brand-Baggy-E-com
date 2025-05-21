@@ -99,7 +99,7 @@ export default function RecentActivity() {
     : activities.filter((activity) => activity.orderType === filter)
 
   return (
-    <div className="w-[500px] h-[350px] bg-gray-50 border rounded-md shadow-none flex flex-col">
+    <div className="w-[500px] h-[350px] bg-white border rounded-md shadow-none flex flex-col">
       <div className="p-4 flex items-center justify-between">
         <h2 className="text-md font-medium text-[#331d67] font-roboto">Recent Activity</h2>
         <Select value={filter} onValueChange={setFilter}>

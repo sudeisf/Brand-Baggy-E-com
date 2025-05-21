@@ -11,7 +11,7 @@ export default function SellerLayotut({children}: {children:React.ReactNode}){
             <SidebarProvider>
                 <AppSidbar/>
                 <main className="w-full ">
-                    <div className="w-full">
+                    <div className="w-full bg-white">
                         {children}
                     </div>
                 </main>

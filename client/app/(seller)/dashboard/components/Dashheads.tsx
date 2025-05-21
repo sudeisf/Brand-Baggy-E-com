@@ -56,12 +56,12 @@ const data = [
 
   export default function Dashheads() {
     return (
-      <div className="flex flex-col gap-8 ">
+      <div className="flex flex-col gap-8 bg-white ">
       <div className="flex gap-4 px-4">
         {data.map((item, index) => (
           <div 
             key={index}
-            className="bg-gray-50 rounded-lg h-[200px] flex-1 flex justify-between p-5 items-baseline  border relative"
+            className="bg-white rounded-lg h-[200px] flex-1 flex justify-between p-5 items-baseline  border relative"
           >
             {/* Left side - Text content */}
             <div className="flex flex-col h-full justify-between">

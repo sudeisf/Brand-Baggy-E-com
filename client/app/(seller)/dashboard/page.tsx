@@ -24,7 +24,7 @@ export default function Dashboard(){
 
 
         return (
-            <div className="w-[1250px] mx-auto">
+            <div className="w-[1250px] mx-auto bg-white">
             <div className="flex items-center justfy-between  px-4 py-4">
             <div className=" w-full flex itmes-start gap-8">
             {!open && (
