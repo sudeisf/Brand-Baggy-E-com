@@ -7,6 +7,7 @@ import {
     getFilteredRowModel,
     getPaginationRowModel,
     getSortedRowModel,
+    Row,
     SortingState,
     useReactTable,
     VisibilityState,
@@ -20,12 +21,31 @@ import {
     TableHeader,
     TableRow,
   } from "@/components/ui/table"
-  import { Button } from "@/components/ui/button"
-import { DateRange, Dropdown } from "react-day-picker"
-import { DropdownMenu, DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuCheckboxItem } from "@radix-ui/react-dropdown-menu"
-import { AlignCenter, ChevronDown, ChevronDownIcon, Search } from "lucide-react"
-import { Span } from "next/dist/trace"
-import { Input } from "@/components/ui/input"
+import { DateRange } from "react-day-picker"
+import { DropdownMenu, 
+  DropdownMenuItem, 
+  DropdownMenuContent, 
+  DropdownMenuTrigger, 
+  DropdownMenuCheckboxItem 
+} from "@radix-ui/react-dropdown-menu"
+import { 
+  AlignCenter, 
+  ChevronDown,
+  ChevronDownIcon, 
+  Search, 
+  User 
+  } from "lucide-react"
+import { 
+  endOfDay, 
+  format, 
+  parse, 
+  startOfDay 
+} from "date-fns"
+
+import { useState } from "react"
+import { DatePickerWithRange } from "./DateFilter"
+import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
+import { Button } from "@/components/ui/button"
 
 
 
@@ -181,11 +201,30 @@ export const columns : ColumnDef<Order>[] = [
         accessorKey: "orderDate",
         header: "Order date",
         cell: ({row}) => {
+          const formatted = format(
+            parse(row.original.orderDate, "yyyy-MM-dd HH:mm", new Date()),
+            "MMM d, yyyy, h:mm a"
+
+          );
             return (
                 <div className="flex text-left gap-2 font-roboto">
-                    {row.original.orderDate}
+                    {formatted}
                 </div>
             )
+        },
+        filterFn: (row, columnId, filterValue) => {
+          const dateString = row.getValue(columnId);
+          const [fromDate, toDate] = filterValue || [null, null];
+          
+          if (!fromDate || !toDate) return true;
+          if (typeof dateString !== 'string') return false;
+          
+          try {
+            const orderDate = parse(dateString, "yyyy-MM-dd HH:mm", new Date());
+            return orderDate >= fromDate && orderDate <= toDate;
+          } catch (error) {
+            return false;
+          }
         }
     },
     {
@@ -193,10 +232,16 @@ export const columns : ColumnDef<Order>[] = [
         header: "Customer",
         cell: ({row}) => {
             return (
-                <div className="flex text-left gap-2 font-roboto">
+                <div className="flex text-left items-center gap-2 font-roboto">
+                      <Avatar className="w-10 h-10">
+                              <AvatarImage src="https://github.com/shadcn.png" className="rounded-full" />
+                              <AvatarFallback>
+                                  <User className="w-3 h-3" />
+                              </AvatarFallback>
+                      </Avatar>
                     {row.original.customer}
                 </div>
-            )
+            );
         }
     },
     {
@@ -262,80 +307,55 @@ export const columns : ColumnDef<Order>[] = [
     }
 ]
 
-import { useState } from "react"
-import { DatePickerWithRange } from "./DateFilter"
+
 
 export default function RecentOrdersTable() {
-    const [sorting, setSorting] = useState<SortingState>([])
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
-        []
-    )
-    const [columnVisibility, setColumnVisibility] =
-        useState<VisibilityState>({})
-    const [rowSelection, setRowSelection] = useState({})
- 
 
-    const table = useReactTable({
-        data,
-        columns,
-        onSortingChange: setSorting,
-        onColumnFiltersChange: setColumnFilters,
-        getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        onColumnVisibilityChange: setColumnVisibility,
-        onRowSelectionChange: setRowSelection,
-        state: {
-        sorting,
-        columnFilters,
-        columnVisibility,
-        rowSelection,
-        }
-    })
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
 
+  const table = useReactTable({
+    data,
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+    },
+  });
 
-    const [dateRange, setDateRange] = useState<DateRange | undefined>({
-        from: new Date(2025, 4, 1), // May 1, 2025
-        to: new Date(2025, 4, 20), // May 20, 2025
-      })
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: new Date(2025, 4, 7), 
+    to: new Date(2025, 4, 21), 
+  });
 
-    const [searchValue, setSearchValue] = useState("")
-    const handleSearch = (value: string) => {
-    setSearchValue(value)
-    table.getColumn("product")?.setFilterValue(value)
-    }
+  const [searchValue, setSearchValue] = useState("");
 
-    const handleDateRange = (range: DateRange | undefined) => {
-        setDateRange(range);
-        
-        if (!range?.from || !range?.to) {
-          table.getColumn("orderDate")?.setFilterValue(undefined);
-          return;
-        }
-      
-        // Convert filter dates to start/end of day in local timezone
-        const fromDate = new Date(range.from);
-        fromDate.setHours(0, 0, 0, 0);
-        
-        const toDate = new Date(range.to);
-        toDate.setHours(23, 59, 59, 999);
-      
-        table.getColumn("orderDate")?.setFilterValue((value: string) => {
-          try {
-            const orderDate = new Date(value);
-            if (isNaN(orderDate.getTime())) return false;
-            
-            return orderDate >= fromDate && orderDate <= toDate;
-          } catch (error) {
-            console.error("Date filtering error:", error);
-            return false;
-          }
-        });
-      };
+  const handleSearch = (value: string) => {
+    setSearchValue(value);
+    table.getColumn("product")?.setFilterValue(value);
+  };
+
+  const handleDateRange = (range: DateRange | undefined) => {
+    setDateRange(range);
     
-
- 
+    table.getColumn("orderDate")?.setFilterValue(
+      range?.from && range?.to 
+        ? [startOfDay(range.from), endOfDay(range.to)] 
+        : undefined
+    );
+  }
 
     return (
         <div className="w-[1220px] bg-white  rounded-md mb-4 mx-auto mt-8">

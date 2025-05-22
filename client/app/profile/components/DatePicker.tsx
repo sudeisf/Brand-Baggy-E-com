@@ -1,71 +1,52 @@
-"use client"
-
+import * as React from "react"
 import { format } from "date-fns"
-import { CalendarIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
-import {
-  FormControl,
-  FormDescription,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
+import { Button } from "@/components/ui/button"
+import { CalendarIcon } from "lucide-react"
 
-interface DatePickerProps {
-  field: any
-  label?: string
-  description?: string
-  className?: string
+import { DateRange } from "react-day-picker"
+
+type Props = {
+  onDateChange: (range: DateRange | undefined) => void
+  value?: DateRange
 }
 
-export function DatePickerForm({
-  field,
-  label = "Select date",
-  description,
-  className,
-}: DatePickerProps) {
+export function DatePickerWithRange({ onDateChange, value }: Props) {
+  const [date, setDate] = React.useState<DateRange | undefined>(value)
+
+  const handleChange = (range: DateRange | undefined) => {
+    setDate(range)
+    onDateChange(range)
+  }
+
+  const formattedLabel = date?.from
+    ? date.to
+      ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}`
+      : format(date.from, "LLL dd, y")
+    : "Pick a date range"
+
   return (
-    <FormItem className={cn("flex flex-col", className)}>
-      <Popover>
-        <PopoverTrigger asChild>
-          <FormControl>
-            <Button
-              variant={"outline"}
-              className={cn(
-                 "w-[190px] pl-3 text-left rounded-md text-sm font-medium bg-gray-100",
-                !field.value && "text-muted-foreground"
-              )}
-            >
-              {field.value ? (
-                format(field.value, "PPP")
-              ) : (
-                <span>Pick a date</span>
-              )}
-              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-            </Button>
-          </FormControl>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 rounded-none" align="start">
-          <Calendar
-            mode="single"
-            selected={field.value}
-            onSelect={field.onChange}
-            disabled={(date) =>
-              date > new Date() || date < new Date("1900-01-01")
-            }
-            initialFocus
-          />
-        </PopoverContent>
-      </Popover>
-      {description && <FormDescription>{description}</FormDescription>}
-      <FormMessage />
-    </FormItem>
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          id="date"
+          variant={"outline"}
+          className="w-[250px] justify-start text-left font-normal"
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {formattedLabel}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-auto p-0">
+        <Calendar
+          mode="range"
+          selected={date}
+          onSelect={handleChange}
+          initialFocus
+          numberOfMonths={2}
+        />
+      </PopoverContent>
+    </Popover>
   )
 }
