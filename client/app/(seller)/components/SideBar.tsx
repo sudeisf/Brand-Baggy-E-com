@@ -34,7 +34,7 @@ const items : Item[] = [
       },
       {
         title: "Order",
-        url: "#",
+        url: "/orders",
         icon: ShoppingCart,
       },
       {
@@ -86,7 +86,7 @@ export default function AppSidbar(){
             <SidebarGroupContent className="mt-5">
             {/* <SidebarGroupLabel className="uppercase text-gray-400 font-thin font-inter">Main menu</SidebarGroupLabel> */}
             <SidebarMenu className="mx-2">
-                            {items.map((item) => {
+                            {items.slice(0,4).map((item) => {
                                 const isActive = pathname === item.url;
                                 return (
                                     <SidebarMenuItem key={item.title}>
@@ -115,19 +115,15 @@ export default function AppSidbar(){
                 </SidebarGroup>
             </SidebarContent>
         <SidebarFooter className="bg-white flex mb-4 flex-col  ">
-            <div className=" flex justify-center bg-white space-x-3 items-center">
-                <Avatar className="w-10 h-10">
-                <AvatarImage src="https://github.com/shadcn.png" className="rounded-full" />
-                <AvatarFallback>
-                    <User className="w-5 h-5" />
-                </AvatarFallback>
-                </Avatar>
-                <div className=" flex flex-col gap-1 ">
-                    <p className="font-rubik font-semibold text-sm tracking-tight  text-[#331d67] capitalize">sudeis fedlu</p>
-                    <p className="text-sm text-gray-400 font-roboto">sudeisfedlu@gmail.com</p>
-                </div>
-            </div>
-           
+                <Button
+                     className={`hover:bg-white shadow-none bg-white items-start justify-start px-5 text-gray-500 flex flex-row w-full`}>
+                            <a href={items[4].url} className="text-left flex gap-2 ">
+                            <Settings />
+                            <span className={`font-medium font-inter text-md `}>
+                                {items[4].title}
+                            </span>
+                        </a>
+                    </Button>
             </SidebarFooter>
       </Sidebar>
     )

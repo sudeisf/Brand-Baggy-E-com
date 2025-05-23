@@ -22,12 +22,15 @@ import {
     TableRow,
   } from "@/components/ui/table"
 import { DateRange } from "react-day-picker"
-import { DropdownMenu, 
-  DropdownMenuItem, 
-  DropdownMenuContent, 
-  DropdownMenuTrigger, 
-  DropdownMenuCheckboxItem 
-} from "@radix-ui/react-dropdown-menu"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { 
   AlignCenter, 
   ChevronDown,
@@ -358,10 +361,10 @@ export default function RecentOrdersTable() {
   }
 
     return (
-        <div className="w-[1220px] bg-white  rounded-md mb-4 mx-auto mt-8">
-          <div className="p-4 border-x-1 border-t-1 rounded-t-md border-b-0">
+        <div className="w-[1220px] bg-white  rounded-md mb-4  mt-8 mx-auto">
+          <div className="p-4  rounded-t-md border-b-0">
             <div>
-                <h1 className="font-roboto font-medium">Recent Orders</h1>
+                <h1 className="font-roboto font-medium text-2xl text-[#331d67]">Recent Orders</h1>
             </div>
             <div className="flex justify-between items-center py-4">
                     <div className="hidden sm:flex w-[10rem] md:w-[20rem] bg-white items-center justify-start gap-2 rounded-sm px-3 py-1.5 border-1">
@@ -402,8 +405,6 @@ export default function RecentOrdersTable() {
                     ))}
                     </DropdownMenuContent>
                     </DropdownMenu>
-
-
                     <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="ml-auto font-roboto rounded-sm text-gray-600 shadow-none">
@@ -411,7 +412,7 @@ export default function RecentOrdersTable() {
                          Filter
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent align="center" >
                         {table
                         .getAllColumns()
                         .filter((column) => column.getCanHide())
@@ -434,14 +435,14 @@ export default function RecentOrdersTable() {
             </div>
             </div>
           </div>
-          <div className="rounded-b-md border">
-            <Table className="">
+          <div className="px-4">
+            <Table className="rounded-lg border-separate border-1 border-spacing-0 overflow-hidden">
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {
                       return (
-                        <TableHead key={header.id} className="text-gray-500 text-left font-medium  bg-gray-100 py-2 ">
+                        <TableHead key={header.id} className="text-gray-500 text-left font-medium border-b-1  bg-gray-50 py-2 ">
                           {header.isPlaceholder
                             ? null
                             : flexRender(

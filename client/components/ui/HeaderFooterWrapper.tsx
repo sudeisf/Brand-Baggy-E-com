@@ -21,7 +21,8 @@ export default function HeaderFooterWrapper({
     
 
     //seler side
-    '/dashboard'
+    '/dashboard',
+    '/orders'
   ];
 
   const isAuthPage = authRoutes.some(route => 
