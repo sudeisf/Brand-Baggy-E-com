@@ -207,6 +207,17 @@ export const columns: ColumnDef<Order>[] = [
     }
   },
   {
+    accessorKey: "orderDate",
+    header: "Date",
+    cell: ({ row }) => {
+      const formatted = format(
+        new Date(row.original.orderDate),
+        "MMM d, yyyy"
+      )
+      return <div>{formatted}</div>
+    }
+  },
+  {
     accessorKey: "customer",
     header: "Customer",
     cell: ({ row }) => (
@@ -215,23 +226,24 @@ export const columns: ColumnDef<Order>[] = [
       </div>
     )
   },
-  {
-    accessorKey: "orderDate",
-    header: "Order Date",
-    cell: ({ row }) => {
-      const formatted = format(
-        new Date(row.original.orderDate),
-        "MMM d, yyyy, h:mm a"
-      )
-      return <div>{formatted}</div>
-    }
-  },
+
   {
     accessorKey: "total",
-    header: "Amount",
+    header: "Total",
     cell: ({ row }) => (
       <div className="font-medium">
         ${row.original.total.toFixed(2)}
+      </div>
+    )
+  },
+  {
+    accessorKey: "paymentStatus",
+    header: "Payment status",
+    cell: ({ row }) => (
+      <div className={`px-2 py-1 rounded-full text-xs text-center ${
+        paymentStatusStyles[row.original.paymentStatus] || "bg-gray-100"
+      }`}>
+        {row.original.paymentStatus}
       </div>
     )
   },
@@ -245,19 +257,8 @@ export const columns: ColumnDef<Order>[] = [
     )
   },
   {
-    accessorKey: "paymentStatus",
-    header: "Payment",
-    cell: ({ row }) => (
-      <div className={`px-2 py-1 rounded-full text-xs text-center ${
-        paymentStatusStyles[row.original.paymentStatus] || "bg-gray-100"
-      }`}>
-        {row.original.paymentStatus}
-      </div>
-    )
-  },
-  {
     accessorKey: "orderStatus",
-    header: "Status",
+    header: "Order Status",
     cell: ({ row }) => {
       const status = getOrderStatus(row.original.orderStatus)
       return (
@@ -330,7 +331,7 @@ export default function OrdersTable() {
   };
 
     return (
-        <div className="w-[1220px] bg-white  rounded-md mb-4  mt-8 mx-auto">
+        <div className="w-[1220px] bg-white  rounded-md mb-4  mt-4 mx-auto">
           <div className="p-4  rounded-t-md border-b-0">
             <div className="flex justify-between items-center py-4  rounded-md">
                     <div className="hidden sm:flex w-[10rem] md:w-[20rem] bg-white items-center justify-start gap-2 rounded-sm px-3 py-1.5 border-1">
@@ -404,7 +405,7 @@ export default function OrdersTable() {
             </div>
           </div>
           <div className="px-4">
-            <Table className="rounded-lg border-separate border-1 border-spacing-0 overflow-hidden">
+            <Table className="rounded-lg border-separate border-1 shadow-sm border-spacing-0 overflow-hidden">
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>

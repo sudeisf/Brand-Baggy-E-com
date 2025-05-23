@@ -83,8 +83,8 @@ export function Notification() {
 
   return (
     <Sheet>
-      <SheetTrigger className="flex items-center  border-gray-300 border-1 px-2 rounded-lg py-2 gap-2">
-        <Bell className="w-4 h-4 text-gray-500" />
+      <SheetTrigger className="flex items-center  border-gray-300  px-2 rounded-lg py-2 gap-2">
+        <Bell className="w-5 h-5 text-[#331d67]" />
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>

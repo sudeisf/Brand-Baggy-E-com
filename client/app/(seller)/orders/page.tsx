@@ -14,8 +14,8 @@ export default function Orders(){
 
     return (
         <div className="w-[1250px] mx-auto min-h-svh">
-            <div className="flex justify-between px-5">
-                <h1 className="text-2xl font-semibold font-roboto text-[#331d67]">Order</h1>
+            <div className="flex justify-between px-5 mt-6">
+                <h1 className="text-4xl font-semibold font-roboto text-[#331d67]">Order</h1>
                 <div className = "flex gap-2">
                     <Button variant = "outline" className="rounded-sm">Today</Button>
                     <Button variant = "outline" className="rounded-sm flex gap-2">

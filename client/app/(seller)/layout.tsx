@@ -1,7 +1,7 @@
 
 import { SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
 import AppSidbar from "./components/SideBar";
-import { ArrowRightFromLine, Search } from "lucide-react";
+import { ArrowRightFromLine, Search , ChevronDown } from "lucide-react";
 import { Notification } from "@/app/(seller)/components/Notficationsheet"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export const metadata = {
@@ -16,8 +16,8 @@ export default function SellerLayotut({children}: {children:React.ReactNode}){
                 <AppSidbar/>
                 <main className="w-full ">
                     <div className="w-full bg-white">
-                    <div className="flex items-center justify-between p-5">
-                         
+                    <div className="flex items-center justify-between border-b mb-2 px-5 py-3">
+                        {/* <h1 className="font-medium text-gray-400 text-md font-roboto mb-2 capitalize">wellcome to the best way to manage your commerce</h1> */}
                         <div className="hidden sm:flex w-[20rem]   bg-white items-center gap-2 rounded-sm px-3 py-1.5 border-1">
                                 <Search className="text-black w-4 h-4 md:w-5 md:h-5" />
                                 <input 
@@ -26,12 +26,16 @@ export default function SellerLayotut({children}: {children:React.ReactNode}){
                                     className="rounded-md outline-none bg-white w-full text-sm md:text-base" 
                                 />
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex gap-4">
                                 <Notification />
-                                <Avatar>
+                               <div className="flex gap-2 items-center ">
+                               <Avatar className="w-7 h-7">
                                     <AvatarImage src="https://github.com/shadcn.png" />
                                     <AvatarFallback>CN</AvatarFallback>
                                 </Avatar>
+                                <p className="font-medium font-roboto text-sm">Jhon Doe</p>
+                                <ChevronDown className="w-4 h-4" />
+                               </div>
                             </div>
                     </div> 
                         {children}
