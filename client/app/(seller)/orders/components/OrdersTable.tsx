@@ -331,7 +331,7 @@ export default function OrdersTable() {
   };
 
     return (
-        <div className="w-[1220px] bg-white  rounded-md mb-4  mt-4 mx-auto">
+        <div className="w-[1250px] bg-white  rounded-md mb-4  mt-4 mx-auto">
           <div className="p-4  rounded-t-md border-b-0">
             <div className="flex justify-between items-center py-4  rounded-md">
                     <div className="hidden sm:flex w-[10rem] md:w-[20rem] bg-white items-center justify-start gap-2 rounded-sm px-3 py-1.5 border-1">
@@ -433,7 +433,7 @@ export default function OrdersTable() {
                       data-state={row.getIsSelected() && "selected"}
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell className="px-4" key={cell.id}>
+                        <TableCell className="px-4 text-md" key={cell.id}>
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext()
