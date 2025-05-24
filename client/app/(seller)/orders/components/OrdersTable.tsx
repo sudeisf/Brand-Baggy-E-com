@@ -11,7 +11,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowUp, ArrowDown, ArrowDownUp, AlignCenter , RefreshCcw } from "lucide-react"
+import { ArrowUp, ArrowDown, ArrowDownUp, AlignCenter , RefreshCcw, ChevronDownIcon } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -35,10 +35,11 @@ import {
   User 
 } from "lucide-react"
 import { format } from "date-fns"
-import { useState } from "react"
-import { Avatar, AvatarFallback } from "@radix-ui/react-avatar"
+import { use, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Select, SelectContent, SelectGroup, SelectValue, SelectItem, SelectTrigger } from "@/components/ui/select"
+import { Value } from "@radix-ui/react-select"
 
 export const orders: Order[] = [
   {
@@ -171,6 +172,21 @@ const getOrderStatus = (code: number): string => {
   return statusMap[code] || "Unknown"
 }
 
+const PaymentStats= [
+  "paid",
+  "pending",
+  "refunded",
+  "failed"
+]
+const orderStatus : String[] =[
+     "Pending",
+     "Processing",
+     "Shipped",
+     "Delivered",
+     "Returned",
+     "Cancelled"
+]
+
 export const columns: ColumnDef<Order>[] = [
   {
     id: "select",
@@ -239,13 +255,30 @@ export const columns: ColumnDef<Order>[] = [
   {
     accessorKey: "paymentStatus",
     header: "Payment status",
-    cell: ({ row }) => (
-      <div className={`px-2 py-1 rounded-full text-xs text-center ${
-        paymentStatusStyles[row.original.paymentStatus] || "bg-gray-100"
-      }`}>
-        {row.original.paymentStatus}
+    cell: ({ row }) => {
+      const [status, setStatus] = useState(row.original.paymentStatus);
+      const isDisabled = status === "paid";
+      return(
+      <div className={`rounded-full  text-center ${
+        paymentStatusStyles[status] || "bg-gray-100"
+      }  ${isDisabled ? "cursor-not-allowed" : "cursor-pointer"}`}>
+        <Select value={status} onValueChange={(value) => setStatus(value)} disabled={isDisabled}>
+        <SelectTrigger className="w-fit rounded-full border-none shadow-none flex items-center justify-between "  disabled={isDisabled}>
+            <SelectValue className="text-xs p-0"  />
+            
+        </SelectTrigger>
+        <SelectContent>
+            {PaymentStats.map(status => (
+            <SelectItem key={status} value={status as string}>
+                {status}
+              </SelectItem>
+                    ))}
+          </SelectContent>
+        </Select>
+
       </div>
-    )
+    );
+    }
   },
   {
     accessorKey: "items",
@@ -260,15 +293,32 @@ export const columns: ColumnDef<Order>[] = [
     accessorKey: "orderStatus",
     header: "Order Status",
     cell: ({ row }) => {
-      const status = getOrderStatus(row.original.orderStatus)
+      const initialStatus = getOrderStatus(row.original.orderStatus); // e.g. "Pending"
+      const [selectedStatus, setSelectedStatus] = useState(initialStatus);
+      const nonEditableStatuses = ["Shipped", "Delivered", "Returned", "Cancelled"];
+      const isDisabled = nonEditableStatuses.includes(selectedStatus);
+  
       return (
-        <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-          statusStyles[status] || "bg-gray-100"
-        }`}>
-          {status}
+        <div
+          className={`px-3 rounded-full text-xs font-medium ${
+            statusStyles[selectedStatus] || "bg-gray-100"
+          } ${isDisabled ? "cursor-not-allowed" : "cursor-pointer"}` }
+        >
+          <Select value={selectedStatus} onValueChange={setSelectedStatus} disabled={isDisabled}>
+            <SelectTrigger className="w-fit rounded-full border-none shadow-none flex items-center justify-between" disabled={isDisabled}>
+              <SelectValue className="text-xs p-0" />
+            </SelectTrigger >
+            <SelectContent>
+              {orderStatus.map((status, index) => (
+                <SelectItem key={index} value={status as string}>
+                  {status}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      )
-    }
+      );
+    },  
   },
   {
     id: "actions",
