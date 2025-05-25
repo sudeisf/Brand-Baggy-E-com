@@ -49,6 +49,7 @@ import { useState } from "react"
 import { DatePickerWithRange } from "./DateFilter"
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 
 
 
@@ -177,13 +178,37 @@ const statusStyles: Record<string, string> = {
   }
 
 export const columns : ColumnDef<Order>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+        className="shadow-sm"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+        className="shadow-sm"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
     {
         accessorKey: "product",
         header: "Product name",
         cell: ({row}) => {
             return (
                     <div className="flex items-center gap-2 px-2 font-roboto">
-                        <Image src={row.original.image} alt={row.original.product} width={40} height={40} />
+                        <Image src={row.original.image} alt={row.original.product} width={40} height={40} className="rounded-md shadow-sm border-2 border-gray-300" />
                         {row.original.product}
                     </div>
             )
@@ -235,9 +260,9 @@ export const columns : ColumnDef<Order>[] = [
         header: "Customer",
         cell: ({row}) => {
             return (
-                <div className="flex text-left items-center gap-2 font-roboto">
-                      <Avatar className="w-10 h-10">
-                              <AvatarImage src="https://github.com/shadcn.png" className="rounded-full" />
+                <div className="flex text-md text-left items-center gap-2 font-roboto">
+                      <Avatar className="">
+                              <AvatarImage src="https://github.com/shadcn.png" className="rounded-full w-8 h-8" />
                               <AvatarFallback>
                                   <User className="w-3 h-3" />
                               </AvatarFallback>
@@ -361,8 +386,8 @@ export default function RecentOrdersTable() {
   }
 
     return (
-        <div className="w-[1220px] bg-white  rounded-md mb-4  mt-8 mx-auto">
-          <div className="p-4  rounded-t-md border-b-0">
+        <div className="w-[1250px] bg-white  rounded-md mb-4  mt-8 mx-auto">
+          <div className=" p-4 rounded-t-md border-b-0 mb-4">
             <div>
                 <h1 className="font-roboto font-medium text-2xl text-[#331d67]">Recent Orders</h1>
             </div>
@@ -436,13 +461,13 @@ export default function RecentOrdersTable() {
             </div>
           </div>
           <div className="px-4">
-            <Table className="rounded-lg border-separate border-1 border-spacing-0 overflow-hidden">
+            <Table className="rounded-lg border-separate border-spacing-0 overflow-hidden">
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {
                       return (
-                        <TableHead key={header.id} className="text-gray-500 text-left font-medium border-b-1  bg-gray-50 py-2 ">
+                        <TableHead key={header.id} className="text-gray-600 text-left font-medium px-4  bg-gray-50 py-2 ">
                           {header.isPlaceholder
                             ? null
                             : flexRender(
@@ -486,7 +511,7 @@ export default function RecentOrdersTable() {
               </TableBody>
             </Table>
           </div>
-          <div className="flex items-center justify-end space-x-2 py-4">
+          <div className="flex items-center justify-end space-x-2 py-4 px-5">
             <div className="flex-1 text-sm text-muted-foreground">
               {table.getFilteredSelectedRowModel().rows.length} of{" "}
               {table.getFilteredRowModel().rows.length} row(s) selected.

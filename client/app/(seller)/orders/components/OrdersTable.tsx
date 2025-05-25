@@ -198,6 +198,7 @@ export const columns: ColumnDef<Order>[] = [
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
+        className="shadow-sm"
       />
     ),
     cell: ({ row }) => (
@@ -205,6 +206,7 @@ export const columns: ColumnDef<Order>[] = [
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
+        className="shadow-sm"
       />
     ),
     enableSorting: false,
@@ -293,7 +295,7 @@ export const columns: ColumnDef<Order>[] = [
     accessorKey: "orderStatus",
     header: "Order Status",
     cell: ({ row }) => {
-      const initialStatus = getOrderStatus(row.original.orderStatus); // e.g. "Pending"
+      const initialStatus = getOrderStatus(row.original.orderStatus); 
       const [selectedStatus, setSelectedStatus] = useState(initialStatus);
       const nonEditableStatuses = ["Shipped", "Delivered", "Returned", "Cancelled"];
       const isDisabled = nonEditableStatuses.includes(selectedStatus);
@@ -455,13 +457,13 @@ export default function OrdersTable() {
             </div>
           </div>
           <div className="px-4">
-            <Table className="rounded-lg border-separate border-1 shadow-sm border-spacing-0 overflow-hidden">
+            <Table className="rounded-lg border-separate  shadow-sm border-spacing-0 overflow-hidden">
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {
                       return (
-                        <TableHead key={header.id} className="text-gray-500 text-left font-roboto font-medium border-b-1 px-4  bg-gray-50 py-2 ">
+                        <TableHead key={header.id} className="text-gray-700 text-left font-roboto font-medium  px-4  bg-gray-50 py-2 ">
                           {header.isPlaceholder
                             ? null
                             : flexRender(
@@ -505,7 +507,7 @@ export default function OrdersTable() {
               </TableBody>
             </Table>
           </div>
-          <div className="flex items-center justify-end space-x-2 py-4">
+          <div className="flex items-center justify-end space-x-2 py-4 px-5">
             <div className="flex-1 text-sm text-muted-foreground">
               {table.getFilteredSelectedRowModel().rows.length} of{" "}
               {table.getFilteredRowModel().rows.length} row(s) selected.

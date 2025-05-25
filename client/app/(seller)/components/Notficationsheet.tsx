@@ -86,7 +86,7 @@ export function Notification() {
       <SheetTrigger className="flex items-center  border-gray-300  px-2 rounded-lg py-2 gap-2">
         <Bell className="w-5 h-5 text-[#331d67]" />
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className=" mt-3 mb-3">
         <SheetHeader>
           <SheetTitle>Notifications</SheetTitle>
           <SheetDescription>View your recent notifications below.</SheetDescription>

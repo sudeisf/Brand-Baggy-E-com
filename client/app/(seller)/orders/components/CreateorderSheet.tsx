@@ -17,7 +17,7 @@ export function CreateOrder() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline" className="flex gap-2 bg-[#331d67] text-white font-roboto hover:bg-[#331d67]/90 hover:text-white">
+        <Button variant="outline" className="flex gap-2 rounded-sm shadow-2xs bg-[#331d67] text-white font-roboto hover:bg-[#331d67]/90 hover:text-white">
             <Plus/>
             Create order</Button>
       </SheetTrigger>
