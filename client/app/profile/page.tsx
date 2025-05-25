@@ -5,7 +5,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { Input } from "@/components/ui/input"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { DatePickerForm } from "@/app/profile/components/DatePicker"
+import  DatePickerWithRange  from "@/app/profile/components/DatePicker"
 import { z } from "zod"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
@@ -69,7 +69,7 @@ export default function MyAccount() {
 
 
     return (
-        <div className="flex flex-col gap-4 w-full bg-white rounded-md border-2 border-gray-200">
+        <div className="flex flex-col gap-4 w-full bg-white rounded-md border-1 shadow-xs border-gray-200">
             <div className="flex flex-col gap-10 w-full p-10 mt-4">
                 <h1 className={`${rubik.className} text-[#331d67] text-3xl font-bold`}>My details</h1>
                 <div className="flex flex-col gap-4 w-full">
@@ -135,7 +135,7 @@ export default function MyAccount() {
                                             <FormItem>
                                                 <FormLabel className={`${rubik.className} text-sm font-medium uppercase`}>Birth Date</FormLabel>
                                                 <FormControl>
-                                                    <DatePickerForm field={field} />
+                                                    <DatePickerWithRange field={field} />
                                                 </FormControl>
                                             </FormItem>
                                         )}
@@ -149,7 +149,7 @@ export default function MyAccount() {
                                                 <FormControl>
                                                     <Select
                                                         onValueChange={field.onChange}
-                                                        defaultValue="Male"
+                                                        value={field.value}
                                                     >
                                                         <SelectTrigger className="w-full rounded-md bg-gray-100">
                                                             <SelectValue defaultValue={field.value} className="text-sm font-medium bg-gray-100"/>
