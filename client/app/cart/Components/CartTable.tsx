@@ -43,17 +43,17 @@ import { Trash2 } from "lucide-react"
 export default function CartTable() {
     return (
         <div className=" *:font-roboto w-[70%] ">
-        <div className="border-2  border-gray-200 rounded-xl p-4">
-            <div className="grid grid-cols-12 border-b-2 border-gray-200 gap-4 py-4">
-                <div className="col-span-6 font-roboto text-[#331d67] font-semibold">Product name</div>
-                <div className="col-span-2 text-center font-roboto text-[#331d67] font-semibold">Quantity</div>
-                <div className="col-span-2 text-center font-roboto text-[#331d67] font-semibold">Total</div>
-                <div className="col-span-2 text-center font-roboto text-[#331d67] font-semibold">Action</div>
+        <div className="  border-gray-200 rounded-xl p-4">
+            <div className="grid grid-cols-12 border-b-1 border-gray-200 gap-4 py-4">
+                <div className="col-span-6 font-roboto text-[#331d67] font-medium">Product name</div>
+                <div className="col-span-2 text-center font-roboto text-[#331d67] font-medium">Quantity</div>
+                <div className="col-span-2 text-center font-roboto text-[#331d67] font-medium">Total</div>
+                <div className="col-span-2 text-center font-roboto text-[#331d67] font-medium">Action</div>
             </div>
             <div className="space-y-6 py-4">
                 {cartItems.map((item) => (
-                    <div key={item.id} className="grid grid-cols-12 gap-4 items-center">
-                    <div className="col-span-6 flex items-center gap-4">
+                    <div key={item.id} className="grid not-last:border-b-1 *:font-roboto grid-cols-12 gap-4 items-center">
+                    <div className="col-span-6   flex items-center gap-4">
                         <Image src={item.image} 
                         alt={item.name} 
                         width={80} 

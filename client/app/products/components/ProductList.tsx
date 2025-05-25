@@ -76,12 +76,12 @@ export function ProductList(){
         <div>
             <div className="relative w-full">
           <div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 w-full  ml-0 pr-32"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 w-full  ml-0 "
           >
             {products.map((product) => (
               <div
                 key={product.id}
-                className="bg-inherit rounded-md transition-shadow duration-300 w-64 md:w-80 h-[22rem] md:h-[24rem] flex flex-col flex-shrink-0 snap-start justify-between group border items-start border-gray-200"
+                className="bg-inherit rounded-md transition-shadow duration-300 w-64 md:w-92 h-[22rem] md:h-[24rem] flex flex-col flex-shrink-0 snap-start justify-between group border items-start border-gray-200"
               >
                 <div className="overflow-hidden rounded-t-md w-full h-48 md:h-56">
                   <Link href={`/products/${product.id}`}>

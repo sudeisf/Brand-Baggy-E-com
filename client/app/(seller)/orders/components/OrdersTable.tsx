@@ -154,10 +154,10 @@ const statusStyles: Record<string, string> = {
 }
 
 const paymentStatusStyles: Record<string, string> = {
-  paid: "bg-green-500/5 text-green-500 w-fit",
-  pending: "bg-yellow-500/5 text-yellow-500 w-fit",
-  refunded: "bg-purple-500/5 text-purple-500 w-fit",
-  failed: "bg-red-500/5 text-red-500 w-fit"
+  paid: "bg-green-500/10 text-green-600 w-fit",
+  pending: "bg-yellow-500/10 text-yellow-600 w-fit",
+  refunded: "bg-purple-500/10 text-purple-600 w-fit",
+  failed: "bg-red-500/10 text-red-600 w-fit"
 }
 
 const getOrderStatus = (code: number): string => {
@@ -261,7 +261,7 @@ export const columns: ColumnDef<Order>[] = [
       const [status, setStatus] = useState(row.original.paymentStatus);
       const isDisabled = status === "paid";
       return(
-      <div className={`rounded-full  text-center ${
+      <div className={`rounded-md  text-center ${
         paymentStatusStyles[status] || "bg-gray-100"
       }  ${isDisabled ? "cursor-not-allowed" : "cursor-pointer"}`}>
         <Select value={status} onValueChange={(value) => setStatus(value)} disabled={isDisabled}>
@@ -302,7 +302,7 @@ export const columns: ColumnDef<Order>[] = [
   
       return (
         <div
-          className={`px-3 rounded-full text-xs font-medium ${
+          className={`px-3 rounded-md text-xs font-medium ${
             statusStyles[selectedStatus] || "bg-gray-100"
           } ${isDisabled ? "cursor-not-allowed" : "cursor-pointer"}` }
         >
