@@ -72,9 +72,9 @@ export default function OrderDetails({ order }: Props) {
           <p className="text-gray-700 font-roboto font-medium text-sm ">Order details</p>
         </SheetTitle>
         <div className="flex flex-col">
-            <div className="px-4 space-y-5">
+            <div className="px-4 space-y-2">
               <h1 className="font-roboto font-medium text-md text-gray-700 capitalize">Items</h1>
-              <ScrollArea className="flex flex-col gap-4 h-52 px-2 ">
+              <ScrollArea className="flex flex-col gap-4 max-h-52 px-2 ">
                   {
                     order.items.map((item,index)=> {
                       return(

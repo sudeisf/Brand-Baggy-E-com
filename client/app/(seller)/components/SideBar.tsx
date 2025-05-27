@@ -76,7 +76,7 @@ export default function AppSidbar(){
     return (
         <Sidebar className="h-full">
         <SidebarContent className="bg-white text-[#331d67] ">
-            <SidebarHeader className="flex flex-row items-center  pb-5 justify-between mx-4 mt-2 border-b-1 ">
+            <SidebarHeader className="flex flex-row items-center  pb-5 justify-between mx-4 mt-2  ">
                 <h1 className={`font-medium text-xl  tracking-tighter ${rubik.className}`}>Brand-Baggy</h1>
                 <SidebarTrigger />
 

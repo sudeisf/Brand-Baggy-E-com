@@ -431,7 +431,7 @@ export const columns: ColumnDef<Order>[] = [
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Print Invoice</DropdownMenuItem>
-            <DropdownMenuItem>Resend Notification</DropdownMenuItem>
+            {/* <DropdownMenuItem>Resend Notification</DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

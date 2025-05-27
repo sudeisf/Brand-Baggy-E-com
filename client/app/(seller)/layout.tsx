@@ -16,7 +16,7 @@ export default function SellerLayotut({children}: {children:React.ReactNode}){
                 <AppSidbar/>
                 <main className="w-full ">
                     <div className="w-full bg-white">
-                    <div className="flex items-center justify-between border-b mb-2 px-5 py-3">
+                    <div className="flex items-center justify-between border-b mb-2 px-5 py-4">
                         {/* <h1 className="font-medium text-gray-400 text-md font-roboto mb-2 capitalize">wellcome to the best way to manage your commerce</h1> */}
                         <div className="hidden sm:flex w-[20rem]   bg-white items-center gap-2 rounded-sm px-3 py-1.5 border-1">
                                 <Search className="text-black w-4 h-4 md:w-5 md:h-5" />
