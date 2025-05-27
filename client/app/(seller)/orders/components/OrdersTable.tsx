@@ -411,65 +411,31 @@ export const columns: ColumnDef<Order>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const [isOpen, setIsOpen] = useState<boolean>(false);
-      const triggerRef = useRef<HTMLButtonElement>(null);
-  
-      // Listen for custom close event
-      useEffect(() => {
-        const handleClose = () => {
-          setIsOpen(false);
-          // Restore focus to the button after closing
-          setTimeout(() => triggerRef.current?.focus(), 0);
-        };
-        window.addEventListener("close-sheet", handleClose);
-        return () => window.removeEventListener("close-sheet", handleClose);
-      }, []);
-  
-      return (
-        <>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="h-8 w-8 p-0"
-                ref={triggerRef}
-                aria-label="Open actions menu"
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => navigator.clipboard.writeText(row.original.id)}>
-                Copy Order ID
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={(e) => {
-                  e.preventDefault();
-                  setIsOpen(true);
-                }}
-              >
-                View Details
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Print Invoice</DropdownMenuItem>
-              <DropdownMenuItem>Resend Notification</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Sheet open={isOpen} onOpenChange={(open) => {
-            setIsOpen(open);
-            if (!open) {
-              setTimeout(() => triggerRef.current?.focus(), 0);
-            }
-          }}>
-            <SheetContent side="right" className="w-[700px] sm:max-w-[90vw]">
-              <SheetTitle>{row.original.id} - Order Details</SheetTitle>
-              <OrderDetails order={row.original} />
-            </SheetContent>
-          </Sheet>
-        </>
-      );
-    }
+    cell: ({ row }) => (
+      <div className="flex items-center gap-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="h-8 w-8 p-0"
+              aria-label="Open actions menu"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+          <OrderDetails order={row.original} />
+
+            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(row.original.id)}>
+              Copy Order ID
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>Print Invoice</DropdownMenuItem>
+            <DropdownMenuItem>Resend Notification</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    ),
   }
 ]
 
