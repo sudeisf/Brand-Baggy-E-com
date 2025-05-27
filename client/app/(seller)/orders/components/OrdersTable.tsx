@@ -53,9 +53,9 @@ export const orders: Order[] = [
     total: 149.99,
     paymentStatus: "paid",
     items: [
-      { name: "Product 1", price: 49.99, image: "https://example.com/images/product1.jpg" },
-      { name: "Product 2", price: 50.00, image: "https://example.com/images/product2.jpg" },
-      { name: "Product 3", price: 50.00, image: "https://example.com/images/product3.jpg" }
+      { name: "Product 47", price: 45.75, image: "/assets/products/product1.jpg" },
+      { name: "Product 48", price: 45.75, image: "/assets/products/product2.jpg" },
+      { name: "Product 49", price: 45.75, image: "/assets/products/product3.jpg" },
     ],
     orderStatus: 2 // Shipped
   },
@@ -68,7 +68,7 @@ export const orders: Order[] = [
     total: 87.50,
     paymentStatus: "paid",
     items: [
-      { name: "Product 4", price: 87.50, image: "https://example.com/images/product4.jpg" }
+      { name: "Product 49", price: 45.75, image: "/assets/products/product3.jpg" },
     ],
     orderStatus: 3 // Delivered
   },
@@ -81,11 +81,11 @@ export const orders: Order[] = [
     total: 234.95,
     paymentStatus: "pending",
     items: [
-      { name: "Product 5", price: 45.99, image: "https://example.com/images/product5.jpg" },
-      { name: "Product 6", price: 45.99, image: "https://example.com/images/product6.jpg" },
-      { name: "Product 7", price: 47.99, image: "https://example.com/images/product7.jpg" },
-      { name: "Product 8", price: 47.99, image: "https://example.com/images/product8.jpg" },
-      { name: "Product 9", price: 46.99, image: "https://example.com/images/product9.jpg" }
+      { name: "Product 47", price: 45.75, image: "/assets/products/product1.jpg" },
+      { name: "Product 48", price: 45.75, image: "/assets/products/product2.jpg" },
+      { name: "Product 49", price: 45.75, image: "/assets/products/product3.jpg" },
+      { name: "Product 50", price: 45.75, image: "/assets/products/product4.jpg" },
+      { name: "Product 51", price: 46.00, image: "/assets/products/product5.jpg" },
     ],
     orderStatus: 1 // Processing
   },
@@ -98,8 +98,8 @@ export const orders: Order[] = [
     total: 65.00,
     paymentStatus: "refunded",
     items: [
-      { name: "Product 10", price: 32.50, image: "https://example.com/images/product10.jpg" },
-      { name: "Product 11", price: 32.50, image: "https://example.com/images/product11.jpg" }
+      { name: "Product 47", price: 45.75, image: "/assets/products/product1.jpg" },
+      { name: "Product 48", price: 45.75, image: "/assets/products/product2.jpg" },
     ],
     orderStatus: 4 // Returned
   },
@@ -112,13 +112,13 @@ export const orders: Order[] = [
     total: 320.75,
     paymentStatus: "paid",
     items: [
-      { name: "Product 12", price: 45.75, image: "https://example.com/images/product12.jpg" },
-      { name: "Product 13", price: 45.75, image: "https://example.com/images/product13.jpg" },
-      { name: "Product 14", price: 45.75, image: "https://example.com/images/product14.jpg" },
-      { name: "Product 15", price: 45.75, image: "https://example.com/images/product15.jpg" },
-      { name: "Product 16", price: 46.00, image: "https://example.com/images/product16.jpg" },
-      { name: "Product 17", price: 46.00, image: "https://example.com/images/product17.jpg" },
-      { name: "Product 18", price: 45.75, image: "https://example.com/images/product18.jpg" }
+      { name: "Product 47", price: 45.75, image: "/assets/products/product1.jpg" },
+      { name: "Product 48", price: 45.75, image: "/assets/products/product2.jpg" },
+      { name: "Product 49", price: 45.75, image: "/assets/products/product3.jpg" },
+      { name: "Product 50", price: 45.75, image: "/assets/products/product4.jpg" },
+      { name: "Product 51", price: 46.00, image: "/assets/products/product5.jpg" },
+      { name: "Product 52", price: 46.00, image: "/assets/products/product6.jpg" },
+      { name: "Product 53", price: 45.75, image: "/assets/products/product7.jpg" }
     ],
     orderStatus: 2 // Shipped
   },
@@ -131,13 +131,13 @@ export const orders: Order[] = [
     total: 320.75,
     paymentStatus: "paid",
     items: [
-      { name: "Product 19", price: 45.75, image: "https://example.com/images/product19.jpg" },
-      { name: "Product 20", price: 45.75, image: "https://example.com/images/product20.jpg" },
-      { name: "Product 21", price: 45.75, image: "https://example.com/images/product21.jpg" },
-      { name: "Product 22", price: 45.75, image: "https://example.com/images/product22.jpg" },
-      { name: "Product 23", price: 46.00, image: "https://example.com/images/product23.jpg" },
-      { name: "Product 24", price: 46.00, image: "https://example.com/images/product24.jpg" },
-      { name: "Product 25", price: 45.75, image: "https://example.com/images/product25.jpg" }
+      { name: "Product 47", price: 45.75, image: "/assets/products/product1.jpg" },
+      { name: "Product 48", price: 45.75, image: "/assets/products/product2.jpg" },
+      { name: "Product 49", price: 45.75, image: "/assets/products/product3.jpg" },
+      { name: "Product 50", price: 45.75, image: "/assets/products/product4.jpg" },
+      { name: "Product 51", price: 46.00, image: "/assets/products/product5.jpg" },
+      { name: "Product 52", price: 46.00, image: "/assets/products/product6.jpg" },
+      { name: "Product 53", price: 45.75, image: "/assets/products/product7.jpg" }
     ],
     orderStatus: 2 // Shipped
   },
@@ -150,13 +150,13 @@ export const orders: Order[] = [
     total: 320.75,
     paymentStatus: "paid",
     items: [
-      { name: "Product 26", price: 45.75, image: "https://example.com/images/product26.jpg" },
-      { name: "Product 27", price: 45.75, image: "https://example.com/images/product27.jpg" },
-      { name: "Product 28", price: 45.75, image: "https://example.com/images/product28.jpg" },
-      { name: "Product 29", price: 45.75, image: "https://example.com/images/product29.jpg" },
-      { name: "Product 30", price: 46.00, image: "https://example.com/images/product30.jpg" },
-      { name: "Product 31", price: 46.00, image: "https://example.com/images/product31.jpg" },
-      { name: "Product 32", price: 45.75, image: "https://example.com/images/product32.jpg" }
+      { name: "Product 47", price: 45.75, image: "/assets/products/product1.jpg" },
+      { name: "Product 48", price: 45.75, image: "/assets/products/product2.jpg" },
+      { name: "Product 49", price: 45.75, image: "/assets/products/product3.jpg" },
+      { name: "Product 50", price: 45.75, image: "/assets/products/product4.jpg" },
+      { name: "Product 51", price: 46.00, image: "/assets/products/product5.jpg" },
+      { name: "Product 52", price: 46.00, image: "/assets/products/product6.jpg" },
+      { name: "Product 53", price: 45.75, image: "/assets/products/product7.jpg" }
     ],
     orderStatus: 2 // Shipped
   },
@@ -169,13 +169,13 @@ export const orders: Order[] = [
     total: 320.75,
     paymentStatus: "paid",
     items: [
-      { name: "Product 33", price: 45.75, image: "https://example.com/images/product33.jpg" },
-      { name: "Product 34", price: 45.75, image: "https://example.com/images/product34.jpg" },
-      { name: "Product 35", price: 45.75, image: "https://example.com/images/product35.jpg" },
-      { name: "Product 36", price: 45.75, image: "https://example.com/images/product36.jpg" },
-      { name: "Product 37", price: 46.00, image: "https://example.com/images/product37.jpg" },
-      { name: "Product 38", price: 46.00, image: "https://example.com/images/product38.jpg" },
-      { name: "Product 39", price: 45.75, image: "https://example.com/images/product39.jpg" }
+      { name: "Product 47", price: 45.75, image: "/assets/products/product1.jpg" },
+      { name: "Product 48", price: 45.75, image: "/assets/products/product2.jpg" },
+      { name: "Product 49", price: 45.75, image: "/assets/products/product3.jpg" },
+      { name: "Product 50", price: 45.75, image: "/assets/products/product4.jpg" },
+      { name: "Product 51", price: 46.00, image: "/assets/products/product5.jpg" },
+      { name: "Product 52", price: 46.00, image: "/assets/products/product6.jpg" },
+      { name: "Product 53", price: 45.75, image: "/assets/products/product7.jpg" }
     ],
     orderStatus: 2 // Shipped
   },
@@ -188,13 +188,13 @@ export const orders: Order[] = [
     total: 320.75,
     paymentStatus: "paid",
     items: [
-      { name: "Product 40", price: 45.75, image: "https://example.com/images/product40.jpg" },
-      { name: "Product 41", price: 45.75, image: "https://example.com/images/product41.jpg" },
-      { name: "Product 42", price: 45.75, image: "https://example.com/images/product42.jpg" },
-      { name: "Product 43", price: 45.75, image: "https://example.com/images/product43.jpg" },
-      { name: "Product 44", price: 46.00, image: "https://example.com/images/product44.jpg" },
-      { name: "Product 45", price: 46.00, image: "https://example.com/images/product45.jpg" },
-      { name: "Product 46", price: 45.75, image: "https://example.com/images/product46.jpg" }
+      { name: "Product 47", price: 45.75, image: "/assets/products/product1.jpg" },
+      { name: "Product 48", price: 45.75, image: "/assets/products/product2.jpg" },
+      { name: "Product 49", price: 45.75, image: "/assets/products/product3.jpg" },
+      { name: "Product 50", price: 45.75, image: "/assets/products/product4.jpg" },
+      { name: "Product 51", price: 46.00, image: "/assets/products/product5.jpg" },
+      { name: "Product 52", price: 46.00, image: "/assets/products/product6.jpg" },
+      { name: "Product 53", price: 45.75, image: "/assets/products/product7.jpg" }
     ],
     orderStatus: 2 // Shipped
   },
@@ -207,13 +207,13 @@ export const orders: Order[] = [
     total: 320.75,
     paymentStatus: "paid",
     items: [
-      { name: "Product 47", price: 45.75, image: "https://example.com/images/product47.jpg" },
-      { name: "Product 48", price: 45.75, image: "https://example.com/images/product48.jpg" },
-      { name: "Product 49", price: 45.75, image: "https://example.com/images/product49.jpg" },
-      { name: "Product 50", price: 45.75, image: "https://example.com/images/product50.jpg" },
-      { name: "Product 51", price: 46.00, image: "https://example.com/images/product51.jpg" },
-      { name: "Product 52", price: 46.00, image: "https://example.com/images/product52.jpg" },
-      { name: "Product 53", price: 45.75, image: "https://example.com/images/product53.jpg" }
+      { name: "Product 47", price: 45.75, image: "/assets/products/product1.jpg" },
+      { name: "Product 48", price: 45.75, image: "/assets/products/product2.jpg" },
+      { name: "Product 49", price: 45.75, image: "/assets/products/product3.jpg" },
+      { name: "Product 50", price: 45.75, image: "/assets/products/product4.jpg" },
+      { name: "Product 51", price: 46.00, image: "/assets/products/product5.jpg" },
+      { name: "Product 52", price: 46.00, image: "/assets/products/product6.jpg" },
+      { name: "Product 53", price: 45.75, image: "/assets/products/product7.jpg" }
     ],
     orderStatus: 2 // Shipped
   }
