@@ -16,7 +16,7 @@ import {
   } from "@/components/ui/sidebar"
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
 import { url } from "inspector"
-import { Calendar,Package, Home, ShoppingCart,Package2, Settings, Search, Link , LogOutIcon, User } from "lucide-react"
+import { Calendar,Package, User2Icon, Home, ShoppingCart,Package2, Settings, Search, Link , LogOutIcon, User } from "lucide-react"
 
 
 
@@ -43,9 +43,9 @@ const items : Item[] = [
         icon: Package,
       },
       {
-        title: "Search",
+        title: "Customer",
         url: "#",
-        icon: Search,
+        icon: User2Icon,
       },
       {
         title: "Settings",

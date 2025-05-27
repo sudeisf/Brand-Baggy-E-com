@@ -463,11 +463,11 @@ export default function RecentOrdersTable() {
           <div className="px-4">
             <Table className="rounded-lg border-separate border-spacing-0 overflow-hidden">
               <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => {
+                {table.getHeaderGroups().map((headerGroup , index) => (
+                  <TableRow key={index}>
+                    {headerGroup.headers.map((header , index) => {
                       return (
-                        <TableHead key={header.id} className="text-gray-600 text-left font-medium px-4  bg-gray-50 py-2 ">
+                        <TableHead key={index} className="text-gray-600 text-left font-medium px-4  bg-gray-50 py-2 ">
                           {header.isPlaceholder
                             ? null
                             : flexRender(
@@ -482,9 +482,9 @@ export default function RecentOrdersTable() {
               </TableHeader>
               <TableBody>
                 {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
+                  table.getRowModel().rows.map((row,index) => (
                     <TableRow
-                      key={row.id}
+                      key={index}
                       className="text-gray-600 font-medium text-left py-2 px-4"
                       data-state={row.getIsSelected() && "selected"}
                     >
