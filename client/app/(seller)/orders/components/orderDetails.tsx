@@ -74,7 +74,7 @@ export default function OrderDetails({ order }: Props) {
         <div className="flex flex-col">
             <div className="px-4 space-y-5">
               <h1 className="font-roboto font-medium text-md text-gray-700 capitalize">Items</h1>
-              <ScrollArea className="flex flex-col gap-4 h-52 px-2">
+              <ScrollArea className="flex flex-col gap-4 h-52 px-2 ">
                   {
                     order.items.map((item,index)=> {
                       return(
@@ -89,7 +89,7 @@ export default function OrderDetails({ order }: Props) {
                     })
                   }
               </ScrollArea>
-              <div className="w- space-y-3 py-4 px-2">
+              <div className="w- space-y-3 px-2 border-t py-2">
                     <div className="flex justify-between">
                       <p className="font-roboto  text-gray-500">Created at</p>
                       <p className="font-roboto font-medium text-black text-sm">{formatDate(order.orderDate)}</p> 
@@ -104,6 +104,35 @@ export default function OrderDetails({ order }: Props) {
                       <p className="font-roboto  text-gray-500">Status</p>
                       <p className="font-roboto font-medium text-black text-sm">{order.paymentStatus}</p>
                     </div>
+              </div>
+              <div className="w- space-y-3 py-2 px-2 border-t">
+                <div className="flex justify-between">
+                  <p className="font-roboto  text-gray-500">Customer name</p>
+                  <p className="font-roboto font-medium text-black text-sm">{order.customer}</p>
+                </div>
+                <div className="flex justify-between">
+                  <p className="font-roboto  text-gray-500">Email</p>
+                  <p className="font-roboto font-medium text-black text-sm">{order.email}</p>
+                </div>
+                <div className="flex justify-between">
+                  <p className="font-roboto  text-gray-500">Phone</p>
+                  <p className="font-roboto font-medium text-black text-sm">{order.phone}</p>
+                </div>
+              </div>
+              <div className="w- space-y-3 py-2 px-2 border-t">
+                <h1>Payment</h1>
+                <div className="flex justify-between">
+                  <p className="font-roboto  text-gray-500">Subtotal</p>
+                  <p className="font-roboto font-medium text-black text-sm">{order.total}</p>
+                </div>
+                <div className="flex justify-between">
+                  <p className="font-roboto  text-gray-500">Shipping fee</p>
+                  <p className="font-roboto font-medium text-black text-sm">free</p>
+                </div>
+                <div className="flex justify-between">
+                  <p className="font-roboto  text-gray-500">Total</p>
+                  <p className="font-roboto font-medium text-black text-sm">{order.total}</p>
+                </div>
               </div>
 
             </div>
