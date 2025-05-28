@@ -39,17 +39,17 @@ const items : Item[] = [
       },
       {
         title: "Products",
-        url: "#",
+        url: "/products-dashboard",
         icon: Package,
       },
       {
-        title: "Customer",
-        url: "#",
+        title: "Customers",
+        url: "/customer",
         icon: User2Icon,
       },
       {
         title: "Settings",
-        url: "#",
+        url: "/settings",
         icon: Settings,
       },    
     ]
