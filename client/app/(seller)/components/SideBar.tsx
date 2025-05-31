@@ -11,19 +11,27 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    SidebarMenuSub,
+    SidebarMenuSubButton,
+    SidebarMenuSubItem,
     SidebarTrigger,
     useSidebar,
   } from "@/components/ui/sidebar"
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
 import { url } from "inspector"
-import { Calendar,Package, User2Icon, Home, ShoppingCart,Package2, Settings, Search, Link , LogOutIcon, User } from "lucide-react"
+import { Calendar,Package, User2Icon, Home, ShoppingCart,Package2, Settings, Search, Link , LogOutIcon, User, Plus } from "lucide-react"
 
 
 
 interface Item{
         title : string,
         url : string,
-        icon : any
+        icon : any,
+        subMenu?: {
+            title: string,
+            url: string,
+            icon: any
+        }[]
 }
 
 const items : Item[] = [
@@ -31,6 +39,7 @@ const items : Item[] = [
         title: "Dashboard",
         url: "/dashboard",
         icon: Home,
+        subMenu :[]
       },
       {
         title: "Order",
@@ -41,6 +50,13 @@ const items : Item[] = [
         title: "Products",
         url: "/products-dashboard",
         icon: Package,
+        subMenu : [
+            {
+                title: "Create Products",
+                url: "/products-dashboard/create-product",
+                icon: Plus
+            }
+        ]
       },
       {
         title: "Customers",
@@ -65,6 +81,7 @@ const rubik = Rubik({
   });
 
 import { usePathname } from "next/navigation"
+import { title } from "process"
  
 export default function AppSidbar(){
 
@@ -75,56 +92,83 @@ export default function AppSidbar(){
 
     return (
         <Sidebar className="h-full">
-        <SidebarContent className="bg-white text-[#331d67] ">
-            <SidebarHeader className="flex flex-row items-center  pb-5 justify-between mx-4 mt-2  ">
-                <h1 className={`font-medium text-xl  tracking-tighter ${rubik.className}`}>Brand-Baggy</h1>
+        <SidebarContent className="bg-white text-[#331d67] flex flex-col h-full">
+            <SidebarHeader className="flex flex-row items-center pb-5 justify-between mx-4 mt-2">
+                <h1 className={`font-medium text-xl tracking-tighter ${rubik.className}`}>Brand-Baggy</h1>
                 <SidebarTrigger />
-
             </SidebarHeader>
-          <SidebarGroup>
-            
-            <SidebarGroupContent className="mt-5">
-            {/* <SidebarGroupLabel className="uppercase text-gray-400 font-thin font-inter">Main menu</SidebarGroupLabel> */}
-            <SidebarMenu className="mx-2">
-                            {items.slice(0,4).map((item) => {
-                                const isActive = pathname === item.url;
-                                return (
-                                    <SidebarMenuItem key={item.title}>
-                                        <SidebarMenuButton
-                                            className={`hover:bg-[#331d67]/5 rounded-none px-5  mb-3 ${
-                                                isActive 
-                                                    ? ' border-l-3 rounded-none text-md border-[#331d67] text-[#2d116d] font-bold ' 
-                                                    : 'text-gray-500'
-                                            }`}
-                                            asChild
-                                        >
-                                            <a href={item.url}>
-                                                <item.icon className={isActive ? 'text-[#331d67]' : ''} />
-                                                <span className={`font-medium font-inter text-md ${
-                                                    isActive ? 'text-[#6449a3] ' : ''
-                                                }`}>
-                                                    {item.title}
-                                                </span>
-                                            </a>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                );
-                            })}
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
-            </SidebarContent>
-        <SidebarFooter className="bg-white flex mb-4 flex-col  ">
+            <SidebarGroup className="flex-1">
+                <SidebarGroupContent className="mt-5">
+                    <SidebarMenu className="mx-2">
+                        {items.slice(0,4).map((item) => {
+                            const isActive = pathname === item.url;
+                            const hasOpenSubmenu = item.subMenu?.some(subItem => pathname === subItem.url);
+                            return (
+                                <SidebarMenuItem key={item.title}>
+                                    <SidebarMenuButton
+                                        className={`hover:bg-[#331d67]/5 rounded-none px-5 mb-3 ${
+                                            isActive 
+                                                ? 'border-l-3 rounded-none text-md border-[#331d67] text-[#2d116d] font-bold' 
+                
+                                                : 'text-gray-500'
+                                        }`}
+                                        asChild
+                                    >
+                                        <a href={item.url}>
+                                            <item.icon className={isActive ? 'text-[#331d67]' : ''} />
+                                            <span className={`font-medium font-inter text-md ${
+                                                isActive ? 'text-[#6449a3]' : ''
+                                            }`}>
+                                                {item.title}
+                                            </span>
+                                        </a>
+                                    </SidebarMenuButton>
+                                    {item.subMenu && item.subMenu.length > 0 && (
+                                        <SidebarMenuSub>
+                                            {item.subMenu.map((subItem) => {
+                                                const isSubActive = pathname === subItem.url;
+                                                return (
+                                                    <SidebarMenuSubItem key={subItem.title}>
+                                                        <SidebarMenuSubButton
+                                                            className={`hover:bg-[#331d67]/5 rounded-none  mb-2 ${
+                                                                isSubActive 
+                                                                    ? ' rounded-none text-md border-[#331d67] text-[#2d116d] font-bold' 
+                                                                    : 'text-gray-500'
+                                                            }`}
+                                                            asChild
+                                                        >
+                                                            <a href={subItem.url}>
+                                                                <subItem.icon className={isSubActive ? 'text-[#331d67]' : ''} />
+                                                                <span className={`font-medium font-inter text-md ${
+                                                                    isSubActive ? 'text-[#6449a3]' : ''
+                                                                }`}>
+                                                                    {subItem.title}
+                                                                </span>
+                                                            </a>
+                                                        </SidebarMenuSubButton>
+                                                    </SidebarMenuSubItem>
+                                                );
+                                            })}
+                                        </SidebarMenuSub>
+                                    )}
+                                </SidebarMenuItem>
+                            );
+                        })}
+                    </SidebarMenu>
+                </SidebarGroupContent>
+            </SidebarGroup>
+            <SidebarFooter className="bg-white mt-auto">
                 <Button
-                     className={`hover:bg-white shadow-none bg-white items-start justify-start px-5 text-gray-500 flex flex-row w-full`}>
-                            <a href={items[4].url} className="text-left flex gap-2 ">
-                            <Settings />
-                            <span className={`font-medium font-inter text-md `}>
-                                {items[4].title}
-                            </span>
-                        </a>
-                    </Button>
+                    className="hover:bg-white shadow-none bg-white items-start justify-start px-5 text-gray-500 flex flex-row w-full">
+                    <a href={items[4].url} className="text-left flex gap-2">
+                        <Settings />
+                        <span className="font-medium font-inter text-md">
+                            {items[4].title}
+                        </span>
+                    </a>
+                </Button>
             </SidebarFooter>
-      </Sidebar>
+        </SidebarContent>
+        </Sidebar>
     )
 }

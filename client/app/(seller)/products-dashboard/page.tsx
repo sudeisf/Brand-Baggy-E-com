@@ -45,8 +45,9 @@ import {
   Plus,
   ArrowDownUp,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
   } from "lucide-react"
+import Link from "next/link"
 import { 
   endOfDay, 
   format, 
@@ -266,7 +267,7 @@ export default function RecentOrdersTable() {
   }
 
     return (
-        <div className="w-[1250px] bg-white  rounded-md mb-4  mt-8 mx-auto">
+        <div className="w-[1250px] bg-white  rounded-md mb-4 mx-auto">
           <div className=" p-4 rounded-t-md border-b-0 mb-4">
             <div className="space-y-2">
             <h1 className="text-2xl font-semibold font-roboto text-[#331d67]/90">Products</h1>
@@ -281,7 +282,7 @@ export default function RecentOrdersTable() {
                         placeholder="Search products..."
                         value={searchValue}
                         onChange={(e) => handleSearch(e.target.value)}
-                        className="rounded-md outline-none bg-white w-full text-sm md:text-base text-[#331d67]"
+                        className="rounded-md outline-none bg-gray-50 w-full text-sm md:text-base text-[#331d67]"
                     />
                     </div>
 
@@ -343,8 +344,10 @@ export default function RecentOrdersTable() {
                     <Button
                     className="bg-[#331d67] rounded-sm"
                     >
+                      <Link href={'/products-dashboard/create-product'} className="flex items-center gap-2 w-full">
                       <Plus />
-                      Create Product
+                     <p>Add Product</p>
+                      </Link>
                     </Button>
                   </div>
             </div>  
@@ -359,7 +362,7 @@ export default function RecentOrdersTable() {
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           onClick={() => table.getColumn("category")?.setFilterValue(undefined)}
-                          className="w-full font-roboto bg-gray-200 border flex items-center justify-between px-4 py-2 rounded-sm text-gray-600 text-sm font-medium shadow-none" 
+                          className="w-full font-roboto bg-gray-50 border flex items-center justify-between px-4 py-2 rounded-sm text-gray-600 text-sm font-medium shadow-none" 
                         > 
                           {table.getColumn("category")?.getFilterValue() as string || "All categories"}
                           <ChevronDown className="w-4 h-4"/>
@@ -389,7 +392,7 @@ export default function RecentOrdersTable() {
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           onClick={() => table.getColumn("status")?.setFilterValue(undefined)}
-                          className="w-full font-roboto bg-gray-200 border flex items-center justify-between px-4 py-2 rounded-sm text-gray-600 text-sm font-medium shadow-none" 
+                          className="w-full font-roboto bg-gray-50 border flex items-center justify-between px-4 py-2 rounded-sm text-gray-600 text-sm font-medium shadow-none" 
                         >
                           {table.getColumn("status")?.getFilterValue() as string || "All Status"}
                           <ChevronDown className="w-4 h-4"/>
@@ -419,7 +422,7 @@ export default function RecentOrdersTable() {
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           onClick={() => table.getColumn("unitPrice")?.setFilterValue(undefined)}
-                          className="w-full font-roboto bg-gray-200 border flex items-center justify-between px-4 py-2 rounded-sm text-gray-600 text-sm font-medium shadow-none" 
+                          className="w-full font-roboto bg-gray-50 border flex items-center justify-between px-4 py-2 rounded-sm text-gray-600 text-sm font-medium shadow-none" 
                         >
                           {table.getColumn("unitPrice")?.getFilterValue() as string || "All Prices"}
                           <ChevronDown className="w-4 h-4"/>
@@ -449,7 +452,7 @@ export default function RecentOrdersTable() {
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           onClick={() => table.getColumn("store")?.setFilterValue(undefined)}
-                          className="w-full font-roboto bg-gray-200 border flex items-center justify-between px-4 py-2 rounded-sm text-gray-600 text-sm font-medium shadow-none" 
+                          className="w-full font-roboto bg-gray-50 border flex items-center justify-between px-4 py-2 rounded-sm text-gray-600 text-sm font-medium shadow-none" 
                         >
                           {table.getColumn("store")?.getFilterValue() as string || "All Stores"}
                           <ChevronDown className="w-4 h-4"/>

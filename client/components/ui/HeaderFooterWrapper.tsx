@@ -25,7 +25,8 @@ export default function HeaderFooterWrapper({
     '/orders',
     '/customer',
     '/settings',
-    '/products-dashboard'
+    '/products-dashboard',
+    '/create-product'
 
 
   ];
