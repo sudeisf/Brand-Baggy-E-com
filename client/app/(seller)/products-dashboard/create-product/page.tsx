@@ -59,8 +59,8 @@ export default function CreateProduct(){
                                     {["XS","S", "M", "L", "XL", "XXL"].map((size) => (
                                         <div 
                                             key={size} 
-                                            className={`rounded-sm items-center flex justify-center  w-10 h-10 border-1 shadow-xs border-gray-200 ${
-                                                size === "M" ? "bg-[#331d67] text-white" : "bg-gray-100"
+                                            className={`rounded-sm items-center flex justify-center  w-10 h-10 border-1 shadow-none border-gray-200 ${
+                                                size === "M" ? "bg-[#331d67] text-white" : "bg-white"
                                             }`}
                                         >
                                             <h1 className="text-xs text-center font-medium font-roboto">{size}</h1>
@@ -92,8 +92,8 @@ export default function CreateProduct(){
                         </div>
                         
                     </div>
-                    <div className="w-full   rounded-md shadow-xs p-2 bg-gray-50">
-                    <h1 className=" font-roboto text-gray-600 capitalize p-2 font-semibold">price and stock</h1>
+                    <div className="w-full   rounded-md shadow-xs p-4 bg-gray-50">
+                    <h1 className=" font-roboto text-gray-700 capitalize p-2 font-medium">price and stock</h1>
                     <div className="flex w-full">
                 
                         <div className="w-full">
@@ -125,6 +125,16 @@ export default function CreateProduct(){
                             </div>
                         </div>
                     </div>
+                    </div>
+
+                    <div className=" w-full  rounded-md shadow-xs p-4 bg-gray-50">
+                        <div className="w-full">
+                            <h1 className="capitalize font-roboto text-gray-700 font-medium">Store Loaction</h1>
+                            <p className="font-roboto text-gray-500 text-sm">pick availabe store</p>
+                        </div>
+                        
+                        <Input placeholder="store location" className="capitalize font-roboto mt-2 focus:ring-0 border-none bg-white h-12" />
+                        
                     </div>
             </div>
             <div id="right-side-block" className="w-full">

@@ -63,6 +63,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { table } from "console"
 import { Product, data } from './data'
+import EditDialog from "./create-product/components/EditDialog"
 
 export const statusStyles: Record<string, string> = {
   Active: "bg-green-500/5 text-green-500 rounded-md",
@@ -202,13 +203,7 @@ export const columns: ColumnDef<Product>[] = [
       cell: ({ row }) => (
   
              <div className="flex items-center justify-end gap-2 w-full">
-             <Button
-                variant="outline"
-                className="h-8 w-20 rounded-sm border-1 font-roboto  p-0  text-[#333567] shadow-none"
-                aria-label="Open actions menu"
-              >
-                <Edit2Icon /> Edit
-              </Button>
+             <EditDialog />
               <button className="text-gray-600" aria-label="Delete product">
                   <Trash2Icon className="text-sm w-4 h-4" />
               </button>
@@ -282,7 +277,7 @@ export default function RecentOrdersTable() {
                         placeholder="Search products..."
                         value={searchValue}
                         onChange={(e) => handleSearch(e.target.value)}
-                        className="rounded-md outline-none bg-gray-50 w-full text-sm md:text-base text-[#331d67]"
+                        className="rounded-md outline-none bg-white w-full text-sm md:text-base text-[#331d67]"
                     />
                     </div>
 
