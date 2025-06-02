@@ -1,4 +1,4 @@
-interface Address {
+export interface Address {
   street: string;
   city: string;
   state: string;
@@ -6,7 +6,7 @@ interface Address {
   country: string;
 }
 
-interface CustomerInfo {
+export interface CustomerInfo {
   name: string;
   email: string;
   phone: string;
@@ -14,7 +14,7 @@ interface CustomerInfo {
   billingAddress: Address;
 }
 
-interface Order {
+export interface Order {
   id: string;
   productName: string;
   date: string;
@@ -23,7 +23,7 @@ interface Order {
   price: number;
 }
 
-interface OrderStats {
+export interface OrderStats {
   totalCost: number;
   totalOrders: number;
   completed: number;
@@ -42,10 +42,10 @@ export const customerData: CustomerInfo = {
     country: "USA"
   },
   billingAddress: {
-    street: "123 Main St",
+    street: "456 Business Ave",
     city: "New York",
     state: "NY",
-    zipCode: "10001",
+    zipCode: "10002",
     country: "USA"
   }
 };
@@ -82,12 +82,44 @@ export const orders: Order[] = [
     status: "pending",
     payment: "pending",
     price: 299.99
+  },
+  {
+    id: "ORD-005",
+    productName: "4K Webcam",
+    date: "2024-02-28",
+    status: "completed",
+    payment: "paid",
+    price: 89.99
+  },
+  {
+    id: "ORD-006",
+    productName: "Ergonomic Chair",
+    date: "2024-02-20",
+    status: "completed",
+    payment: "paid",
+    price: 249.99
+  },
+  {
+    id: "ORD-007",
+    productName: "USB-C Hub",
+    date: "2024-02-15",
+    status: "cancelled",
+    payment: "failed",
+    price: 39.99
+  },
+  {
+    id: "ORD-008",
+    productName: "Noise-Cancelling Earbuds",
+    date: "2024-02-10",
+    status: "completed",
+    payment: "paid",
+    price: 159.99
   }
 ];
 
 export const orderStats: OrderStats = {
-  totalCost: 679.96,
-  totalOrders: 4,
-  completed: 2,
-  cancelled: 1
+  totalCost: 1209.92,
+  totalOrders: 8,
+  completed: 5,
+  cancelled: 2
 };

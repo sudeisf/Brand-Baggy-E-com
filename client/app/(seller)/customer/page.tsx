@@ -65,6 +65,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { table } from "console"
 import { Customer, data } from './data'
 import { AddCustomerSheet } from "./components/addCustomerSheet"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import EditCustomer from "./[id]/component/EditCustomer"
+import { customerData } from "./[id]/data"
 
 export const statusStyles: Record<string, string> = {
   Active: "bg-green-500/5 text-green-500 rounded-md",
@@ -173,9 +176,33 @@ export const columns: ColumnDef<Customer>[] = [
       },
       cell: ({ row }) => (
   
-             <div className="flex items-center justify-end gap-2 w-full">
-            <Ellipsis className="w-4 h-4" />
-             </div>
+        <div className="flex items-center justify-end gap-2 w-full">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Ellipsis className="w-4 h-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-48 p-2" align="end">
+            <div className="flex flex-col gap-1">
+              <Link
+                href={`/customer/${row.original.id}`}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 rounded-sm"
+              >
+                View Details
+              </Link>
+              <button
+                onClick={() => navigator.clipboard.writeText(row.original.name)}
+                className="w-full text-left px-3 py-2 text-sm border-b hover:bg-gray-100 rounded-sm"
+              >
+                Copy Name
+              </button>
+              <EditCustomer data={customerData} />
+              
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
 
             
   ),
