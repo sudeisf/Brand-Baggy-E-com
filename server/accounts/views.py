@@ -12,6 +12,7 @@ from .serializer import (
     reset_password_serializer 
     ,CustomTokenRefreshSerilizer
 )
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework_simplejwt.views import TokenObtainPairView , TokenRefreshView
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -91,6 +92,13 @@ class UserDetailView(generics.RetrieveAPIView):
     def get_object(self):
         return self.request.user
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response({
+            "user": serializer.data
+        })
+
 class UserUpdateView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
@@ -108,6 +116,33 @@ class UserUpdateView(generics.UpdateAPIView):
             "message": "Profile updated successfully",
             "user": serializer.data
         })
+
+class updateProfileImageView(APIView):
+     permission_classes = [IsAuthenticated]
+     parser_classes = [MultiPartParser, FormParser]
+     def patch(self, request):
+          try:
+               if 'profile_image' not in request.FILES:
+                    return Response(
+                         {"error": "No image file provided"},
+                         status=status.HTTP_400_BAD_REQUEST
+                    )
+               
+               user = request.user
+               user.profile_url = request.FILES['profile_image']
+               user.save()
+               
+               serializer = UserSerializer(user)
+               return Response({
+                    "message": "Profile image updated successfully",
+                    "user": serializer.data
+               }, status=status.HTTP_200_OK)
+               
+          except Exception as e:
+               return Response(
+                    {"error": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+               )
 
 class ForgotPasswordView(APIView):
      permission_classes = [AllowAny]

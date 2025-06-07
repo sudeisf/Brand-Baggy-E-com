@@ -5,9 +5,14 @@ type User = {
     id: string,
     email: string;
     username: string;
-    role: 'seller' | 'buyer' | 'admin'; 
+    first_name : string | null;
+    last_name : string | null;
+    phone_number : string | null;
+    birth_date : string | null;
+    gender : string | null;
+    user_role: 'seller' | 'buyer' | 'admin'; 
+    profile_url : string | null
   };
-
 
 type AuthState = {
     accessToken: string | null;
@@ -47,7 +52,10 @@ type AuthState = {
         fieldErrors?: Record<string, string> } | void>;
     refreshAccessToken: () => Promise<void>;
     checkAuth: () => Promise<void>;
-    hasRole: (role: User['role']) => boolean;
+    profileFn : () => Promise<void>;
+    updateProfileFn : (data : any) => Promise<void>;
+    profilImageUpload : (formData: FormData) => Promise<void>;
+    hasRole: (role: User['user_role']) => boolean;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -77,9 +85,9 @@ export const useAuthStore = create<AuthState>()(
                                 isLoading: false,
                             }
                         );
-                       
                         return { success: true };
                     }catch(err : any){
+                        set({error: err, isLoading: false});
                         const errorMsg =
                             err.response?.data?.non_field_errors?.[0] ||
                             err.response?.data?.detail ||
@@ -364,19 +372,63 @@ export const useAuthStore = create<AuthState>()(
                         return;
                      }
                      try{
+                        set({ isLoading: false});
                         const response = await api.get('/accounts/me' , {
                             headers: { Authorization: `Bearer ${accessToken}` },
                         });
                         const {user} = response.data;
-                        set({user , isAuthenticated: true})
+                        set({user: user , isAuthenticated: true , isLoading: false});
                      }catch(error : any){
                         set({ isAuthenticated: false });
                      }
                 },
                 hasRole: (role) => {
                     const user = get().user;
-                    return user?.role === role;
-                  }
+                    return user?.user_role === role;
+                  },
+                profileFn : async  () =>{
+                    try{
+                        const accessToken = get().accessToken;
+                        const response = await api.get('/accounts/profile' , {
+                            headers: { Authorization: `Bearer ${accessToken}` },
+                        });
+                        const {user} = response.data;
+                        set({user: user})
+                     }catch(error : any){
+                        set({ error: error });
+                     }
+                },
+                updateProfileFn : async (data) =>{
+                    try{
+                        const accessToken = get().accessToken;
+                        set({isLoading : true, error: null});
+                        const response = await api.patch('/accounts/profile/update/',data, {
+                            headers: { Authorization: `Bearer ${accessToken}` },
+                        });
+                        const {user} = response.data;
+                        set({user: user , isLoading: false})
+                     }catch(error : any){
+                        set({ error : error });
+                     }
+                },
+                profilImageUpload : async (formData) => {
+                    try {
+                        const accessToken = get().accessToken;
+                        set({isLoading: true, error: null});
+                        
+                        const response = await api.patch('/accounts/profile/image/update/', formData, {
+                            headers: { 
+                                Authorization: `Bearer ${accessToken}`,
+                                "Content-Type": "multipart/form-data"
+                            },
+                        });
+                        const {user} = response.data;
+                        set({user: user, isLoading: false});
+                    } catch(error: any) {
+                        console.log(error);
+                        set({ error: error, isLoading: false });
+                    }
+                }
     }),
        {
         name : "auth-storage",

@@ -53,15 +53,11 @@ export default function LoginPage() {
            setError("root" , {message : result?.error})
         }else{
           setRedirecting(true);
-          const currentUser = useAuthStore.getState().user;
-          
-          setTimeout(() => {
-            if(currentUser?.role === "buyer"){
-              router.replace('/')
-            }else if(currentUser?.role === "seller"){
-              router.replace('/dashboard')
-            }
-          }, 100);
+          if(user?.user_role === "buyer"){
+            router.replace('/');
+          }else if(user?.user_role === "seller"){
+            router.replace('/dashboard');
+          }
         }
   }
 
@@ -69,8 +65,8 @@ export default function LoginPage() {
   return (
     <>
       {
-        isLoading || redirecting  ? (
-                   <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        isLoading   ? (
+          <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
             <LoaderCircle className="w-8 h-8 animate-spin text-[#47307d]" />
             <p className="text-lg font-medium text-[#3A3D44]">Signing you in...</p>
           </div>

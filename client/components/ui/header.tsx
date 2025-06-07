@@ -13,6 +13,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import React, { useState } from "react"
+import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 
 const jersey10 = Jersey_10({ subsets: ["latin"], weight: "400" });
 const rubik = Rubik({ subsets: ["latin"], weight: "500" });
@@ -88,14 +89,19 @@ export default function Header(){
 
                 <div className="flex items-center gap-2 sm:gap-4">
                 <div className="bg-white rounded-full border border-gray-300 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
-                        {isAuthenticated ? (
+                        {isAuthenticated && user?.user_role === "buyer"  ? (
                             <Link href="/profile" className="flex items-center justify-center w-full h-full">
-                                <User className="text-[#2d1a4d] w-4 h-4 sm:w-5 sm:h-5" />
+                             <Avatar className="w-8 h-8">
+                                <AvatarImage src="" />
+                                <AvatarFallback>
+                                   <p className="font-roboto capitalize font-semibold text-gray-700 "> {user?.username[0]}</p>
+                                </AvatarFallback>
+                            </Avatar>
                             </Link>
                         ) : (
                             <Link href="/login" className="flex items-center justify-center w-full h-full">
-                                <User className="text-[#2d1a4d] w-4 h-4 sm:w-5 sm:h-5" />
-                            </Link>
+                            <User className="text-[#2d1a4d] w-4 h-4 sm:w-5 sm:h-5" />
+                        </Link>
                         )}
                     </div>
                     

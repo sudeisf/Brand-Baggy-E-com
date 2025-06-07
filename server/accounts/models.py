@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.utils.translation import gettext_lazy as _
+from cloudinary.models import CloudinaryField
 
 
 class CustomUser(AbstractUser):
@@ -11,6 +12,10 @@ class CustomUser(AbstractUser):
         SELLER = 'seller'
         BUYER = 'buyer'
         ADMIN = 'admin'
+    
+    class Gender(models.TextChoices):
+       MALLE = 'male',
+       FEMALE = "female"
     
     
     groups = models.ManyToManyField(
@@ -27,7 +32,14 @@ class CustomUser(AbstractUser):
 
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=30 , unique=True)
+    first_name = models.CharField(max_length=30 ,null=True , blank=True) 
+    lastname_name = models.CharField(max_length=30 ,null=True , blank=True)
     user_role =  models.CharField(max_length=200, choices=Role.choices, default=Role.BUYER)
+    birth_date = models.DateField(null=True,blank=True)
+    gender = models.CharField(max_length=200, choices=Gender.choices,blank=True , null=True)
+    phone_number = models.CharField(max_length=20,null=True,blank=True)
+    profile_url =  CloudinaryField('image', null=True, blank=True)
+
     
     is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

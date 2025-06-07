@@ -9,7 +9,8 @@ from accounts.views import (
     UserUpdateView,
     LogOutView,
     reset_password_view
-    ,CustomTokenRefreshView,GetMe,TokenTestView
+    ,CustomTokenRefreshView,GetMe,TokenTestView,
+    updateProfileImageView
 )
 
 urlpatterns = [
@@ -25,5 +26,7 @@ urlpatterns = [
     path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
     path('me/' , GetMe.as_view() , name="get-me"),
     path('token/test/', TokenTestView.as_view(), name='token-test'),
+
+    path('profile/image/update/',updateProfileImageView.as_view(),name='profile-image-add')
     
 ]

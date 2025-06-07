@@ -123,22 +123,19 @@ class CreateProductSerializer(serializers.Serializer):
         variants_data = validated_data.pop('variants', [])
         request  = self.context.get('request')
         seller = request.user
-        
-        # Convert variants from JSON string if needed
+    
         if isinstance(variants_data, str):
             try:
                 variants_data = json.loads(variants_data)
             except json.JSONDecodeError:
                 raise serializers.ValidationError("Invalid variants JSON format")
 
-        # Create the product first
+      
         product = Product.objects.create(seller= seller ,**validated_data)
 
-        # Handle product images
         for image_data in images_data:
             ProductImage.objects.create(product=product, image=image_data)
 
-        # Handle variants
         for variant_data in variants_data:
             size_data = variant_data.pop('size', {})
             stock = variant_data.pop('stock', 0)  
@@ -151,7 +148,6 @@ class CreateProductSerializer(serializers.Serializer):
                 
             size, _ = ProductSize.objects.get_or_create(**size_data)
             
-            # Create variant with explicit fields
             ProductVariants.objects.create(
                 product=product,
                 size=size,

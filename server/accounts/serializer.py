@@ -12,6 +12,7 @@ from .services import sendEmail
 from django.utils import timezone
 from datetime import timedelta
 from django.conf import settings
+from cloudinary import CloudinaryImage
 
 User = get_user_model()
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -23,7 +24,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'email', 'password', 'confirm_password', 'role']
 
-    # ✅ Field-level validation
     def validate_username(self, value):
         if User.objects.filter(username=value).exists():
             raise serializers.ValidationError({
@@ -50,7 +50,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
             })
         return value
 
-    # ✅ Object-level validation
     def validate(self, attrs):
         if attrs['password'] != attrs['confirm_password']:
             raise serializers.ValidationError({
@@ -60,8 +59,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
                 }
             })
         return attrs
-
-    # ✅ Create method
+    
     def create(self, validated_data):
         validated_data.pop('confirm_password')
 
@@ -73,11 +71,30 @@ class UserCreateSerializer(serializers.ModelSerializer):
         )
         return user
 
-
 class UserSerializer(serializers.ModelSerializer):
+    profile_url = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email']
+        fields = [
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'phone_number',
+            'gender',
+            'birth_date',
+            'user_role',
+            'profile_url',
+        ]
+
+    def get_profile_url(self, obj):
+        if obj.profile_url:
+            # Extract the public_id from CloudinaryResource
+            public_id = str(obj.profile_url)  # Converts CloudinaryResource to string
+            return CloudinaryImage(public_id).build_url(secure=True)
+        return None
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
@@ -98,14 +115,10 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         attrs['username'] = user.username
         data = super().validate(attrs)
+        user_data = UserSerializer(user).data
 
         response = {
-            "user": {
-                'id': str(user.id),
-                'email': user.email,
-                'username': user.username,
-                'role': user.user_role,
-            },
+            "user": user_data,
             'access': data['access'],
             'refresh': data['refresh']
         }

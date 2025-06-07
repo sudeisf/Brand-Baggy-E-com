@@ -10,63 +10,124 @@ import { z } from "zod"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { User } from "lucide-react"
+import { Upload, User } from "lucide-react"
 import { Pen } from "lucide-react"
+import { useAuthStore } from "@/store/authStore"
+import { toast } from "sonner"
+import { useEffect } from "react"
+import { AddProfileImage } from "./components/AddProfileImage"
 const rubik = Rubik({
     subsets: ["latin"],
     weight: ["400", "500", "600", "700"],
 })
 const formSchema = z.object({
-    firstName   : z.string().min(1).max(50 ,{message: "First name must be less than 50 characters"}),
-    lastName: z.string().min(1).max(50 ,{message: "Last name must be less than 50 characters"}),
-    oldPassword: z.string().min(1).max(50 ,{message: "Old password must be less than 50 characters"}),
-    newPassword: z.string().min(1).max(50 ,{message: "New password must be less than 50 characters"}),
-    confirmPassword: z.string().min(1).max(50 ,{message: "Confirm password must be less than 50 characters"}),
-    email: z.string().email().max(50 ,{message: "Email must be less than 50 characters"}),
-    phone: z.string().min(1).max(15).regex(/^[0-9]+$/).refine((val) => val.length === 10, {
-        message: "Phone number must be 10 digits",
-    }),
+    firstName   : z.string().min(1).max(50 ,{message: "First name must be less than 50 characters"}).optional().nullable(),
+    lastName: z.string().min(1).max(50 ,{message: "Last name must be less than 50 characters"}).optional().nullable(),
+    oldPassword: z.string().max(50, {message: "Old password must be less than 50 characters"}).optional().nullable(),
+    newPassword: z.string().max(50, {message: "New password must be less than 50 characters"}).optional().nullable(),
+    confirmPassword: z.string().max(50, {message: "Confirm password must be less than 50 characters"}).optional().nullable(),
+    email: z.string().email().max(50 ,{message: "Email must be less than 50 characters"}).optional().nullable(),
+    phone: z.string()
+        .min(10)
+        .max(20)
+        .regex(/^[0-9]+$/, "Phone number can only contain numbers , Remove spaces if any")
+        .refine((val) => {
+            const cleanNumber = val.replace(/\s+/g, '');
+            return cleanNumber.length <= 20;
+        }, {
+            message: "Phone number must be at least 10 digits",
+        })
+        .transform((val) => {
+            return val.replace(/\s+/g, '');
+        }).optional().nullable(),
     birthDate: z.date().refine((val) => val < new Date(new Date().getFullYear() - 18, 0, 1), {
         message: "You must be at least 18 years old",
-    }),
-    gender: z.string().min(1).max(10 ,{message: "Gender must be less than 10 characters"}),
+    }).optional().nullable(),
+    gender: z.string().min(1).max(10 ,{message: "Gender must be less than 10 characters"}).optional().nullable(),
 }).refine((data) => data.newPassword === data.confirmPassword, {
     path: ["confirmPassword"],
     message: "Passwords do not match",
 })
 
-const personalInfo ={
-    firstName: "Jhon",
-    lastName: "Doe",
-    email: "jhon.doe@example.com",
-    phone: "1234567890",
-    birthDate: new Date("1990-01-01"),
-    gender: {
-        label: "Male",
-        value: "male",
-    },
-}
 
 export default function MyAccount() {
+    const user  = useAuthStore((state)=>state.user);
+    const updateProfileFn  = useAuthStore((state)=>state.updateProfileFn);
+    const isLoading = useAuthStore((state)=> state.isLoading)
+    const error = useAuthStore((state)=> state.error)
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            firstName: personalInfo.firstName,
-            lastName: personalInfo.lastName,
-            email: personalInfo.email,
-            phone: personalInfo.phone,
-            birthDate: personalInfo.birthDate,
-            gender: personalInfo.gender.value,
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+          birthDate: new Date(),
+          gender: "",
+          oldPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        },
+      });
+
+    useEffect(() => {
+        const fetchAndSetProfile = async () => {
+          form.reset({
+            firstName: user?.first_name || "",
+            lastName: user?.last_name || "",
+            email: user?.email || "",
+            phone: user?.phone_number || "",
+            birthDate: user?.birth_date ? new Date(user.birth_date) : new Date(),
+            gender: user?.gender || "",
             oldPassword: "",
             newPassword: "",
             confirmPassword: "",
-        },
+          });
+        };
+      
+        fetchAndSetProfile();
+      }, [user]);
+    const onSubmit = async (data: z.infer<typeof formSchema>) => {
+        const updatedFields: Record<string, string> = {};
+        
+        if (data.firstName?.trim()) {
+            updatedFields.first_name = data.firstName.trim();
+        }
+        
+        if (data.lastName?.trim()) {
+            updatedFields.last_name = data.lastName.trim();
+        }
+        
+        if (data.email?.trim()) {
+            updatedFields.email = data.email.trim().toLowerCase();
+        }
+        
+        if (data.phone?.trim()) {
+            const formattedPhone = data.phone.replace(/[\s+]/g, '');
+            updatedFields.phone_number = formattedPhone;
+        }
+        
+        if (data.birthDate) {
+            updatedFields.birth_date = data.birthDate.toISOString().split('T')[0];
+        }
+        
+        if (data.gender?.trim()) {
+            updatedFields.gender = data.gender.toLowerCase();
+        }
 
-    })
-    const onSubmit = (data: z.infer<typeof formSchema>) => {
-        console.log(data)
+       
+        if (Object.keys(updatedFields).length > 0) {
+            try {
+                await updateProfileFn(updatedFields);
+                toast.success("Profile updated!");
+            } catch (err) {
+                toast.error(error || "Something went wrong.");
+            }
+        } else {
+            toast.info("No changes to update");
+        }
     }
-
+    console.log(user?.profile_url)
 
     return (
         <div className="flex flex-col gap-4 w-full bg-white rounded-md border-1 shadow-xs border-gray-200">
@@ -82,17 +143,21 @@ export default function MyAccount() {
                                   
                                     <div className="flex flex-col items-start w-[500px] justify-start gap-4">
                                         <Avatar className="w-40 h-40">
-                                            <AvatarImage src="https://github.com/shadcn.png" />
-                                            <AvatarFallback>
-                                                <User className="w-10 h-10" />
+                                            <AvatarImage 
+                                                src={user?.profile_url || ''} 
+                                                alt={`${user?.first_name || user?.username || 'User'}'s profile picture`}
+                                                className="object-cover"
+                                            />
+                                            <AvatarFallback className="bg-gray-100">
+                                                <p className="text-6xl font-roboto font-medium">{user?.first_name?.[0] || user?.username?.[0]}</p>
                                             </AvatarFallback>
                                         </Avatar>
 
                                         <div className="flex items-start gap-2">
-                                            <Pen className="w-4 h-4 text-gray-500 cursor-pointer hover:text-gray-700" />
+                                            <AddProfileImage />
                                             <div className="flex flex-col items-start gap-1">
-                                                <p className="text-xl capitalize font-medium">John Doe</p>
-                                                <p className="text-md text-gray-500 font-medium">john.doe@example.com</p>
+                                                <p className="text-xl capitalize font-medium">{user?.username}</p>
+                                                <p className="text-md text-gray-500 font-medium">{user?.email}</p>
                                             </div>
                                             
                                         </div>
@@ -107,7 +172,10 @@ export default function MyAccount() {
                                             <FormItem>
                                                 <FormLabel className={`${rubik.className} text-sm font-medium uppercase`}>First Name</FormLabel>
                                             <FormControl>
-                                                <Input className="w-full p-3 rounded-md text-sm font-medium bg-gray-100"  {...field} />
+                                                <Input  className="w-full p-3 rounded-md text-sm font-medium bg-gray-100"
+                                                  {...field}
+                                                  value={field.value || ''}
+                                                 />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -120,7 +188,11 @@ export default function MyAccount() {
                                         <FormItem>
                                             <FormLabel className={`${rubik.className} text-sm font-medium uppercase`}>Last Name</FormLabel>
                                             <FormControl>
-                                                <Input className="w-full p-3 rounded-md text-sm font-medium bg-gray-100"  {...field} />
+                                                <Input 
+                                                    className="w-full p-3 rounded-md text-sm font-medium bg-gray-100"  
+                                                    {...field}
+                                                    value={field.value || ''}
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -137,6 +209,7 @@ export default function MyAccount() {
                                                 <FormControl>
                                                     <DatePickerWithRange field={field} />
                                                 </FormControl>
+                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
@@ -149,10 +222,11 @@ export default function MyAccount() {
                                                 <FormControl>
                                                     <Select
                                                         onValueChange={field.onChange}
-                                                        value={field.value}
+                                                        
+                                                        value={field.value || ''}
                                                     >
                                                         <SelectTrigger className="w-full rounded-md bg-gray-100">
-                                                            <SelectValue defaultValue={field.value} className="text-sm font-medium bg-gray-100"/>
+                                                            <SelectValue defaultValue={field.value || ''} className="text-sm font-medium bg-gray-100"/>
                                                         </SelectTrigger>
                                                         <SelectContent className="rounded-md text-sm font-medium">
                                                             <SelectItem className="rounded-md" value="male">Male</SelectItem>
@@ -173,14 +247,22 @@ export default function MyAccount() {
                                         <FormItem>
                                             <FormLabel className={`${rubik.className} text-sm font-medium uppercase`}>Phone</FormLabel>
                                             <FormControl>
-                                                <Input  type="tel" className="w-48 p-3 rounded-md text-sm font-medium bg-gray-100"  {...field} />
+                                                <Input 
+                                                    type="tel" 
+                                                    className="w-48 p-3 rounded-md text-sm font-medium bg-gray-100"  
+                                                    placeholder="+251 74 126 234"
+                                                    {...field} 
+                                                    value={field.value || ''}
+                                                />
                                             </FormControl>
-                                            <FormDescription className="text-sm text-gray-500">keep 9-digit format with no spaces and dashes</FormDescription>
+                                            <FormDescription className="text-sm text-gray-500">
+                                                Enter phone number in format: +251 74 126 234
+                                            </FormDescription>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />  
-                                  <Button type="submit" className="w-32 rounded-md py-5 bg-[#331d67] text-white">Save</Button>
+                                  <Button type="submit" disabled={isLoading} className="w-32 rounded-md py-5 bg-[#331d67] text-white">Save</Button>
                             </div>
                             </div>
 
@@ -199,13 +281,17 @@ export default function MyAccount() {
                                             <FormItem className="w-full">
                                                 <FormLabel className={`${rubik.className} text-sm font-medium uppercase`}>E-mail Address</FormLabel>
                                                 <FormControl>
-                                                    <Input className="w-52 p-3 rounded-md text-sm font-medium bg-gray-100"  {...field} />
+                                                    <Input
+                                                     className="w-52 p-3 rounded-md text-sm font-medium bg-gray-100"  
+                                                     {...field}
+                                                     value={field.value || ''}
+                                                      />
                                                 </FormControl>
                                             </FormItem>
                                         )}
                                     />
                                     <p className="text-sm text-gray-500">you can change your e-mail address by clicking the button below</p>
-                                    <Button className="w-32 rounded-md py-5 bg-[#331d67] text-white">change e-mail</Button>
+                                    <Button type="submit" className="w-32 rounded-md py-5 bg-[#331d67] text-white">change e-mail</Button>
                                     </div>
                                    
                                 </div>
@@ -225,7 +311,9 @@ export default function MyAccount() {
                                                     <FormItem>
                                                         <FormLabel className={`${rubik.className} text-sm font-medium uppercase`}>Old Password</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="********" className="w-52 p-3 rounded-md text-sm font-medium bg-gray-100"  {...field} />
+                                                            <Input placeholder="********" className="w-52 p-3 rounded-md text-sm font-medium bg-gray-100"  {...field}
+                                                             value={field.value || ''}
+                                                            />
                                                         </FormControl>
                                                     </FormItem>
                                                 )}
@@ -237,7 +325,9 @@ export default function MyAccount() {
                                                     <FormItem>  
                                                         <FormLabel className={`${rubik.className} text-sm font-medium uppercase`}>New Password</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="********"   className="w-52 p-3 rounded-md text-sm font-medium bg-gray-100"  {...field} />
+                                                            <Input placeholder="********"   className="w-52 p-3 rounded-md text-sm font-medium bg-gray-100"  {...field}
+                                                             value={field.value || ''}
+                                                            />
                                                         </FormControl>
                                                     </FormItem>
                                                 )}
@@ -249,12 +339,12 @@ export default function MyAccount() {
                                                     <FormItem>
                                                         <FormLabel className={`${rubik.className} text-sm font-medium uppercase`}>Confirm Password</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="********" className="w-52 p-3 rounded-md text-sm font-medium bg-gray-100"  {...field} />
+                                                            <Input placeholder="********" className="w-52 p-3 rounded-md text-sm font-medium bg-gray-100"  {...field}  value={field.value || ''} />
                                                         </FormControl>
                                                     </FormItem>
                                                 )}  
                                             />
-                                            <Button className="w-40 rounded-md py-5 px-4 bg-[#331d67] text-white">change password</Button>
+                                            <Button type="submit" className="w-40 rounded-md py-5 px-4 bg-[#331d67] text-white">change password</Button>
                                          </div>
                                         </div>
                         
@@ -274,5 +364,6 @@ export default function MyAccount() {
                 </div>
             </div>
         </div>
-    )
+    );
 }
+
