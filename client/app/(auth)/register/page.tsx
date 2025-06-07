@@ -19,6 +19,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { LoaderCircle } from "lucide-react"
 import { Combobox } from "@/components/ui/combobox"
+import { useState } from "react"
 
 const formSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -43,6 +44,7 @@ export default function RegisterPage() {
   const isLoading  = useAuthStore((state)=> state.isLoading);
   const error  = useAuthStore((state)=> state.error);
   const register = useAuthStore((state)=> state.register);
+  const [redirecting, setRedirecting] = useState<Boolean>(false);
   const router = useRouter()
 
 
@@ -55,64 +57,88 @@ export default function RegisterPage() {
         confirmPassword : "",
         role: ""
     },
-    mode: "onBlur"
+    mode: "onChange"
   })
 
- const { setError} = form;
+
  async function onSubmit(values: z.infer<typeof formSchema>) {
-  // Clear previous errors
-  form.clearErrors();
-  
-  const result = await register(
-    values.email,
-    values.username,
-    values.password,
-    values.confirmPassword,
-    values.role
-  );
+  try {
+    form.clearErrors();
+    const result = await register(
+      values.email,
+      values.username,
+      values.password,
+      values.confirmPassword,
+      values.role
+    );
 
-  if (!result) return; // Handle undefined case
+    if (result.success) {
+      console.log("Registration successful");
+      router.push("/login");
+      return;
+    }
 
-  if ('fieldErrors' in result && result.fieldErrors) {
-    // Map backend field names to form field names
-    const fieldMapping: Record<string, keyof typeof values> = {
-      username: 'username',
-      email: 'email',
-      password: 'password',
-      confirm_password: 'confirmPassword',
-      role: 'role'
-    };
+    if (!result) {
+      console.error('Registration failed: No result returned');
+      form.setError("root", { 
+        message: "Registration failed. Please try again." 
+      });
+      return;
+    }
 
-    // Set errors for each field
-    Object.entries(result.fieldErrors).forEach(([field, message]) => {
-      const formField = fieldMapping[field];
-      if (formField) {
-        form.setError(formField, {
-          type: 'server',
-          message: message
-        });
-      } else {
-        // If field doesn't exist in our form, show as root error
-        form.setError("root", { 
-          message: `${field}: ${message}` 
-        });
-      }
+    if ('fieldErrors' in result && result.fieldErrors) {
+        const fieldMapping: Record<string, keyof typeof values> = {
+        username: 'username',
+        email: 'email',
+        password: 'password',
+        confirm_password: 'confirmPassword',
+        role: 'role'
+      };
+
+      Object.entries(result.fieldErrors).forEach(([field, message]) => {
+        const formField = fieldMapping[field];
+        if (formField) {
+          console.log(`Setting error for field ${field}:`, message);
+          form.setError(formField, {
+            type: 'server',
+            message: message
+          });
+        } else {
+          console.warn(`Unknown field error received: ${field}`);
+          form.setError("root", { 
+            message: `${field}: ${message}` 
+          });
+        }
+      });
+    }
+
+    if (result.error && (!result.fieldErrors || Object.keys(result.fieldErrors).length === 0)) {
+      console.error('General error received:', result.error);
+      form.setError("root", { message: result.error });
+    }
+
+    if (!result.error && (!result.fieldErrors || Object.keys(result.fieldErrors).length === 0)) {
+      router.push('/login');
+    }
+  } catch (error) {
+
+    form.setError("root", { 
+      message: "An unexpected error occurred. Please try again." 
     });
-  }
-
-  if (result.error && (!result.fieldErrors || Object.keys(result.fieldErrors).length === 0)) {
-    form.setError("root", { message: result.error });
-  }
-
-  if (!result.error && (!result.fieldErrors || Object.keys(result.fieldErrors).length === 0)) {
-    router.push('/login');
   }
 }
 
 
-
   return (
-    <Form {...form}>
+    <>
+    {
+        isLoading || redirecting ? (
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <LoaderCircle className="w-8 h-8 animate-spin text-[#47307d]" />
+        <p className="text-lg font-medium text-[#3A3D44]">Registering you in...</p>
+      </div>
+      ) :(
+        <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-full max-w-md mx-auto p-5 md:p-10 font-inter">
         <div className="flex flex-col space-y-2.5 mb-10">
             <h1 className="font-semibold text-[#3A3D44] text-4xl">Welcome</h1>
@@ -203,7 +229,7 @@ export default function RegisterPage() {
             </div>
           )}
 
-        <Button disabled={isLoading || !form.formState.isValid} className="w-full bg-[#47307d] hover:bg-[#665292] h-10 font-medium" type="submit">
+        <Button disabled={ isLoading || !form.formState.isValid} className="w-full bg-[#47307d] hover:bg-[#665292] h-10 font-medium" type="submit">
         {
             isLoading ? <LoaderCircle className="animate-spin" /> : "Sign Up"
           }
@@ -223,6 +249,10 @@ export default function RegisterPage() {
         </div>
       </form>
     </Form>
+      )
+    }
+    </>
+    
   )
 }
 

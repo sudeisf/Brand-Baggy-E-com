@@ -133,6 +133,7 @@ export const useAuthStore = create<AuthState>()(
                   
                       set({ error: errorMsg, isLoading: false });
                       return { 
+                        success: false,
                         error: errorMsg,
                         fieldErrors 
                       };

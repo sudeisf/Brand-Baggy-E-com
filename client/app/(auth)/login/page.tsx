@@ -17,7 +17,8 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
-import { LoaderCircle } from 'lucide-react';
+import { Bold, LoaderCircle } from 'lucide-react';
+import { useState } from "react"
 
 const formSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -34,6 +35,7 @@ export default function LoginPage() {
   const isLoading = useAuthStore((state) => state.isLoading);
   const  user = useAuthStore((state)=> state.user)
   const error = useAuthStore((state) => state.error);
+  const [redirecting, setRedirecting] = useState<Boolean>(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver : zodResolver(formSchema),
@@ -50,18 +52,26 @@ export default function LoginPage() {
         if(result?.error){
            setError("root" , {message : result?.error})
         }else{
+          setRedirecting(true)
           if(user?.role === "buyer"){
-             router.push('/')
+             router.replace('/')
           }else if(user?.role === "seller"){
-            router.push('/dashboard')
+            router.replace('/dashboard')
           }
         }
   }
 
 
-
   return (
-    <Form {...form}>
+    <>
+      {
+        isLoading || redirecting  ? (
+                   <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+            <LoaderCircle className="w-8 h-8 animate-spin text-[#47307d]" />
+            <p className="text-lg font-medium text-[#3A3D44]">Signing you in...</p>
+          </div>
+        ): (
+          <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 w-full max-w-md mx-auto p-2 md:p-10 font-inter ">
         <div className="flex flex-col space-y-2.5 mt-10 mb-15 md:mb-10 font-inter">
             <h1 className="font-semibold text-[#3A3D44] text-4xl">Welcome back</h1>
@@ -140,6 +150,9 @@ export default function LoginPage() {
         </div>
       </form>
     </Form>
+        )
+      }
+    </>
   )
 }
 
