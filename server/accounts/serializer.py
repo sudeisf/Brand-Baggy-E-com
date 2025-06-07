@@ -91,8 +91,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_profile_url(self, obj):
         if obj.profile_url:
-            # Extract the public_id from CloudinaryResource
-            public_id = str(obj.profile_url)  # Converts CloudinaryResource to string
+            public_id = str(obj.profile_url)
             return CloudinaryImage(public_id).build_url(secure=True)
         return None
 
