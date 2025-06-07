@@ -27,7 +27,6 @@ export default function Header(){
 
     return(
         <header className="flex justify-between items-center px-4 sm:px-8 md:px-10 lg:px-10 py-2 bg-inherit w-full">
-            {/* Mobile Menu Button (Hamburger) - Only shows on small screens */}
             <div className="lg:hidden">
                 <button 
                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -88,10 +87,16 @@ export default function Header(){
                 </div>
 
                 <div className="flex items-center gap-2 sm:gap-4">
-                    <div className="bg-white rounded-full border border-gray-300 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
-                        <Link href="/profile" className="flex items-center justify-center w-full h-full">
-                            <User className="text-[#2d1a4d] w-4 h-4 sm:w-5 sm:h-5" />
-                        </Link>
+                <div className="bg-white rounded-full border border-gray-300 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
+                        {isAuthenticated ? (
+                            <Link href="/profile" className="flex items-center justify-center w-full h-full">
+                                <User className="text-[#2d1a4d] w-4 h-4 sm:w-5 sm:h-5" />
+                            </Link>
+                        ) : (
+                            <Link href="/login" className="flex items-center justify-center w-full h-full">
+                                <User className="text-[#2d1a4d] w-4 h-4 sm:w-5 sm:h-5" />
+                            </Link>
+                        )}
                     </div>
                     
                     <div className="bg-white rounded-md p-1 sm:p-2  border-1 relative">

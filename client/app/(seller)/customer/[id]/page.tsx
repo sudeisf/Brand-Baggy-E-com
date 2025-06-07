@@ -4,7 +4,8 @@ import { Check, DotIcon, Ellipsis } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
-import { customerData , orderStats  ,orders , Order } from "./data"
+import { Order, customerData, orderStats, orders } from "./data"
+import { statusStyles } from "./lib/statusStyles"
 
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
@@ -21,13 +22,8 @@ import { ColumnDef, getCoreRowModel, getPaginationRowModel, getSortedRowModel, g
 import { useState } from "react"
 import EditCustomer from "./component/EditCustomer"
 
-export const statusStyles: Record<string, string> = {
-    completed: " text-green-500 rounded-md",
-    pending: " text-yellow-500 rounded-md",
-    cancelled: "text-red-500 rounded-md",
-};
 
-export const columns: ColumnDef<Order>[] = [
+const columns: ColumnDef<Order>[] = [
     {
       id: "id",
       header: "ID",
@@ -91,16 +87,14 @@ export const columns: ColumnDef<Order>[] = [
         );
       },
     }    
-  ];
-
-
-
+  ]; 
 
 export default function CustomerDetailPage() {
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = useState({})
+    
 
     const table = useReactTable({
         data: orders,
