@@ -82,17 +82,14 @@ export default function Header(){
                     />
                 </div>
 
-                {/* Mobile Search Icon - Shows on small screens */}
-                <div className="sm:hidden">
-                    <Search className="text-[#2d1a4d] w-5 h-5" />
-                </div>
+           
 
                 <div className="flex items-center gap-2 sm:gap-4">
-                <div className="bg-white rounded-full border border-gray-300 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
+                <div className="bg-white rounded-full border border-gray-300 w-10 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
                         {isAuthenticated && user?.user_role === "buyer"  ? (
                             <Link href="/profile" className="flex items-center justify-center w-full h-full">
                              <Avatar className="w-8 h-8">
-                                <AvatarImage src="" />
+                                <AvatarImage src={user?.profile_url || undefined} />
                                 <AvatarFallback>
                                    <p className="font-roboto capitalize font-semibold text-gray-700 "> {user?.username[0]}</p>
                                 </AvatarFallback>

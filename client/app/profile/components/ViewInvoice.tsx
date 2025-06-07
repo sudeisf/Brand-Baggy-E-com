@@ -56,7 +56,7 @@ export default function ViewInvoice() {
                     View Invoice
                 </Button>
             </DialogTrigger>
-            <DialogContent className="w-[90vw] max-w-7xl p-6 overflow-x-auto">
+            <DialogContent className="w-[95vw] sm:w-[90vw] p-3 sm:p-6 overflow-x-auto max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <DialogHeader>
                     <DialogTitle>
                     <div className="flex flex-col gap-2">
@@ -99,7 +99,7 @@ export default function ViewInvoice() {
                     <h1 className="text-sm text-gray-500 font-bold">Invoice Details</h1>
                     <div className="flex flex-col gap-4">
                         <div className="flex flex-col ">
-                            <div className="grid grid-cols-5 items-center gap-4 border-b border-t border-gray-500 py-4 text-sm text-gray-500">
+                            <div className="grid grid-cols-4 sm:grid-cols-5 items-center gap-4 border-b border-t border-gray-500 py-4 text-sm text-gray-500">
                                 <p className="text-sm col-span-2 font-bold capitalize">Description</p>
                                 <p className="text-sm font-bold capitalize text-center">price</p>
                                 <p className="text-sm font-bold capitalize text-center">quantity</p>
@@ -108,30 +108,23 @@ export default function ViewInvoice() {
 
                             <div className="flex flex-col gap-4">
                                 {invoiceDetails.items.map((item) => (
-                                    <div className="grid grid-cols-5 text-center items-center gap-2 py-2 text-sm text-gray-500">
+                                    <div className="grid grid-cols-4 sm:grid-cols-5 text-center items-center gap-2 py-2 text-sm text-gray-500">
                                         <p className="text-sm col-span-2 text-left font-bold capitalize">{item.name}</p>
                                         <p className="text-sm font-bold">${item.price}</p>
                                         <p className="text-sm font-bold">{item.quantity}</p>
                                         <p className="text-sm font-bold text-right">${item.price * item.quantity}</p>
                                     </div>
                                 ))}
-                                <div className="flex justify-between mt-2 pt-2 border-t">
-                                    <div className="flex flex-col gap-1">
-                                        <p className="capitalize text-gray-500 font-medium ">subtotal</p>
-                                        <p className="capitalize text-gray-500 font-medium">tax</p>
-                                        <p className="capitalize text-gray-500 font-mefium">Balance</p>
-                                    </div>
-                                    <div className="flex flex-col gap-1 text-right">
-                                        <p>${invoiceDetails.items.reduce((acc, item) => acc + item.price * item.quantity, 0)}</p>
-                                        <p>${invoiceDetails.items.reduce((acc, item) => acc + item.price * item.quantity, 0) * 0.1}</p>
-                                        <p>${invoiceDetails.items.reduce((acc, item) => acc + item.price * item.quantity, 0) + invoiceDetails.items.reduce((acc, item) => acc + item.price * item.quantity, 0) * 0.1}</p>
-                                    </div>
+                                <div className="flex flex-col gap-1 text-right mt-2 sm:mt-0">
+                                    <p>${invoiceDetails.items.reduce((acc, item) => acc + item.price * item.quantity, 0)}</p>
+                                    <p>${invoiceDetails.items.reduce((acc, item) => acc + item.price * item.quantity, 0) * 0.1}</p>
+                                    <p>${invoiceDetails.items.reduce((acc, item) => acc + item.price * item.quantity, 0) + invoiceDetails.items.reduce((acc, item) => acc + item.price * item.quantity, 0) * 0.1}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className="flex flex-col gap-4 bg-gray-200/50 p-2 rounded-md text-center">
+                <div className="flex flex-col gap-4 bg-gray-200/50 p-2 rounded-md text-center mt-2">
                     <p className="text-sm text-gray-500">Baggy Brand inc.</p>
                 </div>
             </DialogContent>

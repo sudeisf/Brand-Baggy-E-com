@@ -57,33 +57,39 @@ export default function Payment() {
 
     return (
            <div className="container sm:px-4 px-2 space-y-8 mx-auto p-4 max-w-4xl">
-           <div className="flex justify-between items-center mb-4">
+           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                <div className="flex flex-col gap-2">
-                    <h1 className={`${rubik.className} text-3xl font-bold text-[#331d67] `}>My Payment Methods</h1>
+                    <h1 className={`${rubik.className} text-2xl sm:text-3xl font-bold text-[#331d67]`}>My Payment Methods</h1>
                     <p className="text-gray-500 text-sm">Manage your payment methods and add new ones.</p>
                </div>
                 <AddPayment />
            </div>
-           <div className="flex flex-col gap-4 w-full bg-white">
+           <div className="flex flex-col gap-4 w-full bg-white rounded-lg">
             <div className="flex flex-col gap-4 w-full">
                 {paymentMethods.map((method) => (
-                    <div key={method.id} className="flex justify-between items-center p-4 ">
+                    <div key={method.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 gap-4 border-b last:border-b-0">
                         <div className="flex items-center gap-2 px-2">
                             <Image src={method.image} alt={method.name} width={32} height={32} />
-                            <p>{method.number}</p>
+                            <p className="text-sm sm:text-base">{method.number}</p>
                         </div>
-                        <p>{method.holder}</p>
-                        <p>{method.expiry}</p>
-                       <Button onClick={() => handleShowCvv(method.id)} variant="outline" className="rounded-full px-8 text-gray-500">
-                            {showCvv.includes(method.id) ? "cvv" : "123"}
-                       </Button>
-                        <EditPayment payment={{
-                            id: method.id.toString(),
-                            cardholderName: method.holder,
-                            cardNumber: method.number,
-                            expiry: method.expiry,
-                            cvv: method.cvv,
-                        }} onUpdate={() => {}} />
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
+                            <p className="text-sm sm:text-base">{method.holder}</p>
+                            <p className="text-sm sm:text-base">{method.expiry}</p>
+                            <Button 
+                                onClick={() => handleShowCvv(method.id)} 
+                                variant="outline" 
+                                className="rounded-full px-4 sm:px-8 text-gray-500 text-sm sm:text-base"
+                            >
+                                {showCvv.includes(method.id) ? "cvv" : "123"}
+                            </Button>
+                            <EditPayment payment={{
+                                id: method.id.toString(),
+                                cardholderName: method.holder,
+                                cardNumber: method.number,
+                                expiry: method.expiry,
+                                cvv: method.cvv,
+                            }} onUpdate={() => {}} />
+                        </div>
                     </div>
                 ))}
             </div>
@@ -92,15 +98,15 @@ export default function Payment() {
 
            </div>
            <div className="flex flex-col gap-4 w-full mt-4 rounded-lg">    
-                <div className="flex justify-between items-center w-full ">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full gap-4">
                     <div className="flex flex-col gap-2">
-                            <h1 className={`${rubik.className} text-2xl font-semibold text-[#331d67] `}>Shipping Address</h1>
+                            <h1 className={`${rubik.className} text-xl sm:text-2xl font-semibold text-[#331d67]`}>Shipping Address</h1>
                             <p className="text-gray-500 text-sm">select where you want to ship your order</p>
                     </div>
                     <AddAddress />
                 </div>
-                <div className="flex gap-4 items-center justify-between w-full bg-white   ">
-                    <div className="flex flex-col gap-2 p-4">
+                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between w-full bg-white p-4 rounded-lg">
+                    <div className="flex flex-col gap-2">
                         <p className="text-md font-medium text-[#331d67]">John Doe</p>
                         <p className="text-sm text-gray-500">123 Main St, Anytown, USA</p>
                     </div>

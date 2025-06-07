@@ -3,64 +3,31 @@ import { FaGithub, FaTwitter, FaLinkedin } from 'react-icons/fa';
 
 const Footer = () => {
   return (
-    <footer className=" text-gray-300 mb-2 rounded-lg w-full">
-      <div className=" max-w-[1500px] bg-gray-900 rounded-lg mx-auto px-10 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Company Info */}
+    <footer className="text-gray-300 mb-2 rounded-lg w-full">
+      <div className="max-w-[1500px] bg-gray-900 rounded-lg mx-auto px-10 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Brand Section */}
           <div className="space-y-4">
-            <h3 className="text-white text-lg font-semibold">Company</h3>
-            <p className="text-sm">
-              Building the future of web development with modern solutions.
+            <h3 className="text-white text-lg font-semibold">Your Brand</h3>
+            <p className="text-sm text-gray-400">
+              Building modern web solutions
             </p>
           </div>
 
-          {/* Quick Links */}
+          {/* Navigation */}
           <div className="space-y-4">
-            <h3 className="text-white text-lg font-semibold">Quick Links</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/" className="hover:text-white transition-colors">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link href="/about" className="hover:text-white transition-colors">
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link href="/services" className="hover:text-white transition-colors">
-                  Services
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="hover:text-white transition-colors">
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Resources */}
-          <div className="space-y-4">
-            <h3 className="text-white text-lg font-semibold">Resources</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/blog" className="hover:text-white transition-colors">
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link href="/docs" className="hover:text-white transition-colors">
-                  Documentation
-                </Link>
-              </li>
-              <li>
-                <Link href="/support" className="hover:text-white transition-colors">
-                  Support
-                </Link>
-              </li>
-            </ul>
+            <h3 className="text-white text-lg font-semibold">Navigation</h3>
+            <div className="flex flex-wrap gap-4">
+              <Link href="/" className="hover:text-white transition-colors">
+                Home
+              </Link>
+              <Link href="/about" className="hover:text-white transition-colors">
+                About
+              </Link>
+              <Link href="/contact" className="hover:text-white transition-colors">
+                Contact
+              </Link>
+            </div>
           </div>
 
           {/* Social Links */}
@@ -73,7 +40,7 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 className="hover:text-white transition-colors"
               >
-                <FaGithub size={24} />
+                <FaGithub size={20} />
               </a>
               <a
                 href="https://twitter.com"
@@ -81,7 +48,7 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 className="hover:text-white transition-colors"
               >
-                <FaTwitter size={24} />
+                <FaTwitter size={20} />
               </a>
               <a
                 href="https://linkedin.com"
@@ -89,16 +56,16 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 className="hover:text-white transition-colors"
               >
-                <FaLinkedin size={24} />
+                <FaLinkedin size={20} />
               </a>
             </div>
           </div>
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-gray-800 mt-12 pt-8 text-center">
-          <p className="text-sm">
-            © {new Date().getFullYear()} Your Company Name. All rights reserved.
+        <div className="border-t border-gray-800 mt-8 pt-6 text-center">
+          <p className="text-sm text-gray-400">
+            © {new Date().getFullYear()} Your Brand. All rights reserved.
           </p>
         </div>
       </div>

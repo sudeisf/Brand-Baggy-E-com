@@ -116,48 +116,46 @@ export default function Orders() {
                     filteredOrders.map(order => (
                         <Card key={order.id} className="border-none rounded-sm">
                             <CardHeader className="w-full">
-                                <CardTitle className="flex space-x-4 justify-between border-b  border-gray-200 px-2 pb-4 w-full">
-                                  <div className="flex flex-col gap-2">
-                                    <span className="text-sm text-gray-500">Order Date:</span>
-                                    <span className="text-sm text-[#331d67] font-semibold">{order.date}</span>
-                                  </div>
-                                  <div className="flex flex-col gap-2">
-                                    <span className="text-sm text-gray-500">Total Amount:</span>
-                                    <span className="text-sm text-[#331d67] font-semibold">${order.total.toFixed(2)}</span>
-                                  </div>
-                                  <div className="flex flex-col gap-2">
-                                    <span className="text-sm text-gray-500">Ship To:</span>
-                                    <span className="text-sm text-[#331d67] capitalize">{order.shipTo}</span>
-                                  </div>
-                                  <div className="flex flex-col gap-3 items-end">
-                                    <div className="flex gap-2">
-                                        <span className="text-sm text-gray-500">Order ID:</span>
-                                        <span className="text-md font-bold text-[#331d67]">#{order.id}</span>
+                                <CardTitle className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-between border-b border-gray-200 px-2 pb-4 w-full">
+                                    <div className="flex flex-col gap-2">
+                                        <span className="text-sm text-gray-500">Order Date:</span>
+                                        <span className="text-sm text-[#331d67] font-semibold">{order.date}</span>
                                     </div>
-                                    <div className="flex gap-2 w-full justify-end">
-                                        <ViewInvoice />
-                                        <ViewDetails status={order.deliveryStatus} />
+                                    <div className="flex flex-col gap-2">
+                                        <span className="text-sm text-gray-500">Total Amount:</span>
+                                        <span className="text-sm text-[#331d67] font-semibold">${order.total.toFixed(2)}</span>
                                     </div>
-                                  </div>
-                                 
+                                    <div className="flex flex-col gap-2">
+                                        <span className="text-sm text-gray-500">Ship To:</span>
+                                        <span className="text-sm text-[#331d67] capitalize">{order.shipTo}</span>
+                                    </div>
+                                    <div className="flex flex-col gap-3 items-start sm:items-end">
+                                        <div className="flex gap-2">
+                                            <span className="text-sm text-gray-500">Order ID:</span>
+                                            <span className="text-md font-bold text-[#331d67]">#{order.id}</span>
+                                        </div>
+                                        <div className="flex gap-2 w-full justify-start sm:justify-end">
+                                            <ViewInvoice />
+                                            <ViewDetails status={order.deliveryStatus} />
+                                        </div>
+                                    </div>
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="flex flex-col gap-4 p-4">
-                                        <h1 className={`text-lg font-${rubik.className}  text-[#331d67] font-bold`}>Delivered {extractMonthName(order.deliveryDate)}</h1>
-                                        <h2 className={`text-md font-${rubik.className} inline-block  font-semibold text-gray-500`}>Order Status: <span className={`${order.deliveryStatus === "delivered" ? "text-green-500 ml-2 bg-green-500/10 px-2 py-1 rounded-sm" : "text-red-500 ml-2 bg-red-500/10 px-2 py-1 rounded-sm"}`}>{order.deliveryStatus}</span></h2>
+                                    <h1 className={`text-lg font-${rubik.className}  text-[#331d67] font-bold`}>Delivered {extractMonthName(order.deliveryDate)}</h1>
+                                    <h2 className={`text-md font-${rubik.className} inline-block  font-semibold text-gray-500`}>Order Status: <span className={`${order.deliveryStatus === "delivered" ? "text-green-500 ml-2 bg-green-500/10 px-2 py-1 rounded-sm" : "text-red-500 ml-2 bg-red-500/10 px-2 py-1 rounded-sm"}`}>{order.deliveryStatus}</span></h2>
                                     {order.items.map(item => (
-                                        <div key={item.id} className="flex gap-4 items-center border-b border-gray-200 pb-4">
-                                            <h1>{item.id}</h1>
+                                        <div key={item.id} className="flex flex-col sm:flex-row gap-4 items-start sm:items-center border-b border-gray-200 pb-4">
+                                            <h1 className="hidden sm:block">{item.id}</h1>
                                             <img
                                                 src={item.image}
                                                 alt={item.name}
                                                 className="w-16 h-16 object-cover rounded"
                                             />
-                                            <div className="flex flex-col gap-2">
+                                            <div className="flex flex-col gap-2 w-full">
                                                 <p className="font-semibold">{item.name}</p>
                                                 <p className="text-gray-600">{item.description}</p>
-                                                {/* <p className="text-gray-600">${item.price.toFixed(2)}</p> */}
                                                 <div className="flex gap-2 items-center">
                                                     <EyeIcon className="w-4 h-4 text-[#331d67]" />
                                                     <Link href={`/products/${item.id}`} className="text-[#331d67] font-semibold">View Product</Link>
@@ -165,7 +163,6 @@ export default function Orders() {
                                             </div>
                                         </div>
                                     ))}
-                                    
                                 </div>
                             </CardContent>
                         </Card>
