@@ -18,8 +18,8 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import Link from "next/link"
 import { LoaderCircle } from "lucide-react"
+import { useState } from "react"
 
 const formSchema = z.object({
     password:  z.string()
@@ -39,6 +39,7 @@ export default function NewPasswordPage() {
   const newPassword = useAuthStore((state) => state.newPassword);
   const isLoading = useAuthStore((state) => state.isLoading);
   const error = useAuthStore((state) => state.error);
+  const [redirecting, setRedirecting] = useState<Boolean>(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver : zodResolver(formSchema),
@@ -53,7 +54,8 @@ export default function NewPasswordPage() {
     try{
       const result = await newPassword(values.password, values.confirmPassword);
       if (result?.success) {
-        router.push('/login');
+        setRedirecting(true)
+        router.replace('/login');
       }else{
         if (result?.fieldErrors?.password) {
           form.setError("password", {
@@ -84,7 +86,14 @@ export default function NewPasswordPage() {
 
 
   return (
-    <Form {...form}>
+  <>
+     { isLoading || redirecting ? (
+         <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+         <LoaderCircle className="w-8 h-8 animate-spin text-[#47307d]" />
+         <p className="text-lg font-medium text-[#3A3D44]">Setting you new password...</p>
+       </div>
+     ) : (
+      <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-full max-w-md mx-auto p-2 md:p-10 font-inter">
         <div className="flex flex-col space-y-2.5 mb-10 md:mt-0 mt-10">
             <h1 className="font-semibold text-[#3A3D44] text-4xl">Create new Password</h1>
@@ -132,7 +141,10 @@ export default function NewPasswordPage() {
         </Button>
       </form>
     </Form>
-  )
+    )
+  }
+  </>
+)
 }
 
 

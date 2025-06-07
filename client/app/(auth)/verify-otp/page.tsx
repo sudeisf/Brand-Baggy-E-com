@@ -16,7 +16,7 @@ import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/comp
 import Link from "next/link";
 import { useAuthStore } from "@/store/authStore";
 import { LoaderCircle } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const formSchema = z.object({
   otp: z.string()
@@ -28,6 +28,7 @@ const formSchema = z.object({
 export default function OtpPage() {
   const isLoading = useAuthStore((state) => state.isLoading);
   const otpVerify = useAuthStore((state) => state.otpVerify);
+  const [redirecting, setRedirecting] = useState<Boolean>(false);
   const router = useRouter();
   
   const form = useForm<z.infer<typeof formSchema>>({
@@ -38,21 +39,17 @@ export default function OtpPage() {
     mode: "onChange",
   });
 
-  // Debug form state
-  useEffect(() => {
-    console.log("Current OTP value:", form.getValues().otp);
-    console.log("Form validity:", form.formState.isValid);
-  }, [form.watch("otp")]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("Submitting OTP:", values.otp);
+
     const inputValue = String(values.otp)
-    console.log("Input Value:", inputValue);
+
     try {
       const result = await otpVerify(inputValue);
       
       if (result?.success) {
-        router.push('/new-password');
+        setRedirecting(true)
+        router.replace('/new-password');
       } else {
         if (result?.fieldErrors?.otp) {
           form.setError("otp", {
@@ -67,7 +64,6 @@ export default function OtpPage() {
         }
       }
     } catch (error) {
-      console.error("Submission error:", error);
       form.setError("root", {
         message: "An unexpected error occurred"
       });
@@ -75,13 +71,20 @@ export default function OtpPage() {
   }
 
   return (
-    <Form {...form}>
+    <>
+    {
+      isLoading || redirecting ? (
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <LoaderCircle className="w-8 h-8 animate-spin text-[#47307d]" />
+        <p className="text-lg font-medium text-[#3A3D44]">Verifying your OTP...</p>
+      </div>
+      ) : (
+        <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full max-w-md mx-auto p-2 md:p-10 font-inter">
         <div className="flex flex-col space-y-2.5 mb-10 md:mb-5 mt-10 md:mt-0">
           <h1 className="font-semibold text-[#3A3D44] text-4xl">Enter the OTP sent to your email</h1>
           <p className="text-[#999ba0]">Please enter the 6-digit code sent to your email address</p>
         </div>
-
         <FormField
           control={form.control}
           name="otp"
@@ -92,7 +95,6 @@ export default function OtpPage() {
                   maxLength={6}
                   value={field.value}
                   onChange={e => {
-                    // Only allow numeric input
                     const numericValue = e.replace(/\D/g, '');
                     field.onChange(numericValue);
                   }}
@@ -137,5 +139,8 @@ export default function OtpPage() {
         </div>
       </form>
     </Form>
-  );
+      )
+    }
+    </>
+  )
 }

@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { useAuthStore } from "@/store/authStore"
 import { LoaderCircle } from "lucide-react"
+import { useState } from "react"
 
 const formSchema = z.object({
     email: z.string().email("Invalid email address")
@@ -25,6 +26,7 @@ const formSchema = z.object({
 export default function ForgotPasswordPage() {
 const isLoading  = useAuthStore((state)=> state.isLoading)
 const sendEmail = useAuthStore((state)=> state.sendEmail)
+const [redirecting, setRedirecting] = useState<Boolean>(false);
 const router = useRouter()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver : zodResolver(formSchema),
@@ -45,12 +47,10 @@ const router = useRouter()
       });
       return;
   }
-
-     // Handle success case first
      if (result.success) {
-      // Optional: Add a small delay for better UX
-      await new Promise(resolve => setTimeout(resolve, 500));
-      return router.push('/verify-otp');  // Note: Fixed typo in 'verify-otp'
+
+      setRedirecting(true)
+      return router.replace('/verify-otp');  
   }
 
     if (result.fieldErrors?.email) {
@@ -68,40 +68,51 @@ const router = useRouter()
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full max-w-md mx-auto p-2 md:p-10 font-inter">
-        <div className="flex flex-col space-y-2.5 mb-10 mt-10 md:mt-0 md:mb-5">
-            <h1 className="font-semibold text-[#3A3D44] text-4xl">Reset Your Password</h1>
-            <p className="text-[#999ba0]">Please enter your email and we will send you an otp code to reset your password in the next step</p>
-        </div>
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem className="space-y-1.5">
-              <FormControl>
-                <Input
-                className="rounded-sm px-5 py-5"
-                 placeholder="Enter your email" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-         
-         <Button disabled={isLoading || !form.formState.isValid} className="w-full bg-[#47307d] hover:bg-[#665292] h-10 font-medium" type="submit">
-        {
-            isLoading ? <LoaderCircle className="animate-spin" /> : "Rest"
-          }
-        </Button>
-        <div className="flex justify-center">
-            <Link
-            href = "/login"
-            className="text-md  text-[#47307d]  font-inter"
-            >Remembered password ?</Link>
-        </div>
-      </form>
-    </Form>
+    <>
+    {
+      isLoading || redirecting ? (
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <LoaderCircle className="w-8 h-8 animate-spin text-[#47307d]" />
+        <p className="text-lg font-medium text-[#3A3D44]">Verifying your OTP...</p>
+      </div>
+      ) : (
+        <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full max-w-md mx-auto p-2 md:p-10 font-inter">
+          <div className="flex flex-col space-y-2.5 mb-10 mt-10 md:mt-0 md:mb-5">
+              <h1 className="font-semibold text-[#3A3D44] text-4xl">Reset Your Password</h1>
+              <p className="text-[#999ba0]">Please enter your email and we will send you an otp code to reset your password in the next step</p>
+          </div>
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem className="space-y-1.5">
+                <FormControl>
+                  <Input
+                  className="rounded-sm px-5 py-5"
+                   placeholder="Enter your email" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+           
+           <Button disabled={isLoading || !form.formState.isValid} className="w-full bg-[#47307d] hover:bg-[#665292] h-10 font-medium" type="submit">
+          {
+              isLoading ? <LoaderCircle className="animate-spin" /> : "Rest"
+            }
+          </Button>
+          <div className="flex justify-center">
+              <Link
+              href = "/login"
+              className="text-md  text-[#47307d]  font-inter"
+              >Remembered password ?</Link>
+          </div>
+        </form>
+      </Form>
+      )
+    }
+    </>
   )
 }
 

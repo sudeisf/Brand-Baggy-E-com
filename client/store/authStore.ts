@@ -77,7 +77,7 @@ export const useAuthStore = create<AuthState>()(
                                 isLoading: false,
                             }
                         );
-                        console.log(response.data);
+                       
                         return { success: true };
                     }catch(err : any){
                         const errorMsg =
