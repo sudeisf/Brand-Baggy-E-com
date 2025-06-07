@@ -32,6 +32,7 @@ export default function LoginPage() {
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
   const isLoading = useAuthStore((state) => state.isLoading);
+  const  user = useAuthStore((state)=> state.user)
   const error = useAuthStore((state) => state.error);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -49,7 +50,11 @@ export default function LoginPage() {
         if(result?.error){
            setError("root" , {message : result?.error})
         }else{
-          router.push('/')
+          if(user?.role === "buyer"){
+             router.push('/')
+          }else if(user?.role === "seller"){
+            router.push('/dashboard')
+          }
         }
   }
 
