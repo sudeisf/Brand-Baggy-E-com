@@ -62,70 +62,63 @@ export default function RegisterPage() {
 
 
  async function onSubmit(values: z.infer<typeof formSchema>) {
-  try {
-    form.clearErrors();
-    const result = await register(
-      values.email,
-      values.username,
-      values.password,
-      values.confirmPassword,
-      values.role
-    );
+    try {
+        form.clearErrors();
+        const result = await register(
+            values.email,
+            values.username,
+            values.password,
+            values.confirmPassword,
+            values.role
+        );
 
-    if (result.success) {
-      console.log("Registration successful");
-      router.push("/login");
-      return;
-    }
-
-    if (!result) {
-      console.error('Registration failed: No result returned');
-      form.setError("root", { 
-        message: "Registration failed. Please try again." 
-      });
-      return;
-    }
-
-    if ('fieldErrors' in result && result.fieldErrors) {
-        const fieldMapping: Record<string, keyof typeof values> = {
-        username: 'username',
-        email: 'email',
-        password: 'password',
-        confirm_password: 'confirmPassword',
-        role: 'role'
-      };
-
-      Object.entries(result.fieldErrors).forEach(([field, message]) => {
-        const formField = fieldMapping[field];
-        if (formField) {
-          console.log(`Setting error for field ${field}:`, message);
-          form.setError(formField, {
-            type: 'server',
-            message: message
-          });
-        } else {
-          console.warn(`Unknown field error received: ${field}`);
-          form.setError("root", { 
-            message: `${field}: ${message}` 
-          });
+        if (result?.success) {
+            setRedirecting(true);
+            setTimeout(() => {
+                router.replace("/login");
+            }, 100);
+            return;
         }
-      });
-    }
 
-    if (result.error && (!result.fieldErrors || Object.keys(result.fieldErrors).length === 0)) {
-      console.error('General error received:', result.error);
-      form.setError("root", { message: result.error });
-    }
+        if (!result) {
+            form.setError("root", { 
+                message: "Registration failed. Please try again." 
+            });
+            return;
+        }
 
-    if (!result.error && (!result.fieldErrors || Object.keys(result.fieldErrors).length === 0)) {
-      router.push('/login');
-    }
-  } catch (error) {
+        if ('fieldErrors' in result && result.fieldErrors) {
+            const fieldMapping: Record<string, keyof typeof values> = {
+                username: 'username',
+                email: 'email',
+                password: 'password',
+                confirm_password: 'confirmPassword',
+                role: 'role'
+            };
 
-    form.setError("root", { 
-      message: "An unexpected error occurred. Please try again." 
-    });
-  }
+            Object.entries(result.fieldErrors).forEach(([field, message]) => {
+                const formField = fieldMapping[field];
+                if (formField) {
+                    form.setError(formField, {
+                        type: 'server',
+                        message: message
+                    });
+                } else {
+                    form.setError("root", { 
+                        message: `${field}: ${message}` 
+                    });
+                }
+            });
+        }
+
+        if (result.error && (!result.fieldErrors || Object.keys(result.fieldErrors).length === 0)) {
+            form.setError("root", { message: result.error });
+        }
+    } catch (error) {
+        form.setError("root", { 
+            message: "An unexpected error occurred. Please try again." 
+        });
+    }
 }
 
 

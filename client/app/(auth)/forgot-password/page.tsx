@@ -50,7 +50,9 @@ const router = useRouter()
      if (result.success) {
 
       setRedirecting(true)
-      return router.replace('/verify-otp');  
+      setTimeout(() => {
+        router.replace('/verify-otp');  
+      }, 100);
   }
 
     if (result.fieldErrors?.email) {

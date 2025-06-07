@@ -55,7 +55,9 @@ export default function NewPasswordPage() {
       const result = await newPassword(values.password, values.confirmPassword);
       if (result?.success) {
         setRedirecting(true)
-        router.replace('/login');
+        setTimeout(() => {
+          router.replace('/login');
+        }, 100);
       }else{
         if (result?.fieldErrors?.password) {
           form.setError("password", {

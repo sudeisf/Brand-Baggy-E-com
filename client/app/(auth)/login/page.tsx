@@ -52,12 +52,16 @@ export default function LoginPage() {
         if(result?.error){
            setError("root" , {message : result?.error})
         }else{
-          setRedirecting(true)
-          if(user?.role === "buyer"){
-             router.replace('/')
-          }else if(user?.role === "seller"){
-            router.replace('/dashboard')
-          }
+          setRedirecting(true);
+          const currentUser = useAuthStore.getState().user;
+          
+          setTimeout(() => {
+            if(currentUser?.role === "buyer"){
+              router.replace('/')
+            }else if(currentUser?.role === "seller"){
+              router.replace('/dashboard')
+            }
+          }, 100);
         }
   }
 

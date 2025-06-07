@@ -48,8 +48,10 @@ export default function OtpPage() {
       const result = await otpVerify(inputValue);
       
       if (result?.success) {
-        setRedirecting(true)
+       setRedirecting(true)
+       setTimeout(() => {
         router.replace('/new-password');
+       }, 100);
       } else {
         if (result?.fieldErrors?.otp) {
           form.setError("otp", {
