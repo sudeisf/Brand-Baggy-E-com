@@ -9,7 +9,7 @@ from .serializer import (
     UserCreateSerializer, 
     UserSerializer,
     CustomTokenObtainPairSerializer,
-    reset_password_serializer  # Make sure this is imported
+    reset_password_serializer 
     ,CustomTokenRefreshSerilizer
 )
 from rest_framework_simplejwt.views import TokenObtainPairView , TokenRefreshView
@@ -24,7 +24,7 @@ User = get_user_model()
 from .models import CustomUser
 
 
-# Create your views here.
+
 class RegisterView(generics.CreateAPIView):
      serializer_class = UserCreateSerializer
      permission_classes = [AllowAny]
@@ -34,8 +34,6 @@ class RegisterView(generics.CreateAPIView):
           role = request.data.get('role', CustomUser.Role.BUYER)  
           if role not in [CustomUser.Role.SELLER, CustomUser.Role.BUYER, CustomUser.Role.ADMIN]:
                return Response({"error": "Invalid role specified."}, status=status.HTTP_400_BAD_REQUEST)
-
-          # Add role to request data before serialization
           request.data['role'] = role
                
           serializer = self.get_serializer(data= request.data)

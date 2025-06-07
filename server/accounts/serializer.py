@@ -78,6 +78,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email']
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         email = attrs.get('email')
@@ -98,22 +99,27 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         attrs['username'] = user.username
         data = super().validate(attrs)
 
-        # Add custom claims
-        data['id'] = str(user.id)
-        data['email'] = user.email
-        data['username'] = user.username
-        data['role'] = user.user_role  # Use the correct field (user_role)
+        response = {
+            "user": {
+                'id': str(user.id),
+                'email': user.email,
+                'username': user.username,
+                'role': user.user_role,
+            },
+            'access': data['access'],
+            'refresh': data['refresh']
+        }
 
-        return data
+        return response
 
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
 
-        # Add custom claims to the token
+       
         token['username'] = user.username
         token['email'] = user.email
-        token['role'] = user.user_role  # Add role to the token
+        token['role'] = user.user_role 
 
         return token
 
