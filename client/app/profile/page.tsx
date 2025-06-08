@@ -6,11 +6,11 @@ import { Input } from "@/components/ui/input"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import  DatePickerWithRange  from "@/app/profile/components/DatePicker"
-import { z } from "zod"
+import { string, z } from "zod"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Upload, User } from "lucide-react"
+import { CheckCircle, Upload, User } from "lucide-react"
 import { Pen } from "lucide-react"
 import { useAuthStore } from "@/store/authStore"
 import { toast } from "sonner"
@@ -55,6 +55,22 @@ export default function MyAccount() {
     const updateProfileFn  = useAuthStore((state)=>state.updateProfileFn);
     const isLoading = useAuthStore((state)=> state.isLoading)
     const error = useAuthStore((state)=> state.error)
+    const deleteUserFn = useAuthStore((state)=> state.deleteUser);
+
+
+    async function onDelete() {
+        toast.promise(
+            deleteUserFn(),
+            {
+                loading: 'Deleting your account...',
+                success: 'Account deleted successfully. We hope to see you again!',
+                error: 'Failed to delete account. Please try again.',
+                duration: 5000,
+                position: "top-right",
+            }
+        )
+    }
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -84,54 +100,86 @@ export default function MyAccount() {
             confirmPassword: "",
           });
         };
-      
         fetchAndSetProfile();
       }, [user]);
+
+      const showSuccessToast = (message : string) => {
+        toast.success(message, {
+          duration: 4000,
+          position: "top-right",
+          style: {
+            background: "linear-gradient(to right, #331d67, #4a2b8f)",
+            color: "white",
+            border: "1px solid #331d67"
+          }
+        });
+      };
+
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
         const updatedFields: Record<string, string> = {};
         
-        if (data.firstName?.trim()) {
+        if (data.firstName?.trim() && data.firstName.trim() !== user?.first_name) {
             updatedFields.first_name = data.firstName.trim();
         }
         
-        if (data.lastName?.trim()) {
+        if (data.lastName?.trim() && data.lastName.trim() !== user?.last_name) {
             updatedFields.last_name = data.lastName.trim();
         }
         
-        if (data.email?.trim()) {
+        if (data.email?.trim() && data.email.trim().toLowerCase() !== user?.email?.toLowerCase()) {
             updatedFields.email = data.email.trim().toLowerCase();
         }
         
         if (data.phone?.trim()) {
             const formattedPhone = data.phone.replace(/[\s+]/g, '');
-            updatedFields.phone_number = formattedPhone;
+            if (formattedPhone !== user?.phone_number) {
+                updatedFields.phone_number = formattedPhone;
+            }
         }
         
-        if (data.birthDate) {
+        if (data.birthDate && data.birthDate.toISOString().split('T')[0] !== user?.birth_date) {
             updatedFields.birth_date = data.birthDate.toISOString().split('T')[0];
         }
         
-        if (data.gender?.trim()) {
+        if (data.gender?.trim() && data.gender.toLowerCase() !== user?.gender?.toLowerCase()) {
             updatedFields.gender = data.gender.toLowerCase();
         }
+        if(data.oldPassword && data.newPassword) {
+            updatedFields.oldPassword = data.oldPassword;
+            updatedFields.newPassword = data.newPassword;
+        }
 
-       
         if (Object.keys(updatedFields).length > 0) {
-            try {
-                await updateProfileFn(updatedFields);
-                toast.success("Profile updated!");
-            } catch (err) {
-                toast.error(error || "Something went wrong.");
+            const result = await updateProfileFn(updatedFields);
+            if(result?.success === true) { 
+                showSuccessToast("Profile updated successfully!");
+            } else {
+                toast.error(typeof error === 'string' ? error : 'Update failed' , {
+                    duration: 4000,
+                    position: "top-right",
+                    style: {
+                      background: "#ef4444",
+                      color: "white",
+                      border: "1px solid #dc2626"
+                    }
+                })
             }
         } else {
-            toast.info("No changes to update");
+            toast.info("No changes to update" , {
+                duration: 2000,
+                position: "top-right",
+                style: {
+                  background : "#331d67",
+                  color : "#ffffff",
+                  border: "1px solid #331d67"
+                }
+            });
         }
     }
-    console.log(user?.profile_url)
 
     return (
         <div className="flex flex-col gap-4 w-full bg-white rounded-md shadow-xs border-gray-200">
-            <div className="flex flex-col gap-10 w-full p-4 md:p-10 mt-4">
+            <div className="flex flex-col gap-10 w-full p-4 md:p-10 mt-0 md:mt-4">
                 <h1 className={`${rubik.className} text-[#331d67] text-2xl md:text-3xl font-bold`}>My details</h1>
                 <div className="flex flex-col gap-4 w-full">
                     <div className="flex flex-col gap-4 w-full">
@@ -350,7 +398,7 @@ export default function MyAccount() {
                                 <div className="flex flex-col gap-2">
                                     <h1 className={`${rubik.className} text-[#331d67] text-lg font-medium border-b mt-10 border-gray-200 pb-4`}>Delete Account</h1>
                                     <p className="text-md text-gray-500 pb-4 pt-4">you can delete your account by clicking the button below</p>
-                                    <Button className="w-full md:w-32 rounded-md py-5 px-4 bg-red-500/80 text-white">delete account</Button>
+                                    <Button onClick={()=> onDelete()} disabled={isLoading} className="w-full md:w-32 rounded-md py-5 px-4 bg-red-500/80 text-white">delete account</Button>
                                 </div>
                             </div>
                         </form>

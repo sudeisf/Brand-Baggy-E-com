@@ -47,7 +47,6 @@ export default function Orders() {
     const [timeFilter, setTimeFilter] = useState("past-1-years")
     const [statusFilter, setStatusFilter] = useState("all")
 
-    // Filter orders based on time and status
     const filteredOrders = orders.filter(order => {
         const orderDate = new Date(order.date)
         const now = new Date()
@@ -108,7 +107,6 @@ export default function Orders() {
                 </Select>
             </div>
 
-            {/* Orders List */}
             <div className="space-y-6">
                 {filteredOrders.length === 0 ? (
                     <p className="text-gray-500">No orders found for the selected filters.</p>

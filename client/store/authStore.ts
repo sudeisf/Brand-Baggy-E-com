@@ -20,7 +20,7 @@ type AuthState = {
     user: User | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    error: string | null;
+    error: string | Record<string, string[]> | null;
     otpEmail : string | null;
     login: (email: string, password: string) => Promise<{ error?: string } | void>;
     register: (
@@ -53,9 +53,18 @@ type AuthState = {
     refreshAccessToken: () => Promise<void>;
     checkAuth: () => Promise<void>;
     profileFn : () => Promise<void>;
-    updateProfileFn : (data : any) => Promise<void>;
+    updateProfileFn : (data : any) => Promise<{
+        success?: boolean;
+        error?: string; 
+        fieldErrors?: Record<string, string> 
+    } | void>;
     profilImageUpload : (formData: FormData) => Promise<void>;
     hasRole: (role: User['user_role']) => boolean;
+    deleteUser : () => Promise<{
+        success?: boolean;
+        error?: string; 
+        fieldErrors?: Record<string, string> 
+    } | void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -255,21 +264,21 @@ export const useAuthStore = create<AuthState>()(
                         const fieldErrors: Record<string, string> = {};
                 
                         if (error?.response?.data) {
-                            // Handle OTP-specific errors first
+                            
                             if (error.response.data.otp) {
                                 fieldErrors.otp = Array.isArray(error.response.data.otp) 
                                     ? error.response.data.otp.join(', ')
                                     : error.response.data.otp;
                             }
                             
-                            // Then handle email errors
+                         
                             if (error.response.data.email) {
                                 fieldErrors.email = Array.isArray(error.response.data.email) 
                                     ? error.response.data.email.join(', ')
                                     : error.response.data.email;
                             }
                 
-                            // Fallback to general errors
+                            
                             errorMsg = error.response.data.detail || 
                                       error.response.data.message || 
                                       errorMsg;
@@ -320,7 +329,7 @@ export const useAuthStore = create<AuthState>()(
                         const fieldErrors: Record<string, string> = {};
                 
                         if (error?.response?.data) {
-                            // Handle OTP-specific errors first
+                            
                             if (error.response.data.password) {
                                 fieldErrors.password = Array.isArray(error.response.data.password) 
                                     ? error.response.data.password.join(', ')
@@ -332,14 +341,14 @@ export const useAuthStore = create<AuthState>()(
                                     : error.response.data.new_password;
                             }
                             
-                            // Then handle email errors
+                           
                             if (error.response.data.email) {
                                 fieldErrors.email = Array.isArray(error.response.data.email) 
                                     ? error.response.data.email.join(', ')
                                     : error.response.data.email;
                             }
                 
-                            // Fallback to general errors
+                            
                             errorMsg = error.response.data.detail || 
                                       error.response.data.message || 
                                       errorMsg;
@@ -398,18 +407,34 @@ export const useAuthStore = create<AuthState>()(
                         set({ error: error });
                      }
                 },
-                updateProfileFn : async (data) =>{
-                    try{
+                updateProfileFn: async (data) => {
+                    try {
                         const accessToken = get().accessToken;
-                        set({isLoading : true, error: null});
-                        const response = await api.patch('/accounts/profile/update/',data, {
+                        set({ isLoading: true, error: null });
+                        const response = await api.patch('/accounts/profile/update/', data, {
                             headers: { Authorization: `Bearer ${accessToken}` },
                         });
                         const {user} = response.data;
-                        set({user: user , isLoading: false})
-                     }catch(error : any){
-                        set({ error : error });
-                     }
+                        set({user: user, isLoading: false});
+                        return { success: true };
+                    } catch(error: any) {
+                        let errorMsg: string = "Something went wrong";
+                        if (error.response?.data) {
+                            const errors = error.response.data;
+                            for (const field in errors) {
+                              const errorMessages = errors[field].join(', ');
+                               errorMsg = `${field} : ${errorMessages}`
+                            }
+                          }
+                        set({ 
+                            error: errorMsg, 
+                            isLoading: false 
+                        });
+                        return {
+                            success : false
+                        }
+                        
+                    }
                 },
                 profilImageUpload : async (formData) => {
                     try {
@@ -426,9 +451,43 @@ export const useAuthStore = create<AuthState>()(
                         set({user: user, isLoading: false});
                     } catch(error: any) {
                         console.log(error);
-                        set({ error: error, isLoading: false });
+                        set({ error: error.response.data.error, isLoading: false });
+                    }
+                },deleteUser : async ()  => {
+                    const { accessToken} = get();
+                    if(!accessToken) {
+                       set({ isAuthenticated: false , isLoading:false});
+                       return;
+                    }
+                    try{
+                       set({ isLoading: true , error: null})
+                       const response = await api.delete('/accounts/delete/user' , {
+                           headers: { Authorization: `Bearer ${accessToken}` },
+                       });
+                       const {user} = response.data;
+                       set({user: user , isAuthenticated: true , isLoading: false , error: null});
+                       return {
+                            success : true,
+                       }
+                    }catch(error : any){
+                        let errorMsg: string = "Something went wrong";
+                        if (error.response?.data) {
+                            const errors = error.response.data;
+                            for (const field in errors) {
+                              const errorMessages = errors[field].join(', ');
+                               errorMsg = `${field} : ${errorMessages}`
+                            }
+                          }
+                        set({ 
+                            error: errorMsg, 
+                            isLoading: false 
+                        });
+                        return {
+                            success : false
+                        }
                     }
                 }
+                
     }),
        {
         name : "auth-storage",

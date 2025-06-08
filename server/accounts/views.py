@@ -99,6 +99,7 @@ class UserDetailView(generics.RetrieveAPIView):
             "user": serializer.data
         })
 
+from rest_framework.exceptions import ValidationError
 class UserUpdateView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
@@ -109,9 +110,27 @@ class UserUpdateView(generics.UpdateAPIView):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
+        
+        
+        if 'email' in request.data:
+            new_email = request.data['email']
+            if User.objects.filter(email=new_email).exclude(id=instance.id).exists():
+                raise ValidationError({"email": ["This email is already in use."]})
+        
+        if "oldPassword" in request.data and "newPassword" in request.data:
+            old_password = request.data['oldPassword']
+            new_password = request.data['newPassword']
+
+            if not instance.check_password(old_password):
+                raise ValidationError({"password": ["old password is incorrect"]})
+         
+            instance.set_password(new_password)
+            instance.save()
+        
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
+        
         return Response({
             "message": "Profile updated successfully",
             "user": serializer.data
@@ -143,6 +162,22 @@ class updateProfileImageView(APIView):
                     {"error": str(e)},
                     status=status.HTTP_400_BAD_REQUEST
                )
+
+class UserDeleteView(APIView):
+     permission_classes = [IsAuthenticated]
+     def delete(self,request):
+          try:
+            user = request.user
+            user.delete()
+            return Response({
+                "message": "Account deleted successfully"
+            }, status=status.HTTP_200_OK)
+            
+          except Exception as e:
+               return Response({
+                    "error": str(e)
+               }, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ForgotPasswordView(APIView):
      permission_classes = [AllowAny]

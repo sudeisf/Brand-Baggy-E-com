@@ -6,10 +6,13 @@ import { usePathname } from "next/navigation"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { useAuthStore } from "@/store/authStore"
+import { toast } from "sonner"
 
 // Custom hook to detect mobile viewport
 const useIsMobile = () => {
     const [isMobile, setIsMobile] = useState(false)
+  
 
     useEffect(() => {
         const checkIsMobile = () => {
@@ -29,19 +32,43 @@ const useIsMobile = () => {
     return isMobile
 }
 
+
+
 export default function SideBarMenu() {
     const pathname = usePathname()
     const router = useRouter()
     const isMobile = useIsMobile()
     const isActive = (path: string) => pathname === path
     const defaultPath = "/profile"
+    const logoutFn = useAuthStore((state)=> state.logout);
+
+    const handleLogout = async () => {
+        try {
+            const result = await logoutFn();
+            if (result?.success) {
+                toast.success("accout logged out successfully.",
+                    {
+                        duration: 2000,
+                        style: {
+                            color: "#ffffff",
+                            background: "#331d67"
+                        }
+                    }
+                )
+                router.replace('/login');
+            }
+        } catch (error:  any) {
+            console.error('Logout failed:', error);
+            toast.error(error)
+        }
+    }
 
     const tabs = [
         { path: defaultPath, icon: User, label: "Details" },
         { path: "/profile/orders", icon: ShoppingBag, label: "Orders" },
         { path: "/profile/payment", icon: CreditCard, label: "Payment" },
         { path: "/profile/settings", icon: Settings, label: "Settings" },
-        { path: "/", icon: LogOut, label: "Logout" }
+        { path: "#", icon: LogOut, label: "Logout" }
     ]
 
     return (
@@ -53,7 +80,11 @@ export default function SideBarMenu() {
                         defaultValue={pathname} 
                         className="w-full"
                         onValueChange={(value) => {
-                            router.push(value)
+                            if (value === '#') {
+                                handleLogout()
+                            } else {
+                                router.push(value)
+                            }
                         }}
                     >
                         <TabsList className="w-full h-16 grid grid-cols-5 rounded-none border-t">
@@ -90,6 +121,12 @@ export default function SideBarMenu() {
                                 <Link
                                     key={tab.path}
                                     href={tab.path}
+                                    onClick={(e) => {
+                                        if (tab.path === '#') {
+                                            e.preventDefault()
+                                            handleLogout()
+                                        }
+                                    }}
                                     className={`
                                         flex items-center gap-2 w-48
                                         text-sm font-medium rounded-md

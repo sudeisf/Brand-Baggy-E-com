@@ -13,7 +13,7 @@ export default function ProfileLayout({children}: {children: React.ReactNode}) {
     return <div className="container mx-auto px-4 py-5 mb-10">
         <ProductCrum />
         <div className="flex flex-col gap-4 w-full max-w-[1250px] mx-auto min-h-screen">
-            <div className="flex flex-col lg:flex-row mt-10 gap-6">
+            <div className="flex flex-col lg:flex-row mt-2 md:mt-10 gap-6">
                 <div className="w-full lg:w-1/4">
                     <SideBarMenu />
                 </div>

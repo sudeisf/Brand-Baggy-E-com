@@ -43,12 +43,11 @@ export default function Header(){
                 </button>
             </div>
 
-            {/* Brand Logo */}
             <div className="flex items-center">
                 <h1 className={`${rubik.className} text-[#331d67]  tracking-tighter  text-md sm:text-2xl`}>Baggy-Brand</h1>
             </div>
 
-            {/* Desktop Navigation - Hidden on mobile */}
+        
             <div className="hidden lg:flex items-center gap-10">
                 <div className="flex items-center gap-4">
                     <Link href="/products" className="text-[#331d67] font-semibold hover:text-[#6c47c6] transition-colors">Products</Link>
@@ -70,9 +69,8 @@ export default function Header(){
                 </div>
             </div>
 
-            {/* Search and User Actions */}
+            
             <div className="flex items-center gap-2 sm:gap-4">
-                {/* Search Bar - Hidden on small mobile */}
                 <div className="hidden sm:flex w-[10rem] md:w-[20rem] lg:w-[30rem] bg-white items-center justify-start gap-2 rounded-sm px-3 py-1.5 border-1">
                     <Search className="text-black w-4 h-4 md:w-5 md:h-5" />
                     <input 
