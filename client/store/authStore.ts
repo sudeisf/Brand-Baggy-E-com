@@ -158,7 +158,6 @@ export const useAuthStore = create<AuthState>()(
                   },
                 logout : async () => {
                     const { refreshToken } = get();
-                    console.log(refreshToken);
                     try {
                         set({ isLoading: true, error: null });
                        const response = await api.post('accounts/logout/', { refresh: refreshToken });

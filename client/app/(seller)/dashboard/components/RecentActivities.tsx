@@ -63,7 +63,6 @@ const activities = [
 export default function RecentActivity() {
   const [filter, setFilter] = useState("all")
 
-  // Helper to generate initials from name
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -73,7 +72,6 @@ export default function RecentActivity() {
       .slice(0, 2)
   }
 
-  // Helper to get order type styles
   const getOrderTypeStyles = (orderType: string) => {
     switch (orderType) {
       case "new order":
