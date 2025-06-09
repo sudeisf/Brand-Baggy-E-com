@@ -17,7 +17,7 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-# Create your models here.
+
 class Product(models.Model):
     category  = models.ForeignKey(Category , on_delete=models.CASCADE , related_name='products')
     name = models.CharField(max_length=200)
@@ -25,7 +25,6 @@ class Product(models.Model):
     in_stock = models.BooleanField(default=True)
     main_image = CloudinaryField('image')
     seller  = models.ForeignKey(CustomUser,on_delete=models.CASCADE, related_name='product_role' , limit_choices_to={'user_role': CustomUser.Role.SELLER} , null=True , blank=True)
-
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     brand = models.CharField(max_length=200 , null=True , blank=True)
     model_number = models.CharField(max_length=200 , null=True , blank=True)
@@ -67,7 +66,7 @@ class ProductReview(models.Model):
 
     class Meta:
         ordering = ['-created_at']
-        unique_together = ('user', 'product')  # One review per user per product
+        unique_together = ('user', 'product') 
 
     def __str__(self):
         return f"{self.product.name} - {self.user.username}"
@@ -89,9 +88,7 @@ class ProductVariants(models.Model):
     product  = models.ForeignKey(Product,on_delete=models.CASCADE,related_name="variants")
     size = models.ForeignKey(ProductSize, on_delete=models.PROTECT)
     stock = models.PositiveIntegerField(default=0)
-    
     sku = models.CharField(max_length=50, unique=True)
-
 
     class Meta:
         unique_together = ('product', 'size')
@@ -119,3 +116,54 @@ class FavoriteProduct(models.Model):
     def __str__(self):
         return f"{self.user.username} ❤ {self.product.name}"
 
+from django.utils import timezone
+class Discount(models.Model):
+    class DiscountType(models.TextChoices):
+          FIXED_AMOUNT = 'fixed_amount', 'Fixed Amount'
+          PERCENTAGE = 'percentage', 'Percentage'
+    
+    name  = models.CharField(max_length=100);
+    description = models.TextField(blank=True)
+    discount_type = models.CharField(max_length=20, choices=DiscountType.choices, null=True, blank=True)
+    value = models.DecimalField(max_digits=10, decimal_places=2)
+
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    usage_limit = models.IntegerField(null=True,blank=True)
+    time_used = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def is_valid(self):
+        now = timezone.now()
+        return(
+            self.is_active and 
+            self.created_at <= now < self.end_date and
+            self.usage_limit is None and self.time_used < self.usage_limit
+        )
+
+    def calcualteDiscount(self, orignial_price):
+        if not self.is_valid():
+            return 0
+        if self.discount_type == "percentage":
+            discount_amount = (orignial_price * self.value)/ 100
+        else:
+            discount_amount = self.value
+            
+        return discount_amount
+    
+class ProductDiscount(models.Model):
+    product = models.ForeignKey(Product ,on_delete=models.CASCADE, related_name='discount')
+    discount = models.ForeignKey(Discount, on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('product', 'discount')  
+        ordering = ['-created_at']
