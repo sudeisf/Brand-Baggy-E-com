@@ -3,6 +3,7 @@ from cloudinary.models import CloudinaryField
 from django.forms import ValidationError
 from accounts.models import CustomUser
 from django.utils import timezone
+from django.utils.text import slugify
 
 
 
@@ -15,7 +16,7 @@ class Category(models.Model):
         blank=True,
         related_name='subcategories'
     )
-    slug = models.SlugField(max_length=200)
+    slug = models.SlugField(max_length=200 , blank=True , null=True)
     description = models.TextField()
 
     class Meta:
@@ -34,7 +35,7 @@ class Category(models.Model):
 class ProductLocation(models.Model):
     name =  models.CharField(max_length=200)
 
-
+ 
 class Product(models.Model):
     class Gender(models.TextChoices):
         MEN = "men","Men"
@@ -54,9 +55,10 @@ class Product(models.Model):
     product_code = models.CharField(max_length=200 , null=True , blank=True)
     quantity = models.PositiveBigIntegerField()
     gender = models.CharField(max_length=20,choices=Gender.choices,null=True,blank=True)
-    stocks = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    slug = models.SlugField(max_length=200, unique=True, null=True)
+
 
     class Meta:
         indexes = [
@@ -64,8 +66,26 @@ class Product(models.Model):
             models.Index(fields=['price']),
         ]
 
+    @property
+    def total_stock(self):
+        return sum(variant.stock for variant in self.variants.all())
+
     def __str__(self):
         return self.name
+    
+    def save(self, *args, **kwargs):
+        if not self.slug or self.slug.strip() == "":
+            base_slug = slugify(self.name)
+            unique_slug = base_slug
+            counter = 1
+            
+            # Ensure slug is unique even if ID isn't available yet
+            while Product.objects.filter(slug=unique_slug).exclude(id=self.id).exists():
+                unique_slug = f"{base_slug}-{counter}"
+                counter += 1
+                
+            self.slug = unique_slug
+        super().save(*args, **kwargs)
 
 
 class ProductImage(models.Model):
@@ -96,9 +116,6 @@ class ProductReview(models.Model):
     def __str__(self):
         return f"{self.product.name} - {self.user.username}"
 
-
-
-
 class ProductSize(models.Model):
     name = models.CharField(max_length=20)
     code = models.CharField(max_length=10)
@@ -123,10 +140,10 @@ class ProductVariants(models.Model):
         return f"{self.product.name} - {self.size.name}"
     
     def save(self, *args, **kwargs):
+        super().save(*args, **kwargs) 
         if not self.sku:
-            self.sku = f"{self.product.id}-{self.size.code}" 
-        super().save(*args, **kwargs)
-
+            self.sku = f"{self.product.id}-{self.size.code}"
+            super().save(update_fields=['sku'])  
 
 class FavoriteProduct(models.Model):
     product = models.ForeignKey(Product ,on_delete=models.CASCADE, related_name='favorites')
@@ -154,12 +171,9 @@ class Discount(models.Model):
 
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
-
     is_active = models.BooleanField(default=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
     usage_limit = models.IntegerField(null=True,blank=True)
     time_used = models.IntegerField(default=0)
 
@@ -170,7 +184,7 @@ class Discount(models.Model):
         now = timezone.now()
         return(
             self.is_active and 
-            self.created_at <= now < self.end_date and
+            self.start_date <= now < self.end_date and
             self.usage_limit is None and self.time_used < self.usage_limit
         )
 

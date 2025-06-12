@@ -92,6 +92,7 @@ class CreateProductSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=200, required=True)
     description = serializers.CharField(required=True, allow_blank=True)
     in_stock = serializers.BooleanField(default=True)
+    stcok = serializers.IntegerField(default = 0)
     main_image = serializers.ImageField(required=True)
     brand = serializers.CharField(max_length=200, required=False, allow_blank=True)
     model_number = serializers.CharField(max_length=200, required=False, allow_blank=True)
