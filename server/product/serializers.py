@@ -230,7 +230,6 @@ class UpdateProductSerializer(serializers.ModelSerializer):
             
             return instance
 
-
     
     
 

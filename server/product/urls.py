@@ -9,6 +9,8 @@ from .views import (
     SellerProductDashboardView,
     UpdateSellerProductAPIView,
     DeleteSellerProductAPIVIew
+    ,CategoryListView
+    ,CategorySubListView
     )
 
 
@@ -24,5 +26,8 @@ urlpatterns =[
     path('seller/<int:id>/update',UpdateSellerProductAPIView.as_view(), name="update-product"),
     path('seller/create-product/', CreateProductView.as_view(), name='create-product'),
     path('seller/<int:id>/delete/',DeleteSellerProductAPIVIew.as_view(),name="delete-product")
+    #test
+   ,path('catagory-list',CategoryListView.as_view(),name="catagory-list"),
+   path('catagory-sub-list',CategorySubListView.as_view(),name="catagory-sub-list")
 
 ]   

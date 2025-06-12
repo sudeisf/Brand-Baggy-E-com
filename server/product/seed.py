@@ -2,7 +2,6 @@ from .models import Category
 from django.utils.text import slugify
 
 def seed_categories():
-    # Category structure with subcategories
     categories_data = {
         "Men": ["T-Shirts", "Jackets", "Jeans"],
         "Women": ["Dresses", "Tops", "Skirts"],
@@ -29,5 +28,5 @@ def seed_categories():
                 }
             )
 
-# Run it
-seed_categories()
+if __name__ == "__main__":
+    seed_categories()

@@ -78,8 +78,6 @@ class Product(models.Model):
             base_slug = slugify(self.name)
             unique_slug = base_slug
             counter = 1
-            
-            # Ensure slug is unique even if ID isn't available yet
             while Product.objects.filter(slug=unique_slug).exclude(id=self.id).exists():
                 unique_slug = f"{base_slug}-{counter}"
                 counter += 1

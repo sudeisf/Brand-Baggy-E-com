@@ -141,7 +141,21 @@ class DeleteSellerProductAPIVIew(APIView):
         # Delete all favorites referencing this product
         product.favorites.all().delete()
 
+from .models import Category
+from .serializers import CatagorySerializer
+class CategoryListView(APIView):
+    permission_classes = [AllowAny]
     
+    def get(self, request):
+        queryset = Category.objects.filter(parent=None)
+        serializer = CatagorySerializer(queryset, many=True)
+        return Response(serializer.data)
 
 
-
+class CategorySubListView(APIView):
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        queryset = Category.objects.filter(parent__isnull=False)
+        serializer = CatagorySerializer(queryset, many=True)
+        return Response(serializer.data)
