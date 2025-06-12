@@ -77,14 +77,14 @@ class ProductReviewListCreateView(generics.ListAPIView):
         product = get_object_or_404(Product , id=self.kwargs['product_id'])
         serializer.save(user=self.request.user , product= Product)
 
-class CreateProductView(APIView):
-    permission_classes = [IsAuthenticated, IsSeller]
-    def post(self , request):
-        serializer = CreateProductSerializer(data=request.data , context = {'request' : request})
-        serializer.is_valid(raise_exception=True)
-        product = serializer.save()
-        return Response({"message": "Product created successfully.", "product_id": product.id}, status=status.HTTP_201_CREATED)
+class ProductCreateAPIView(generics.CreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = CreateProductSerializer
+    permission_classes = [IsAuthenticated]
 
+    def perform_create(self, serializer):
+        serializer.save()
+        
 class SellerProductDashboardView(generics.ListAPIView):
     serializer_class = SellerProductListSerializer
     permission_classes = [IsAuthenticated , IsSeller]

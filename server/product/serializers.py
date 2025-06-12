@@ -1,5 +1,5 @@
 import json
-from .models import Product ,ProductImage ,ProductReview , FavoriteProduct , Category , ProductSize ,ProductVariants
+from .models import Discount, Product, ProductDiscount ,ProductImage, ProductLocation ,ProductReview , FavoriteProduct , Category , ProductSize ,ProductVariants
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from cloudinary.models import CloudinaryField
@@ -87,75 +87,97 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         return obj.main_image.url if obj.main_image else None
 
 
+
 class CreateProductSerializer(serializers.Serializer):
-    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), required=True)
-    name = serializers.CharField(max_length=200, required=True)
-    description = serializers.CharField(required=True, allow_blank=True)
-    in_stock = serializers.BooleanField(default=True)
-    stcok = serializers.IntegerField(default = 0)
-    main_image = serializers.ImageField(required=True)
-    brand = serializers.CharField(max_length=200, required=False, allow_blank=True)
-    model_number = serializers.CharField(max_length=200, required=False, allow_blank=True)
-    product_code = serializers.CharField(max_length=200, required=False, allow_blank=True)
+    name = serializers.CharField(max_length=20, required=True)
+    description = serializers.CharField(max_length=255, required=True)
     price = serializers.DecimalField(max_digits=10, decimal_places=2)
-    quantity = serializers.IntegerField(min_value=0, required=True)
+    quantity = serializers.IntegerField(required = True)
+    main_image = serializers.ImageField(required=True)
+    gender = serializers.ChoiceField(choices=Product.Gender.choices, required=False)
     images = serializers.ListField(
         child=serializers.ImageField(allow_empty_file=False, use_url=False),
         required=False,
         allow_empty=True
     )
+    brand = serializers.CharField(max_length=200, required=False, allow_blank=True)
+    model_number = serializers.CharField(max_length=200, required=False, allow_blank=True)
+    product_code = serializers.CharField(max_length=200, required=False, allow_blank=True)
     variants = serializers.JSONField(required=False)
+    discount_value = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
+    discount_type = serializers.ChoiceField(choices=Discount.DiscountType.choices, required=False)
+    discount_start_date = serializers.DateTimeField(required=False)
+    discount_end_date = serializers.DateTimeField(required=False)
 
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), required=True)
+    product_location = serializers.CharField(max_length=100, required=True)
+
+    def validate_product_location(self, value):
+        location, _ = ProductLocation.objects.get_or_create(name=value)
+        return location
     def validate(self, data):
         variants = data.get('variants', [])
-        quantity = data.get('quantity')
-
+        quantity = data.get('quantity', 0)  
         if variants:
             total_stock = sum(variant.get('stock', 0) for variant in variants)
+            print(total_stock)
+            print(quantity)
             if total_stock > quantity:
                 raise serializers.ValidationError(
-                    "Total stock of variants cannot exceed the product quantity."
+                    "Total stock of variants cannot exceed the product stock quantity."
                 )
-
+        if data.get('discount_value') and (not data.get('discount_start_date') or not data.get('discount_end_date')):
+            raise serializers.ValidationError("Discount start and end dates are required if discount value is provided.")
         return data
-    
+
     def create(self, validated_data):
         images_data = validated_data.pop('images', [])
         variants_data = validated_data.pop('variants', [])
-        request  = self.context.get('request')
+        discount_value = validated_data.pop('discount_value', None)
+        discount_type = validated_data.pop('discount_type', None)
+        discount_start_date = validated_data.pop('discount_start_date', None)
+        discount_end_date = validated_data.pop('discount_end_date', None)
+        request = self.context.get('request')
         seller = request.user
-    
+
         if isinstance(variants_data, str):
             try:
                 variants_data = json.loads(variants_data)
             except json.JSONDecodeError:
                 raise serializers.ValidationError("Invalid variants JSON format")
 
-      
-        product = Product.objects.create(seller= seller ,**validated_data)
+        product = Product.objects.create(seller=seller, **validated_data)
 
         for image_data in images_data:
             ProductImage.objects.create(product=product, image=image_data)
 
         for variant_data in variants_data:
             size_data = variant_data.pop('size', {})
-            stock = variant_data.pop('stock', 0)  
-            
+            stock = variant_data.pop('stock', 0)
             if not size_data.get('name') or not size_data.get('code'):
                 raise serializers.ValidationError("Size name and code are required")
-            
             if stock < 1:
                 raise serializers.ValidationError("Stock must be at least 1")
-                
             size, _ = ProductSize.objects.get_or_create(**size_data)
-            
             ProductVariants.objects.create(
                 product=product,
                 size=size,
                 stock=stock,
-                **variant_data  
+                **variant_data
             )
-            
+
+        if discount_value and discount_type and discount_start_date and discount_end_date:
+            discount = Discount.objects.create(
+                name=f"Discount for {product.name}",
+                description=f"Auto-generated discount for {product.name}",
+                discount_type=discount_type,
+                value=discount_value,
+                start_date=discount_start_date,
+                end_date=discount_end_date,
+                is_active=True
+            )
+            ProductDiscount.objects.create(product=product, discount=discount)
+
         return product
     
 class SellerProductListSerializer(serializers.ModelSerializer):
