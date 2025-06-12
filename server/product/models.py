@@ -2,11 +2,19 @@ from django.db import models
 from cloudinary.models import CloudinaryField
 from django.forms import ValidationError
 from accounts.models import CustomUser
+from django.utils import timezone
 
 
 
 class Category(models.Model):
     name = models.CharField(max_length=200)
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='subcategories'
+    )
     slug = models.SlugField(max_length=200)
     description = models.TextField()
 
@@ -15,12 +23,27 @@ class Category(models.Model):
         ordering = ['name']
 
     def __str__(self):
-        return self.name
+        full_path = [self.name]
+        p = self.parent
+        while p:
+            full_path.append(p.name)
+            p = p.parent
+        return " > ".join(reversed(full_path))
+
+
+class ProductLocation(models.Model):
+    name =  models.CharField(max_length=200)
 
 
 class Product(models.Model):
+    class Gender(models.TextChoices):
+        MEN = "men","Men"
+        WOMEN = "women","Women"
+        KIDS = "kids", "Kids"
+
     category  = models.ForeignKey(Category , on_delete=models.CASCADE , related_name='products')
     name = models.CharField(max_length=200)
+    product_location = models.ForeignKey(ProductLocation,on_delete=models.CASCADE,related_name="product_location" , null=True,blank=True)
     description = models.TextField()
     in_stock = models.BooleanField(default=True)
     main_image = CloudinaryField('image')
@@ -30,6 +53,8 @@ class Product(models.Model):
     model_number = models.CharField(max_length=200 , null=True , blank=True)
     product_code = models.CharField(max_length=200 , null=True , blank=True)
     quantity = models.PositiveBigIntegerField()
+    gender = models.CharField(max_length=20,choices=Gender.choices,null=True,blank=True)
+    stocks = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -99,7 +124,7 @@ class ProductVariants(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.sku:
-            self.sku = f"{self.product.id}-{self.size.code}"  # Automatically generate SKU
+            self.sku = f"{self.product.id}-{self.size.code}" 
         super().save(*args, **kwargs)
 
 
@@ -116,7 +141,7 @@ class FavoriteProduct(models.Model):
     def __str__(self):
         return f"{self.user.username} ❤ {self.product.name}"
 
-from django.utils import timezone
+
 class Discount(models.Model):
     class DiscountType(models.TextChoices):
           FIXED_AMOUNT = 'fixed_amount', 'Fixed Amount'

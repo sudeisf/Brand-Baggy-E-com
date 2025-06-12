@@ -151,12 +151,23 @@ export default function CreateProduct(){
                                         <SelectValue placeholder="jacket" className="capitalize placeholder:capitalize font-roboto" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="percentage">trouser</SelectItem>
-                                        <SelectItem value="fixed">t-shirt</SelectItem>
+                                        <SelectItem value="men">men</SelectItem>
+                                        <SelectItem value="women">women</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <label htmlFor="catagory" className="capitalize font-roboto text-sm ">sub-Catagory</label>
+                                <p className="font-roboto capitalize text-xs font-semibold text-gray-500">product sub catagory</p>
+                                <Select>
+                                    <SelectTrigger className="w-full bg-gray-100 py-6">
+                                        <SelectValue placeholder="jacket" className="capitalize placeholder:capitalize font-roboto" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="top">top</SelectItem>
+                                        <SelectItem value="t-shirt">t-shirt</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <Button className="w-fit rounded-md mt-2 h-12 px-4 bg-[#331d67]">
-                                    <Plus/> Add Catagory
+                                    <Plus/> Add Subcatagory
                                 </Button>
                             </div>
                 </div>
