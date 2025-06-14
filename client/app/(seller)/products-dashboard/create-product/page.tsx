@@ -18,6 +18,7 @@ import axios from "axios"
 import api from "@/lib/axios"
 import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
+import { useProductStore } from "@/store/prouctStore";
 
 const productSchema = z.object({
     name: z.string().min(1, "Product name is required"),
@@ -43,8 +44,12 @@ type ProductFormData = z.infer<typeof productSchema>;
 
 export default function CreateProduct() {
     const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-    const accessToken = useAuthStore((state) => state.accessToken)
-    const [isLoading, setIsloading] = useState<boolean>(false)
+
+    const isLoading = useProductStore((state)=> state.isLoading)
+    const error = useProductStore((state)=> state.error)
+    const CreateProductFn = useProductStore((state)=> state.createProductFn)
+    
+    
     const [images, setImages] = useState<File[]>([]);
     const [parentCategory, setParentCategory] = useState<Array<{
         id: number;
@@ -112,7 +117,6 @@ export default function CreateProduct() {
             return newSizes;
         });
     };
-
     const handleImageChange = (files: File[]) => {
         setImages(files);
         setValue('images', files);
@@ -120,32 +124,10 @@ export default function CreateProduct() {
 
     const onSubmit = async (data: ProductFormData) => {
         try {
-            console.table({
-                Name: data.name,
-                Description: data.description,
-                Brand: data.brand || 'N/A',
-                ProductCode: data.productNumber || 'N/A',
-                ModelNumber: data.modelNumber || 'N/A',
-                Sizes: data.sizes.join(', '),
-                Gender: data.gender || 'N/A',
-                BasePrice: `$${data.basePrice.toFixed(2)}`,
-                quantity: data.stock,
-                Discount: data.discount ? `${data.discount}${data.discountType === 'percentage' ? '%' : ''}` : 'N/A',
-                DiscountType: data.discountType || 'N/A',
-                DiscountStartDate: data.discountStartDate ? data.discountStartDate.toISOString() : 'N/A',
-                DiscountEndDate: data.discountEndDate ? data.discountEndDate.toISOString() : 'N/A',
-                StoreLocation: data.storeLocation,
-                Category: data.category,
-                SubCategory: data.subCategory,
-                MainImage: data.images[0] ? data.images[0].name : 'N/A',
-                AdditionalImages: `${data.images.length - 1} image(s)`
-            });
-
+           
             const submitData = new FormData();
-            
-            // Map form fields to serializer fields
-            submitData.append('category', data.subCategory); // Subcategory ID
-            submitData.append('product_location', data.storeLocation); // ProductLocation ID
+            submitData.append('category', data.subCategory); 
+            submitData.append('product_location', data.storeLocation);
             submitData.append('name', data.name);
             submitData.append('description', data.description);
             submitData.append('price', String(data.basePrice));
@@ -167,37 +149,22 @@ export default function CreateProduct() {
             if (data.images.length > 0) {
                 submitData.append('main_image', data.images[0]);
                 data.images.slice(1).forEach((file, index) => {
-                    submitData.append(`images[${index}]`, file);
+                    submitData.append(`images`, file);
                 });
             }
-
-
             const variants = data.sizes.map(size => ({
                 size: { name: size, code: size },
                 stock: Math.floor(data.stock / data.sizes.length)
             }));
             submitData.append('variants', JSON.stringify(variants));
 
-           
-            setIsloading(true);
-            const response = await api.post('/product/seller/create-product/', submitData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'Authorization': `Bearer ${accessToken}`,
-                }
-            });
-            if (response.data) {
-                toast.success("Product created successfully!");
-                setIsloading(false);
+            const response = await CreateProductFn(submitData);
+            if(response?.success === true){
+                toast.success(response.message)
             }
-            console.log('Product created successfully:', response.data);
-        } catch (error) {
-            setIsloading(false);
-            console.error('Error creating product:', error);
-            if (axios.isAxiosError(error) && error.response) {
-                console.error('API error details:', error.response.data);
-                toast.error(JSON.stringify(error.response.data));
-            }
+        } catch (err) {
+            console.error('Error creating product:', err);
+            toast.error(error)
         }
     };
 
@@ -215,9 +182,9 @@ export default function CreateProduct() {
                         <h1 className="text-2xl font-roboto font-medium text-gray-700">Add New Product</h1>
                     </div>
                 </div>
-                <Button type="submit" className="bg-[#331d67] rounded-sm">
+                <Button type="submit" className="bg-[#331d67] rounded-sm p-5">
                     <Check />
-                    {isLoading ? <Loader2Icon className="animate-spin" /> : "Add Product"}
+                    {isLoading ? <Loader2Icon className="animate-spin w-5 h-5" /> : "Add Product"}
                 </Button>
             </div>
             <div className="flex mt-4 space-x-5 w-full">
@@ -467,9 +434,6 @@ export default function CreateProduct() {
                             {errors.subCategory && (
                                 <span className="text-red-500 text-sm">{errors.subCategory.message}</span>
                             )}
-                            <Button className="w-fit rounded-md mt-2 h-12 px-4 bg-[#331d67]">
-                                <Plus/> Add Subcategory
-                            </Button>
                         </div>
                     </div>
                 </div>

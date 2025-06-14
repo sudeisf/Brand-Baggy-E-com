@@ -20,7 +20,6 @@ class CatagorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ProductImageSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
     class Meta:
         model = ProductImage
         fields = ['image'] 
@@ -96,9 +95,8 @@ class CreateProductSerializer(serializers.Serializer):
     main_image = serializers.ImageField(required=True)
     gender = serializers.ChoiceField(choices=Product.Gender.choices, required=False)
     images = serializers.ListField(
-        child=serializers.ImageField(allow_empty_file=False, use_url=False),
-        required=False,
-        allow_empty=True
+        child=serializers.ImageField(),
+        required=True
     )
     brand = serializers.CharField(max_length=200, required=False, allow_blank=True)
     model_number = serializers.CharField(max_length=200, required=False, allow_blank=True)
