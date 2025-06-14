@@ -29,11 +29,11 @@ export default function ProtectedRoute({children , allowedRoles} : ProtectedRout
         return;
         }
 
-        if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+        if (allowedRoles && user && !allowedRoles.includes(user.user_role)) {
         // Role-based redirection
-        const redirectPath = user.role === "buyer" 
+        const redirectPath = user.user_role === "buyer" 
             ? "/home" 
-            : user.role === "seller" 
+            : user.user_role === "seller" 
             ? "/seller-dashboard" 
             : "/admin";
         router.push(redirectPath);
@@ -43,7 +43,7 @@ export default function ProtectedRoute({children , allowedRoles} : ProtectedRout
     if (isLoading) {
         return <Loading />;
       }
-      if (!isAuthenticated || (allowedRoles && user && !allowedRoles.includes(user.role))) {
+      if (!isAuthenticated || (allowedRoles && user && !allowedRoles.includes(user.user_role))) {
         return <Loading />; 
       }
     
