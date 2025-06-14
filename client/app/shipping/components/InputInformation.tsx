@@ -7,8 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { Rubik } from "next/font/google";
-
 
 const formSchema = z.object({
     firstName: z.string().min(1),
@@ -18,13 +16,6 @@ const formSchema = z.object({
     address: z.string().min(1)
 });
 
-const rubik = Rubik({
-    subsets: ['latin'],
-    weight: ['400', '500', '700'],
-    variable: '--font-rubik',
-  });
-
-
 export default function BillingInformation() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -32,7 +23,7 @@ export default function BillingInformation() {
 
     return (
         <div className="w-full rounded-t-xl p-4">
-            <h1 className={`text-lg font-medium text-[#331d67] p-2 font-${rubik.className}`}>Billing Information</h1>
+            <h1 className="text-lg font-medium text-[#331d67] p-2">Billing Information</h1>
             <Form {...form}>
                 <form className="space-y-4">
                     <div className="flex gap-4 justify-between w-full rounded-xl p-2">

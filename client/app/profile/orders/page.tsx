@@ -3,15 +3,10 @@ import { useState } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Rubik } from "next/font/google"
 import Link from "next/link"
 import { EyeIcon } from "lucide-react"
 import ViewDetails from "../components/ViewDetails"
 import ViewInvoice from "../components/ViewInvoice"
-const rubik = Rubik({
-    subsets: ["latin"],
-    weight: ["400", "500", "600", "700"],
-})
 
 const orders = [
     {
@@ -67,7 +62,7 @@ export default function Orders() {
     }
     return (
         <div className="container mx-auto p-4 max-w-4xl">
-            <h1 className={`${rubik.className} text-3xl font-bold text-[#331d67] mb-2 `}>My Orders</h1>
+            <h1 className="text-3xl font-bold text-[#331d67] mb-2">My Orders</h1>
             <p className="text-gray-500 text-md mb-6">Here are the orders you have made.</p>
 
             {/* Filters */}
@@ -141,8 +136,8 @@ export default function Orders() {
                             </CardHeader>
                             <CardContent>
                                 <div className="flex flex-col gap-4 p-4">
-                                    <h1 className={`text-lg font-${rubik.className}  text-[#331d67] font-bold`}>Delivered {extractMonthName(order.deliveryDate)}</h1>
-                                    <h2 className={`text-md font-${rubik.className} inline-block  font-semibold text-gray-500`}>Order Status: <span className={`${order.deliveryStatus === "delivered" ? "text-green-500 ml-2 bg-green-500/10 px-2 py-1 rounded-sm" : "text-red-500 ml-2 bg-red-500/10 px-2 py-1 rounded-sm"}`}>{order.deliveryStatus}</span></h2>
+                                    <h1 className="text-lg text-[#331d67] font-bold">Delivered {extractMonthName(order.deliveryDate)}</h1>
+                                    <h2 className="text-md inline-block font-semibold text-gray-500">Order Status: <span className={`${order.deliveryStatus === "delivered" ? "text-green-500 ml-2 bg-green-500/10 px-2 py-1 rounded-sm" : "text-red-500 ml-2 bg-red-500/10 px-2 py-1 rounded-sm"}`}>{order.deliveryStatus}</span></h2>
                                     {order.items.map(item => (
                                         <div key={item.id} className="flex flex-col sm:flex-row gap-4 items-start sm:items-center border-b border-gray-200 pb-4">
                                             <h1 className="hidden sm:block">{item.id}</h1>

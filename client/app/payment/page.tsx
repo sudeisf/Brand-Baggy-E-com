@@ -1,7 +1,6 @@
 "use client";
 
 import { ProductCrum } from "@/app/products/components/ProductCrum"
-import { Rubik } from "next/font/google"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { ArrowLeft, Coins } from "lucide-react"
@@ -12,11 +11,6 @@ import { CardMethod } from "./components/CardMethod";
 import FinalSummery from "./components/FinalSummery";
 import CashOnDelivery from "./components/CodMethod";
 import { Button } from "@/components/ui/button";
-const rubik = Rubik({
-    subsets: ['latin'],
-    weight: ['400', '500', '700'],
-    variable: '--font-rubik',
-  });
 
 export default function PaymentPage() {
     const [paymentMethod, setPaymentMethod] = useState<string>("paypal");
@@ -31,8 +25,8 @@ export default function PaymentPage() {
       <ProductCrum />
 
        <div className="flex flex-col w-[1250px] mx-auto mb-4 ">
-            <h1 className={`text-4xl font-bold text-[#331d67] ${rubik.className} p-2 mt-2`}>Payment Method</h1>
-            <p className={`text-gray-500 text-md ${rubik.className} p-2 mt-2`}>Please select the payment method you want to use</p>
+            <h1 className="text-4xl font-bold text-[#331d67] p-2 mt-2">Payment Method</h1>
+            <p className="text-gray-500 text-md p-2 mt-2">Please select the payment method you want to use</p>
        </div>
 
       <div className="flex gap-4 justify-center px-4">
@@ -48,7 +42,7 @@ export default function PaymentPage() {
                 }`}>
                 <div className="flex items-center gap-2">
                     <RadioGroupItem value="paypal" id="paypal" />
-                    <h1 className={`${rubik.className} font-medium text-[#331d67]`}>PayPal</h1>
+                    <h1 className="font-medium text-[#331d67]">PayPal</h1>
                 </div>
                 <img src="/assets/paypal.svg" alt="paypal" className="w-20 h-20" />
             </div>
@@ -61,7 +55,7 @@ export default function PaymentPage() {
                 }`}>
                 <div className="flex items-center gap-2">
                     <RadioGroupItem value="stripe" id="stripe" />
-                    <h1 className={`${rubik.className} font-medium text-[#331d67]`}>Stripe</h1>
+                    <h1 className="font-medium text-[#331d67]">Stripe</h1>
                 </div>
                 <img src="/assets/stripe.svg" alt="stripe" className="w-20 h-20" />
             </div>
@@ -74,7 +68,7 @@ export default function PaymentPage() {
                 }`}>
                 <div className="flex items-center gap-2">
                     <RadioGroupItem value="cash" id="cash" />
-                    <h1 className={`${rubik.className} font-medium text-[#331d67]`}>Cash On Delivery</h1>
+                    <h1 className="font-medium text-[#331d67]">Cash On Delivery</h1>
                 </div>
                 <Coins className="w-16 h-16 text-[#331d67] mt-2" />
             </div>

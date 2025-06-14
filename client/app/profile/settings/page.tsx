@@ -1,5 +1,4 @@
 "use client"
-import { Rubik } from "next/font/google"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -7,11 +6,6 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { User } from "lucide-react"
 import { Avatar, AvatarImage } from "@radix-ui/react-avatar"
-
-const rubik = Rubik({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-})
 
 // Mock data
 const user = {
@@ -59,7 +53,7 @@ const preferences = {
 
 export default function Settings() {
   return (
-    <div className={`${rubik.className} container mx-auto p-4 max-w-4xl`}>
+    <div className="container mx-auto p-4 max-w-4xl">
       <h1 className="text-3xl font-bold text-[#331d67] mb-8">Account Settings</h1>
 
       {/* User Profile */}

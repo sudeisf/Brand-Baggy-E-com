@@ -2,12 +2,6 @@
 import { Button } from "@/components/ui/button"
 import { ShieldCheck, Coins, CreditCard } from "lucide-react"
 import Link from "next/link"
-import { Rubik } from "next/font/google"
-
-const rubik = Rubik({
-    subsets: ['latin'],
-    weight: ['400', '500', '700'],
-})
 
 type FinalSummaryProps = {
   paymentMethod?: string;
@@ -42,20 +36,20 @@ export default function FinalSummary({ paymentMethod = "cash", onConfirm }: Fina
             <div className="space-y-2">
                 <div className="flex justify-between">
                     <p>Order Price</p>
-                    <p className={`${rubik.className} font-medium tracking-wider`}>
+                    <p className="font-medium tracking-wider">
                         {subtotal} <span className="text-sm font-roboto">ETB</span>
                     </p>
                 </div>
                 <div className="flex justify-between">
                     <p>VAT(15%)</p>
-                    <p className={`${rubik.className} font-medium tracking-wider`}>
+                    <p className="font-medium tracking-wider">
                         {vat} <span className="text-sm font-roboto">ETB</span>
                     </p>
                 </div>
                 {paymentMethod === "cash" && (
                     <div className="flex justify-between">
                         <p>Cash Handling Fee</p>
-                        <p className={`${rubik.className} font-medium tracking-wider`}>
+                        <p className="font-medium tracking-wider">
                             {cashFee} <span className="text-sm font-roboto">ETB</span>
                         </p>
                     </div>
@@ -64,14 +58,14 @@ export default function FinalSummary({ paymentMethod = "cash", onConfirm }: Fina
             
             <div className="flex justify-between border-t-2 border-gray-200 pt-2">
                 <p className="font-medium">Total</p>
-                <p className={`${rubik.className} font-bold tracking-wider text-lg`}>
+                <p className="font-bold tracking-wider text-lg">
                     {total} <span className="text-sm font-roboto">ETB</span>
                 </p>
             </div>
 
             <div className="flex items-start gap-2 bg-[#331d67]/5 text-[#331d67] p-4 rounded-md">
                 <ShieldCheck className="w-6 h-6" />
-                <p className={`${rubik.className} font-medium`}>
+                <p className="font-medium">
                     90 days Limited Warranty against manufacturing defects
                 </p>
             </div>

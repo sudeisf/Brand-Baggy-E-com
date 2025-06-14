@@ -1,18 +1,12 @@
 "use client"
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Rubik } from "next/font/google";
 import { AlertCircle, Coins } from "lucide-react";
 
-const rubik = Rubik({
-    subsets: ['latin'],
-    weight: ['400', '500', '700'],
-    variable: '--font-rubik',
-  });
 export default function PaymentMethod() {
     return (
         <div className="w-full rounded-b-xl p-4">
-            <h1 className={`text-lg font-medium text-[#331d67] p-2 font-${rubik.className}`}>Payment Method</h1>
+            <h1 className="text-lg font-medium text-[#331d67] p-2">Payment Method</h1>
             <RadioGroup defaultValue="cash-on-delivery" className="flex flex-col gap-2 p-2">
                         <div className="flex items-center space-x-2 pb-2">
                             <RadioGroupItem value="cash-on-delivery" id="cash-on-delivery" />

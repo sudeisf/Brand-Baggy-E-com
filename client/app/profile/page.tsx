@@ -1,6 +1,5 @@
 "use client"
 
-import { Rubik } from "next/font/google"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useForm } from "react-hook-form"
@@ -16,10 +15,7 @@ import { useAuthStore } from "@/store/authStore"
 import { toast } from "sonner"
 import { useEffect } from "react"
 import { AddProfileImage } from "./components/AddProfileImage"
-const rubik = Rubik({
-    subsets: ["latin"],
-    weight: ["400", "500", "600", "700"],
-})
+
 const formSchema = z.object({
     firstName   : z.string().min(1).max(50 ,{message: "First name must be less than 50 characters"}).optional().nullable(),
     lastName: z.string().min(1).max(50 ,{message: "Last name must be less than 50 characters"}).optional().nullable(),
@@ -180,10 +176,10 @@ export default function MyAccount() {
     return (
         <div className="flex flex-col gap-4 w-full bg-white rounded-md shadow-xs border-gray-200">
             <div className="flex flex-col gap-10 w-full p-4 md:p-10 mt-0 md:mt-4">
-                <h1 className={`${rubik.className} text-[#331d67] text-2xl md:text-3xl font-bold`}>My details</h1>
+                <h1 className="text-[#331d67] text-2xl md:text-3xl font-bold">My details</h1>
                 <div className="flex flex-col gap-4 w-full">
                     <div className="flex flex-col gap-4 w-full">
-                        <h1 className={`${rubik.className} text-[#331d67] text-lg font-medium border-b border-gray-200 pb-4`}>Personal information</h1>
+                        <h1 className="text-[#331d67] text-lg font-medium border-b border-gray-200 pb-4">Personal information</h1>
                     </div>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4 w-full p-2">    
@@ -216,7 +212,7 @@ export default function MyAccount() {
                                             name="firstName"
                                             render={({ field }) => (
                                                 <FormItem className="w-full">
-                                                    <FormLabel className={`${rubik.className} text-sm font-medium uppercase`}>First Name</FormLabel>
+                                                    <FormLabel className="text-sm font-medium uppercase">First Name</FormLabel>
                                                     <FormControl>
                                                         <Input  className="w-full p-3 rounded-md text-sm font-medium bg-gray-100"
                                                           {...field}
@@ -232,7 +228,7 @@ export default function MyAccount() {
                                             name="lastName"
                                             render={({ field }) => (
                                                 <FormItem className="w-full">
-                                                    <FormLabel className={`${rubik.className} text-sm font-medium uppercase`}>Last Name</FormLabel>
+                                                    <FormLabel className="text-sm font-medium uppercase">Last Name</FormLabel>
                                                     <FormControl>
                                                         <Input 
                                                             className="w-full p-3 rounded-md text-sm font-medium bg-gray-100"  
@@ -251,7 +247,7 @@ export default function MyAccount() {
                                             name="birthDate"
                                             render={({ field }) => (
                                                 <FormItem className="w-full">
-                                                    <FormLabel className={`${rubik.className} text-sm font-medium uppercase`}>Birth Date</FormLabel>
+                                                    <FormLabel className="text-sm font-medium uppercase">Birth Date</FormLabel>
                                                     <FormControl>
                                                         <DatePickerWithRange field={field} />
                                                     </FormControl>
@@ -264,7 +260,7 @@ export default function MyAccount() {
                                             name="gender"
                                             render={({ field }) => (
                                                 <FormItem className="w-full">
-                                                    <FormLabel className={`${rubik.className} text-sm font-medium uppercase`}>Gender</FormLabel>
+                                                    <FormLabel className="text-sm font-medium uppercase">Gender</FormLabel>
                                                     <FormControl>
                                                         <Select
                                                             onValueChange={field.onChange}
@@ -290,7 +286,7 @@ export default function MyAccount() {
                                         name="phone"
                                         render={({ field }) => (
                                             <FormItem className="w-full md:w-auto">
-                                                <FormLabel className={`${rubik.className} text-sm font-medium uppercase`}>Phone</FormLabel>
+                                                <FormLabel className="text-sm font-medium uppercase">Phone</FormLabel>
                                                 <FormControl>
                                                     <Input 
                                                         type="tel" 
@@ -312,7 +308,7 @@ export default function MyAccount() {
                             </div>
 
                             <div className="flex flex-col gap-4 w-full">
-                                <h1 className={`${rubik.className} text-[#331d67] text-lg font-medium border-b mt-10 border-gray-200 pb-4`}>E-mail Address</h1>
+                                <h1 className="text-[#331d67] text-lg font-medium border-b mt-10 border-gray-200 pb-4">E-mail Address</h1>
                                 <div className="flex flex-col lg:flex-row justify-between items-start w-full pt-4 gap-8">
                                     <div className="flex flex-col items-start w-full lg:w-[500px] justify-start gap-1">
                                         <p className="text-sm text-gray-500">Current E-mail Address</p>
@@ -324,7 +320,7 @@ export default function MyAccount() {
                                             name="email"
                                             render={({ field }) => (
                                                 <FormItem className="w-full">
-                                                    <FormLabel className={`${rubik.className} text-sm font-medium uppercase`}>E-mail Address</FormLabel>
+                                                    <FormLabel className="text-sm font-medium uppercase">E-mail Address</FormLabel>
                                                     <FormControl>
                                                         <Input
                                                          className="w-52 p-3 rounded-md text-sm font-medium bg-gray-100"  
@@ -342,7 +338,7 @@ export default function MyAccount() {
 
                                 <div className="flex flex-col gap-4 w-full">
                                     <div className="flex flex-col gap-2">
-                                        <h1 className={`${rubik.className} text-[#331d67] text-lg font-medium border-b mt-10 border-gray-200 pb-4`}>Password</h1>
+                                        <h1 className="text-[#331d67] text-lg font-medium border-b mt-10 border-gray-200 pb-4">Password</h1>
                                         <div className="flex flex-col lg:flex-row justify-between items-start w-full mt-10 gap-8">
                                             <div className="flex flex-col gap-2 w-full lg:w-[500px] pr-4">
                                                 <p className="text-sm text-gray-500">this section is for you to change your password</p>
@@ -354,7 +350,7 @@ export default function MyAccount() {
                                                     name="oldPassword"
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel className={`${rubik.className} text-sm font-medium uppercase`}>Old Password</FormLabel>
+                                                            <FormLabel className="text-sm font-medium uppercase">Old Password</FormLabel>
                                                             <FormControl>
                                                                 <Input placeholder="********" className="w-52 p-3 rounded-md text-sm font-medium bg-gray-100"  {...field}
                                                                  value={field.value || ''}
@@ -368,7 +364,7 @@ export default function MyAccount() {
                                                     name="newPassword"
                                                     render={({ field }) => (
                                                         <FormItem>  
-                                                            <FormLabel className={`${rubik.className} text-sm font-medium uppercase`}>New Password</FormLabel>
+                                                            <FormLabel className="text-sm font-medium uppercase">New Password</FormLabel>
                                                             <FormControl>
                                                                 <Input placeholder="********"   className="w-52 p-3 rounded-md text-sm font-medium bg-gray-100"  {...field}
                                                                  value={field.value || ''}
@@ -382,7 +378,7 @@ export default function MyAccount() {
                                                     name="confirmPassword"
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel className={`${rubik.className} text-sm font-medium uppercase`}>Confirm Password</FormLabel>
+                                                            <FormLabel className="text-sm font-medium uppercase">Confirm Password</FormLabel>
                                                             <FormControl>
                                                                 <Input placeholder="********" className="w-52 p-3 rounded-md text-sm font-medium bg-gray-100"  {...field}  value={field.value || ''} />
                                                             </FormControl>
@@ -396,7 +392,7 @@ export default function MyAccount() {
                                 </div>
 
                                 <div className="flex flex-col gap-2">
-                                    <h1 className={`${rubik.className} text-[#331d67] text-lg font-medium border-b mt-10 border-gray-200 pb-4`}>Delete Account</h1>
+                                    <h1 className="text-[#331d67] text-lg font-medium border-b mt-10 border-gray-200 pb-4">Delete Account</h1>
                                     <p className="text-md text-gray-500 pb-4 pt-4">you can delete your account by clicking the button below</p>
                                     <Button onClick={()=> onDelete()} disabled={isLoading} className="w-full md:w-32 rounded-md py-5 px-4 bg-red-500/80 text-white">delete account</Button>
                                 </div>

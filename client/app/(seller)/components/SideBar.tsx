@@ -70,16 +70,7 @@ const items : Item[] = [
       },    
     ]
 
-
-import { Rubik } from "next/font/google"
 import { useState } from "react"
-
-const rubik = Rubik({
-    subsets: ['latin'],
-    weight: ['400', '500', '700'],
-    variable: '--font-rubik',
-  });
-
 import { usePathname } from "next/navigation"
 import { title } from "process"
  
@@ -94,7 +85,7 @@ export default function AppSidbar(){
         <Sidebar className="h-full">
         <SidebarContent className="bg-white text-[#331d67] flex flex-col h-full">
             <SidebarHeader className="flex flex-row items-center pb-5 justify-between mx-4 mt-2">
-                <h1 className={`font-medium text-xl tracking-tighter ${rubik.className}`}>Brand-Baggy</h1>
+                <h1 className="font-medium text-xl tracking-tighter">Brand-Baggy</h1>
                 <SidebarTrigger />
             </SidebarHeader>
             <SidebarGroup className="flex-1">

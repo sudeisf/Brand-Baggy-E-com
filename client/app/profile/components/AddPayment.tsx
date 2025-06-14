@@ -17,12 +17,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Rubik } from "next/font/google"
-
-const rubik = Rubik({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-})
 
 const formSchema = z.object({
   cardNumber: z.string().min(16, "Card number must be 16 digits"),
@@ -30,8 +24,6 @@ const formSchema = z.object({
   expiryDate: z.string().min(5, "Expiry date must be in the format MM/YY"),
   cvv: z.string().min(3, "CVV must be 3 digits"),
 })
-
-
 
 export function AddPayment() {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -54,7 +46,7 @@ export function AddPayment() {
       <DialogTrigger asChild>
       <Button className=" bg-[#331d67]/10 hover:bg-[#331d67]/5 text-sm text-[#7752cc] font-semibold rounded-md px-8"><Plus className="w-4 h-4" />Payment Method</Button>
       </DialogTrigger>
-      <DialogContent className={`${rubik.className} sm:max-w-lg w-[90vw] rounded-lg bg-white shadow-xl animate-in fade-in-50 duration-300`}>
+      <DialogContent className="sm:max-w-lg w-[90vw] rounded-lg bg-white shadow-xl animate-in fade-in-50 duration-300">
         <DialogHeader>  
             <DialogTitle className="text-2xl text-[#331d67] font-bold">Payment Method</DialogTitle>
           <DialogDescription className="text-gray-500">
