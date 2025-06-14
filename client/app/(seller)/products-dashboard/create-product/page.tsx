@@ -68,6 +68,7 @@ export default function CreateProduct() {
 
     const {
         register,
+        reset,
         handleSubmit,
         formState: { errors },
         setValue,
@@ -161,6 +162,9 @@ export default function CreateProduct() {
             const response = await CreateProductFn(submitData);
             if(response?.success === true){
                 toast.success(response.message)
+                reset();
+                setSelectedSizes([]);
+                setImages([]);
             }
         } catch (err) {
             console.error('Error creating product:', err);

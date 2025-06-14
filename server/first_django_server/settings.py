@@ -61,7 +61,8 @@ INSTALLED_APPS = [
     'cloudinary_storage',
     'cart',
     'orders',
-    'payment'
+    'payment',
+    "silk"
 ]
 
 # CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
@@ -115,7 +116,6 @@ REST_AUTH = {
 
 SITE_ID = 1
 ACCOUNT_LOGIN_METHODS = {'username'}
-# 2. Define fields shown during signup
 ACCOUNT_SIGNUP_FIELDS = ['username*', 'email', 'password1*', 'password2*']
 
 LOGIN_REDIRECT_URL = 'http://localhost:5173/home'  # your React app
@@ -162,6 +162,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    "silk.middleware.SilkyMiddleware"
 ]
 
 AUTHENTICATION_BACKENDS = [

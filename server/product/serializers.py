@@ -87,7 +87,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
 
 
-class CreateProductSerializer(serializers.Serializer):
+class CreateProductSerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=20, required=True)
     description = serializers.CharField(max_length=255, required=True)
     price = serializers.DecimalField(max_digits=10, decimal_places=2)
@@ -109,6 +109,15 @@ class CreateProductSerializer(serializers.Serializer):
 
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), required=True)
     product_location = serializers.CharField(max_length=100, required=True)
+
+    class Meta:
+        model = Product
+        fields = [
+            'name', 'description', 'price', 'quantity', 'main_image', 'gender',
+            'images', 'brand', 'model_number', 'product_code', 'variants',
+            'discount_value', 'discount_type', 'discount_start_date', 'discount_end_date',
+            'category', 'product_location'
+        ]
 
     def validate_product_location(self, value):
         location, _ = ProductLocation.objects.get_or_create(name=value)
@@ -175,10 +184,9 @@ class CreateProductSerializer(serializers.Serializer):
                 is_active=True
             )
             ProductDiscount.objects.create(product=product, discount=discount)
-
         return product
     
-class SellerProductListSerializer(serializers.ModelSerializer):
+class SellerProductListSerializer(serializers.Serializer):
     category = CatagorySerializer(read_only=True)
     main_image_url = serializers.SerializerMethodField()
     total_variants = serializers.SerializerMethodField()
@@ -238,10 +246,9 @@ class UpdateProductSerializer(serializers.ModelSerializer):
             """Handle partial updates with image replacement"""
             new_image = validated_data.pop('main_image', None)
             
-            # Update all other fields
+
             instance = super().update(instance, validated_data)
-            
-            # Handle image replacement if provided
+    
             if new_image:
                 if instance.main_image:  # Delete old image if exists
                     instance.main_image.delete()

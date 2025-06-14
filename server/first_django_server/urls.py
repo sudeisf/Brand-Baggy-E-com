@@ -9,6 +9,7 @@ urlpatterns = [
     path('auth/', include('dj_rest_auth.urls')),
     path('product/' , include('product.urls')),
     path('cart/' , include('cart.urls')),
-    path('payment/' , include('payment.urls'))
+    path('payment/' , include('payment.urls')),
+    path('silk/', include('silk.urls', namespace='silk'))
 
 ]
