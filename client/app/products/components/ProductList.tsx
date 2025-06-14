@@ -1,5 +1,4 @@
-"use client"
-import { useRef } from "react"
+
 import Image from "next/image"
 import { Plus } from "lucide-react"
 import Link from "next/link"
