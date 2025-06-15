@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogClose,
@@ -14,24 +15,38 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Edit2Icon } from "lucide-react"
+import { Toggle } from "@/components/ui/toggle"
+import { Edit2Icon, InfoIcon } from "lucide-react"
+import { useState } from "react"
+import { DatePicker } from "./DateTimePicker"
 
 export default function EditDialog() {
+  const [selectedSizes, setSelectedSizes] = useState<string[]>(["M"])
+  const [isDiscountEnabled, setIsDiscountEnabled] = useState(true)
+
+  const toggleSize = (size: string) => {
+    setSelectedSizes(prev => 
+      prev.includes(size) 
+        ? prev.filter(s => s !== size)
+        : [...prev, size]
+    )
+  }
+
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="h-8 w-20 rounded-sm border-1 font-roboto p-0 text-[#333567] shadow-none"
+          className="h-8 w-20 rounded-sm border-1 font-roboto p-0 text-[#333567] shadow-none hover:bg-gray-50 transition-colors"
           aria-label="Open actions menu"
         >
-          <Edit2Icon /> Edit
+          <Edit2Icon className="mr-2 h-4 w-4" /> Edit
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] bg-white rounded-lg shadow-xl">
         <DialogHeader>
-          <DialogTitle>Edit Product</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-2xl text-[#331d67] font-bold">Edit Product</DialogTitle>
+          <DialogDescription className="text-gray-500">
             Make changes to your product information here. Click save when you're done.
           </DialogDescription>
         </DialogHeader>
@@ -39,76 +54,111 @@ export default function EditDialog() {
         <form className="space-y-6 overflow-y-auto max-h-[600px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <div className="space-y-4">
             <div className="space-y-4 p-2">
-              <h1 className="capitalize font-inter font-medium text-gray-900 px-2">general information</h1>
+              <h1 className="capitalize font-inter font-medium text-gray-900 px-2">General Information</h1>
               <div className="flex flex-col gap-2 px-2">
-                <label htmlFor="product-name" className="capitalize font-roboto font-medium text-gray-500">name product</label>
-                <Input id="product-name" placeholder="product name" className="bg-white font-roboto text-gray-700 h-12 shadow-none border capitalize rounded-sm" />
+                <div className="flex items-center gap-2">
+                  <label htmlFor="product-name" className="capitalize font-roboto font-medium text-gray-500">Product Name</label>
+                  <InfoIcon className="h-4 w-4 text-gray-400" />
+                </div>
+                <Input 
+                  id="product-name" 
+                  placeholder="Enter product name" 
+                  className="bg-white font-roboto text-gray-700 h-12 shadow-none border capitalize rounded-sm focus:ring-2 focus:ring-[#331d67] focus:border-transparent" 
+                />
               </div>
               <div className="flex flex-col gap-2 px-2">
-                <label htmlFor="product-description" className="capitalize font-roboto font-medium text-gray-500">description product</label>
-                <Textarea id="product-description" placeholder="add your product description" rows={4} className="bg-white font-roboto shadow-none text-gray-700 capitalize rounded-sm min-h-[100px]" />
+                <div className="flex items-center gap-2">
+                  <label htmlFor="product-description" className="capitalize font-roboto font-medium text-gray-500">Product Description</label>
+                  <InfoIcon className="h-4 w-4 text-gray-400" />
+                </div>
+                <Textarea 
+                  id="product-description" 
+                  placeholder="Add your product description" 
+                  rows={4} 
+                  className="bg-white font-roboto shadow-none text-gray-700 capitalize rounded-sm min-h-[100px] focus:ring-2 focus:ring-[#331d67] focus:border-transparent" 
+                />
               </div>
             </div>
 
             <div className="flex w-full gap-4">
               <div className="p-4 w-full">
-                <h1 className="capitalize text-lg font-roboto font-medium text-gray-700">size</h1>
-                <p className="font-roboto font-medium text-gray-500 text-sm">pick available size</p>
+                <h1 className="capitalize text-lg font-roboto font-medium text-gray-700">Size</h1>
+                <p className="font-roboto font-medium text-gray-500 text-sm">Select available sizes</p>
                 <div className="mt-2">
-                  <div className="flex gap-2 w-full items-center">
+                  <div className="flex flex-wrap gap-2 w-full items-center">
                     {["XS","S", "M", "L", "XL", "XXL"].map((size) => (
-                      <div 
+                      <button
+                        type="button"
                         key={size} 
-                        className={`rounded-sm items-center flex justify-center w-10 h-10 border-1 shadow-none border-gray-200 ${
-                          size === "M" ? "bg-[#331d67] text-white" : "bg-white"
+                        onClick={() => toggleSize(size)}
+                        className={`rounded-sm items-center flex justify-center w-10 h-10 border-1 shadow-none border-gray-200 transition-colors duration-200 ${
+                          selectedSizes.includes(size) 
+                            ? "bg-[#331d67] text-white hover:bg-[#2a174f]" 
+                            : "bg-white hover:bg-gray-50"
                         }`}
                       >
                         <h1 className="text-xs text-center font-medium font-roboto">{size}</h1>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </div>
               </div>
               <div className="p-4 w-full flex flex-col">
                 <div>
-                  <h1 className="capitalize font-roboto text-lg font-medium text-gray-700">gender</h1>
-                  <p className="font-roboto font-medium text-sm text-gray-500">pick available gender</p>
+                  <h1 className="capitalize font-roboto text-lg font-medium text-gray-700">Gender</h1>
+                  <p className="font-roboto font-medium text-sm text-gray-500">Select target gender</p>
                 </div>
-                <RadioGroup defaultValue="comfortable" className="flex mt-5">
+                <RadioGroup defaultValue="men" className="flex mt-5">
                   <div className="flex items-center gap-3">
                     <RadioGroupItem value="men" id="r1" />
-                    <Label htmlFor="r1" className="font-roboto text-sm capitalize text-gray-500">men</Label>
+                    <Label htmlFor="r1" className="font-roboto text-sm capitalize text-gray-500">Men</Label>
                   </div>
                   <div className="flex items-center gap-3">
                     <RadioGroupItem value="women" id="r2" />
-                    <Label htmlFor="r2" className="font-roboto text-sm capitalize text-gray-500">women</Label>
+                    <Label htmlFor="r2" className="font-roboto text-sm capitalize text-gray-500">Women</Label>
                   </div>
                 </RadioGroup>
               </div>
             </div>
 
             <div className="w-full rounded-md shadow-xs p-4 bg-gray-50">
-              <h1 className="font-roboto text-gray-700 capitalize p-2 font-medium">price and stock</h1>
+              <h1 className="font-roboto text-gray-700 capitalize p-2 font-medium">Price and Stock</h1>
               <div className="flex w-full gap-4">
                 <div className="w-full">
                   <div className="flex flex-col gap-2 p-2">
-                    <label htmlFor="base-price" className="capitalize font-roboto text-sm">base price</label>
-                    <Input id="base-price" placeholder="$12.99" className="capitalize font-roboto bg-white h-12" />
+                    <label htmlFor="base-price" className="capitalize font-roboto text-sm">Base Price</label>
+                    <Input 
+                      id="base-price" 
+                      placeholder="$12.99" 
+                      className="capitalize font-roboto bg-white h-12 focus:ring-2 focus:ring-[#331d67] focus:border-transparent" 
+                    />
                   </div>
                   <div className="flex flex-col gap-2 p-2">
-                    <label htmlFor="discount" className="capitalize font-roboto text-sm">discount</label>
-                    <Input id="discount" placeholder="10%" className="capitalize font-roboto bg-white h-12" />
+                    <div className="flex items-center justify-between">
+                      <label htmlFor="discount" className="capitalize font-roboto text-sm">Discount</label>
+                      
+                    </div>
+                    <Input 
+                      id="discount" 
+                      placeholder="10%" 
+                      className="capitalize font-roboto bg-white h-12 focus:ring-2 focus:ring-[#331d67] focus:border-transparent" 
+                      disabled={!isDiscountEnabled}
+                    />
                   </div>
                 </div>
                 <div className="w-full">
                   <div className="flex flex-col gap-2 p-2">
                     <label htmlFor="stock" className="capitalize font-roboto text-sm">Stock</label>
-                    <Input id="stock" placeholder="100" className="capitalize font-roboto bg-white h-12" />
+                    <Input 
+                      id="stock" 
+                      placeholder="100" 
+                      className="capitalize font-roboto bg-white h-12 focus:ring-2 focus:ring-[#331d67] focus:border-transparent" 
+                    />
                   </div>
                   <div className="flex flex-col gap-2 p-2">
-                    <label htmlFor="discount-type" className="capitalize font-roboto text-sm">discount type</label>
-                    <Select>
-                      <SelectTrigger className="w-full bg-white py-6">
+                    <label htmlFor="discount-type" className="capitalize font-roboto text-sm">Discount Type</label>
+                    <Select defaultValue="percentage" disabled={!isDiscountEnabled}>
+                      <SelectTrigger className="w-full bg-white py-6 focus:ring-2 focus:ring-[#331d67] focus:border-transparent">
                         <SelectValue placeholder="Select discount type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -118,23 +168,67 @@ export default function EditDialog() {
                     </Select>
                   </div>
                 </div>
+                
+                
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                                    <div className="flex flex-col gap-2">
+                                        <label htmlFor="discount-start" className="capitalize font-roboto text-sm">discount Start Date</label>
+                                        <DatePicker 
+                    onChange={(date) => console.log(date)} disabled={!isDiscountEnabled}                                        />
+                                       
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                        <label htmlFor="discount-end" className="capitalize font-roboto text-sm">discount end date</label>
+                                        <DatePicker 
+                                             
+                    onChange={(date) => console.log(date)} disabled={!isDiscountEnabled}                                        />
+  
+                                    </div>
+                                </div>
+             
             </div>
+            <div className="p-2 flex items-center gap-5">
+              <Toggle 
+                    pressed={isDiscountEnabled}
+                    onPressedChange={setIsDiscountEnabled}
+                    variant={`${isDiscountEnabled ? "active" : "notActive"}`}
+                  >
+                    {isDiscountEnabled ? "Disable Discount" : "Enable Discount"}
+                      </Toggle>
+                      <p>
+                {isDiscountEnabled ? "Discount has been disabled" : "Discount has been Enabled"}
+                </p>
+                </div>
+                
 
             <div className="w-full rounded-md shadow-xs p-4 bg-gray-50">
               <div className="w-full">
-                <h1 className="capitalize font-roboto text-gray-700 font-medium">Store Location</h1>
-                <p className="font-roboto text-gray-500 text-sm">pick available store</p>
+                <h1 className="capitalize font-roboto text-gray-700 font-medium mb-1">Store Location</h1>
+                <p className="font-roboto text-gray-500 text-sm">Select your store location</p>
               </div>
-              <Input placeholder="store location" className="capitalize font-roboto mt-2 focus:ring-0 border-none bg-white h-12" />
+              <Input 
+                placeholder="Enter store location" 
+                className="capitalize font-roboto mt-2 focus:ring-2 focus:ring-[#331d67] focus:border-transparent border-none bg-white h-12" 
+              />
             </div>
           </div>
 
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button 
+                variant="outline" 
+                className="border-[#331d67] text-[#331d67] hover:bg-[#331d67]/10 rounded-md"
+              >
+                Cancel
+              </Button>
             </DialogClose>
-            <Button type="submit" className="bg-[#331d67] rounded-sm">Save changes</Button>
+            <Button 
+              type="submit" 
+              className="bg-[#331d67] text-white hover:bg-[#2a174f] rounded-md"
+            >
+              Save changes
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

@@ -12,10 +12,11 @@ import {
 } from "@/components/ui/popover"
 
 interface props {
+      disabled : boolean;
       onChange? : (date : Date | undefined) => void;
 }
  
-export function DatePicker({onChange}:props) {
+export function DatePicker({onChange,disabled}:props) {
   const [date, setDate] = React.useState<Date>()
   const handleDateSelect = (newDate: Date | undefined) => {
       setDate(newDate);
@@ -37,6 +38,7 @@ export function DatePicker({onChange}:props) {
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
+          disabled = {disabled}
           mode="single"
           selected={date}
           onSelect={handleDateSelect}

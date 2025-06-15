@@ -8,15 +8,16 @@ from .views import (
     ProductCreateAPIView,
     SellerProductDashboardView,
     UpdateSellerProductAPIView,
-    DeleteSellerProductAPIVIew
-    ,CategoryListView
-    ,CategorySubListView
+    DeleteSellerProductAPIVIew,
+    ProductDetailSellerView,
+    CategoryListView,
+    CategorySubListView
     )
 
 
 urlpatterns =[
     path('product-list/', ProductListView.as_view() , name="products-list"),
-    path('<int:pk>/', ProductDetailView.as_view(), name='product-detail'),
+    path('<int:pk>/detail/', ProductDetailView.as_view(), name='product-detail'),
     path('products/<int:product_id>/reviews/', ProductReviewListCreateView.as_view(), name='product-reviews'),
     path('favorites/add/<int:product_id>/', AddFavoriteProductView.as_view(), name='add-favorite'),
     path('favorites/remove/<int:product_id>/', RemoveFavouriteProductView.as_view(), name='remove-favorite'),
@@ -25,9 +26,10 @@ urlpatterns =[
     path('seller/dashboard/',SellerProductDashboardView.as_view(),name="list-of-seller-products"),
     path('seller/<int:id>/update',UpdateSellerProductAPIView.as_view(), name="update-product"),
     path('seller/create-product/', ProductCreateAPIView.as_view(), name='create-product'),
-    path('seller/<int:id>/delete/',DeleteSellerProductAPIVIew.as_view(),name="delete-product")
-    #test
-   ,path('catagory-list',CategoryListView.as_view(),name="catagory-list"),
+    path('seller/<int:id>/delete/',DeleteSellerProductAPIVIew.as_view(),name="delete-product"),
+    path('seller/<int:product_id>/detail/',ProductDetailSellerView.as_view(),name='product-detail'),
+   
+   path('catagory-list',CategoryListView.as_view(),name="catagory-list"),
    path('catagory-sub-list',CategorySubListView.as_view(),name="catagory-sub-list")
 
 ]   

@@ -85,6 +85,40 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     def get_main_image(self, obj):
         return obj.main_image.url if obj.main_image else None
 
+class ProductDiscountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Discount
+        fields = [
+            'discount_type',
+            'value',
+            'start_date',
+            'end_date',
+            'is_active',
+            'usage_limit',
+            'time_used'
+        ]
+
+
+class SellerProductDetailSerializer(serializers.ModelSerializer):
+    product_size = ProductSizeSerializer(read_only=True)
+    discount = serializers.SerializerMethodField()
+    variants = ProductVariantSerializer(many=True, read_only=True)
+    category = CatagorySerializer(read_only=True)
+
+    class Meta:
+        model = Product
+        fields = [ 
+            'id', 'name', 'description', 'main_image', 'brand', 'category',
+            'product_size', 'discount', 'variants', 'seller'
+        ]
+    
+    def get_discount(self, obj):
+        latest_discount_link = obj.discount.order_by('-created_at').first()
+        if latest_discount_link and latest_discount_link.discount:
+            return ProductDiscountSerializer(latest_discount_link.discount).data
+        return None
+    
+    
 
 
 class CreateProductSerializer(serializers.ModelSerializer):
@@ -186,10 +220,9 @@ class CreateProductSerializer(serializers.ModelSerializer):
             ProductDiscount.objects.create(product=product, discount=discount)
         return product
     
-class SellerProductListSerializer(serializers.Serializer):
-    category = CatagorySerializer(read_only=True)
-    main_image_url = serializers.SerializerMethodField()
-    total_variants = serializers.SerializerMethodField()
+class SellerProductListSerializer(serializers.ModelSerializer):
+    main_image_url = serializers.SerializerMethodField(read_only=True)
+    product_location = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = Product
@@ -199,17 +232,15 @@ class SellerProductListSerializer(serializers.Serializer):
             'price',
             'quantity',
             'in_stock',
-            'category',
             'main_image_url',
-            'created_at',
-            'total_variants'
+            'product_location',
+            'slug'
         ]
-    
     def get_main_image_url(self, obj):
         return obj.main_image.url if obj.main_image else None
     
-    def get_total_variants(self, obj):
-        return obj.variants.count()
+    def get_product_location(self,obj):
+        return obj.product_location.name if obj.product_location else None
       
 
 class UpdateProductSerializer(serializers.ModelSerializer):
@@ -224,17 +255,16 @@ class UpdateProductSerializer(serializers.ModelSerializer):
             'brand',
             'model_number',
             'product_code',
-            'main_image'  # Only image field that can be updated
+            'main_image'  
         ]
         extra_kwargs = {
-            # All fields optional for partial updates
             'name': {'required': False},
             'description': {'required': False},
             'price': {'required': False, 'min_value': 0.01},
             'quantity': {'required': False, 'min_value': 0},
             'main_image': {
                 'required': False,
-                'write_only': True  # Never show in API responses
+                'write_only': True 
             },
             'in_stock' :{'required': False},
             'brand' : {'required': False},
@@ -250,7 +280,7 @@ class UpdateProductSerializer(serializers.ModelSerializer):
             instance = super().update(instance, validated_data)
     
             if new_image:
-                if instance.main_image:  # Delete old image if exists
+                if instance.main_image: 
                     instance.main_image.delete()
                 instance.main_image = new_image
                 instance.save()

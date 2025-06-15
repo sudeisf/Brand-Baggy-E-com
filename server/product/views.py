@@ -3,7 +3,7 @@ from requests import request
 from rest_framework.views import APIView
 from rest_framework import generics , status , filters
 from rest_framework.decorators import api_view
-from .serializers import ProductSerialier ,ProductDetailSerializer ,ProductReviewSerializer , CreateProductSerializer  , UpdateProductSerializer ,SellerProductListSerializer
+from .serializers import ProductSerialier ,ProductDetailSerializer ,ProductReviewSerializer , CreateProductSerializer, SellerProductDetailSerializer  , UpdateProductSerializer ,SellerProductListSerializer
 from .models import Product , FavoriteProduct , ProductReview
 from accounts.models import CustomUser
 from rest_framework.permissions import IsAuthenticated , AllowAny 
@@ -21,7 +21,7 @@ class ProductListView(generics.ListAPIView):
 class ProductDetailView(generics.RetrieveAPIView):
     serializer_class = ProductDetailSerializer
     queryset = Product.objects.prefetch_related('images').all()
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend,filters.SearchFilter]
     filterset_fields = ['category', 'brand']
     search_fields = ['name', "description"]
@@ -31,6 +31,14 @@ class ProductDetailView(generics.RetrieveAPIView):
         context['request'] = self.request
         return context
 
+class ProductDetailSellerView(APIView):
+    serializer_class = SellerProductDetailSerializer
+    permission_classes = [IsAuthenticated, IsSeller]
+
+    def get(self, request, product_id):
+        product = get_object_or_404(Product, id=product_id, seller=request.user)
+        serializer = self.serializer_class(product)
+        return Response(serializer.data)
 
 class AddFavoriteProductView(APIView):
     permission_classes = [IsAuthenticated]
@@ -137,11 +145,7 @@ class DeleteSellerProductAPIVIew(APIView):
         for image in product.images.all():
             image.image.delete() 
             image.delete()  
-        
-        # Delete all variants
         product.variants.all().delete()
-        
-        # Delete all favorites referencing this product
         product.favorites.all().delete()
 
 from .models import Category

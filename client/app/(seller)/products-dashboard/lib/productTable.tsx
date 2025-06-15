@@ -167,5 +167,4 @@ export const columns: ColumnDef<Product>[] = [
   },
 ];
 
-// Assuming 'data' is imported from './data', re-export it
 export { data } from "../data";
