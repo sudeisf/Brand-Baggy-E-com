@@ -3,7 +3,19 @@ import { error } from "console";
 import {create} from "zustand";
 import { persist } from "zustand/middleware";
 import { useAuthStore } from "./authStore";
+import { headers } from "next/headers";
 
+
+type product  = {
+      productName: string;
+      unitPrice: number;
+      products: number;
+      status: string;
+      image: string;
+      sku: string;
+      category: "Men" | "Women" | "Kids";
+      store: "Addis Ababa" | "Dire Dawa" | "Hawassa";
+}
 
 interface productStore {
       isLoading : boolean;
@@ -11,7 +23,8 @@ interface productStore {
       createProductFn : (submitedData : any) => Promise<{
             success: boolean,
             message : string
-      }|void>
+      }|void>;
+      featchProductFn : () => Promise<{product : product}|void>
 }
 
 
@@ -51,6 +64,31 @@ export const useProductStore = create<productStore>()(
                         success : false,
                         message : "product can't be created"
                   }
+            }
+      },
+      featchProductFn :async () => {
+            try {
+                  set({isLoading: true, error: null});
+                  const {accessToken} = useAuthStore.getState();
+                  const response = await api.get('/product/seller/dashboard/',
+                        {
+                              headers : {
+                                    "Content-Type" : 'multipart/form-data',
+                                    'Authorization': `Bearer ${accessToken}`,
+                              }
+                        }    
+                  );
+                  if(response.status == 200){
+                        set({isLoading : false, error: null})
+                  }
+            }catch(error){
+                  console.log(error)
+                  set(
+                       {
+                        isLoading: false,
+                        error: error instanceof Error ? error.message : 'An error occurred'
+                       }
+                  )
             }
       }
     }),

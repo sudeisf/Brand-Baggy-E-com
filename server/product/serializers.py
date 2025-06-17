@@ -224,6 +224,7 @@ class CreateProductSerializer(serializers.ModelSerializer):
 class SellerProductListSerializer(serializers.ModelSerializer):
     main_image_url = serializers.SerializerMethodField(read_only=True)
     product_location = serializers.SerializerMethodField(read_only=True)
+    category = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = Product
@@ -235,10 +236,22 @@ class SellerProductListSerializer(serializers.ModelSerializer):
             'in_stock',
             'main_image_url',
             'product_location',
-            'slug'
+            'slug',
+            'category'
         ]
     def get_main_image_url(self, obj):
         return obj.main_image.url if obj.main_image else None
+    def get_category(self,obj):
+        if obj.category:
+            return {
+                'id': obj.category.id,
+                'name': obj.category.name,
+                'parent' : {
+                    "id" : obj.category.parent.id,
+                    "name" : obj.category.parent.name
+                }
+            } if obj.category.parent else None
+        return None
     
     def get_product_location(self,obj):
         return obj.product_location.name if obj.product_location else None
