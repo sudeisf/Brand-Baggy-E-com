@@ -37,10 +37,10 @@ const getProducts  = async () =>{
         name: item.name,
         price: item.price,
         quantity : item.quantity,
-        in_stock : item.product_location,
+        in_stock : item.in_stock,
         main_image : item.main_image,
         category: item.category,
-        store: item.product_location,
+        product_location: item.product_location,
         status: item.in_stock,
         slug: item.slug
       }));

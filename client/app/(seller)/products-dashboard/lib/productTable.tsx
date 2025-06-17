@@ -28,11 +28,9 @@ type Product = {
   slug: string;
   category: Category;
 };
-
-
 export const statusStyles: Record<string, string> = {
-  Active: "bg-green-500/5 text-green-500 rounded-md",
-  Inactive: "bg-red-500/5 text-red-500",
+  "true": "bg-green-500/5 text-green-500 rounded-md",
+  "false": "bg-red-500/5 text-red-500",
 };
 
 export const columns: ColumnDef<Product>[] = [
@@ -118,20 +116,20 @@ export const columns: ColumnDef<Product>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
+      const status = row.original.in_stock ? "Active" : "Inactive";
       return (
         <Select
-          value={`${row.original.in_stock}`}
-          onValueChange={(value: string) => {
-          }}
+          value={status}
+          onValueChange={(value: string) => {}}
         >
           <SelectTrigger
             className={`w-[120px] px-2 py-4 rounded-sm text-xs font-medium capitalize flex items-center gap-2 font-roboto border-none ${
-              statusStyles[`${row.original.in_stock}`] || "bg-gray-500 text-white"
+              statusStyles[String(row.original.in_stock)]
             }`}
           >
             <DotIcon
               className={`${
-                row.original?.in_stock == true ? "text-green-500" : "text-red-500"
+                row.original.in_stock ? "text-green-500" : "text-red-500"
               } bg-none border-none w-3 h-3`}
             />
             <SelectValue placeholder="Select status" />
@@ -151,9 +149,10 @@ export const columns: ColumnDef<Product>[] = [
     id: "store",
     header: "Store",
     cell: ({ row }) => {
+      console.log('Store location:', row.original.product_location);
       return (
         <div>
-          <p>{row.original.product_location}</p>
+          <p className="text-gray-700 capitalize">{row.original.product_location || "N/A"}</p>
         </div>
       );
     },
