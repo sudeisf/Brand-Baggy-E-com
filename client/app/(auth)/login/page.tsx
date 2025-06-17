@@ -33,8 +33,6 @@ export default function LoginPage() {
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
   const isLoading = useAuthStore((state) => state.isLoading);
-  const  user = useAuthStore((state)=> state.user)
-  const error = useAuthStore((state) => state.error);
   const [redirecting, setRedirecting] = useState<Boolean>(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -48,12 +46,15 @@ export default function LoginPage() {
   const {setError} = form
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
         const result  = await login(values.email , values.password);
+        const user = result?.user;
 
-        if(result?.success === true && user?.user_role === "buyer"){
+        if(user?.user_role === "buyer"){
+          setRedirecting(true)
           router.replace('/');
-        }else if(result?.success === true && user?.user_role === "seller"){
+        } else if(user?.user_role === "seller"){
+          setRedirecting(true)
           router.replace('/dashboard');
-      }
+        }
         if(result?.error){
            setError("root" , {message : result?.error})
         }
@@ -61,12 +62,12 @@ export default function LoginPage() {
   return (
     <>
       {
-        isLoading   ? (
+        (isLoading || redirecting) ? (
           <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
             <LoaderCircle className="w-8 h-8 animate-spin text-[#47307d]" />
             <p className="text-lg font-medium text-[#3A3D44]">Signing you in...</p>
           </div>
-        ): (
+        ) : (
           <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 w-full max-w-md mx-auto p-2 md:p-10 font-inter ">
         <div className="flex flex-col space-y-2.5 mt-10 mb-15 md:mb-10 font-inter">
@@ -128,7 +129,7 @@ export default function LoginPage() {
         )}
         <Button disabled={isLoading || !form.formState.isValid} className="w-full bg-[#47307d] hover:bg-[#665292] h-10 font-medium" type="submit">
         {
-            isLoading ? <LoaderCircle className="animate-spin" /> : "Sign Up"
+            isLoading ? <LoaderCircle className="animate-spin" /> : "Sign In"
           }
         </Button>
         <div className="flex justify-center gap-0.5">

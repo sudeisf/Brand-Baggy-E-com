@@ -22,7 +22,7 @@ type AuthState = {
     isLoading: boolean;
     error: string | Record<string, string[]> | null;
     otpEmail : string | null;
-    login: (email: string, password: string) => Promise<{ error?: string ,  success? : boolean } | void>;
+    login: (email: string, password: string) => Promise<{ error?: string ,  success? : boolean , user?:User } | void>;
     register: (
         email: string,
         username: string,
@@ -94,7 +94,7 @@ export const useAuthStore = create<AuthState>()(
                                 isLoading: false,
                             }
                         );
-                        return { success: true };
+                        return { success: true  , user};
                     }catch(err : any){
                         set({error: err, isLoading: false});
                         const errorMsg =
