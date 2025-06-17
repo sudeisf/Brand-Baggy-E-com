@@ -16,7 +16,7 @@ type Product = {
   price: number;
   quantity: number;
   in_stock: boolean;
-  main_image_url: string;
+  main_image: string;
   product_location: string;
   slug: string;
   category: Category;
@@ -38,7 +38,7 @@ const getProducts  = async () =>{
         price: item.price,
         quantity : item.quantity,
         in_stock : item.product_location,
-        main_image : item.main_image_url,
+        main_image : item.main_image,
         category: item.category,
         store: item.product_location,
         status: item.in_stock,

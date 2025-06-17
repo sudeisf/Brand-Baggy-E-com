@@ -23,7 +23,7 @@ type Product = {
   price: number;
   quantity: number;
   in_stock: boolean;
-  main_image_url: string;
+  main_image: string;
   product_location: string;
   slug: string;
   category: Category;
@@ -67,7 +67,7 @@ export const columns: ColumnDef<Product>[] = [
       return (
         <div className="flex items-center gap-2 px-2 font-roboto">
           <Image
-            src={row.original.main_image_url}
+            src={row.original.main_image}
             alt={row.original.name}
             width={40}
             height={40}

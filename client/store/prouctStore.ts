@@ -20,7 +20,7 @@ interface Category {
       price: number;
       quantity: number;
       in_stock: boolean;
-      main_image_url: string;
+      main_image: string;
       product_location: string;
       slug: string;
       category: Category;

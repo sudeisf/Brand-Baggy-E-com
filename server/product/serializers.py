@@ -220,41 +220,44 @@ class CreateProductSerializer(serializers.ModelSerializer):
             )
             ProductDiscount.objects.create(product=product, discount=discount)
         return product
+# from cloudinary import CloudinaryImage
+# class SellerProductListSerializer(serializers.ModelSerializer):
+#     main_image = serializers.SerializerMethodField(read_only=True)
+#     product_location = serializers.SerializerMethodField(read_only=True)
+#     category = serializers.SerializerMethodField(read_only=True)
     
-class SellerProductListSerializer(serializers.ModelSerializer):
-    main_image_url = serializers.SerializerMethodField(read_only=True)
-    product_location = serializers.SerializerMethodField(read_only=True)
-    category = serializers.SerializerMethodField(read_only=True)
+#     class Meta:
+#         model = Product
+#         fields = [
+#             'id',
+#             'name',
+#             'price',
+#             'quantity',
+#             'in_stock',
+#             'main_image',
+#             'product_location',
+#             'slug',
+#             'category'
+#         ]
+        
+#     def get_main_image(self, obj):
+#         if obj.main_image:
+#             return CloudinaryImage(obj.main_image).build_url(secure=True)
+        
+#     def get_category(self,obj):
+#         if obj.category:
+#             return {
+#                 'id': obj.category.id,
+#                 'name': obj.category.name,
+#                 'parent': {
+#                     'id': obj.category.parent.id,
+#                     'name': obj.category.parent.name
+#                 } if obj.category.parent else None
+#             }
+#         return None
     
-    class Meta:
-        model = Product
-        fields = [
-            'id',
-            'name',
-            'price',
-            'quantity',
-            'in_stock',
-            'main_image_url',
-            'product_location',
-            'slug',
-            'category'
-        ]
-    def get_main_image_url(self, obj):
-        return obj.main_image.url if obj.main_image else None
-    def get_category(self,obj):
-        if obj.category:
-            return {
-                'id': obj.category.id,
-                'name': obj.category.name,
-                'parent': {
-                    'id': obj.category.parent.id,
-                    'name': obj.category.parent.name
-                } if obj.category.parent else None
-            }
-        return None
-    
-    def get_product_location(self,obj):
-        return obj.product_location.name if obj.product_location else None
+#     def get_product_location(self,obj):
+#         return obj.product_location.name if obj.product_location else None
       
 
 class UpdateProductSerializer(serializers.ModelSerializer):
@@ -572,8 +575,9 @@ class CreateProductSerializer(serializers.ModelSerializer):
             ProductDiscount.objects.create(product=product, discount=discount)
         return product
     
+from cloudinary import CloudinaryImage
 class SellerProductListSerializer(serializers.ModelSerializer):
-    main_image_url = serializers.SerializerMethodField(read_only=True)
+    main_image = serializers.SerializerMethodField(read_only=True)
     product_location = serializers.SerializerMethodField(read_only=True)
     category = serializers.SerializerMethodField(read_only=True)
     
@@ -585,13 +589,16 @@ class SellerProductListSerializer(serializers.ModelSerializer):
             'price',
             'quantity',
             'in_stock',
-            'main_image_url',
+            'main_image',
             'product_location',
             'slug',
             'category'
         ]
-    def get_main_image_url(self, obj):
-        return obj.main_image.url if obj.main_image else None
+    def get_main_image(self, obj):
+        if obj.main_image:
+            public_id = str(obj.main_image)
+            return CloudinaryImage(public_id).build_url(secure=True)
+        return None
     def get_category(self,obj):
         if obj.category:
             return {
