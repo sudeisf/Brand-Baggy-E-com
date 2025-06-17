@@ -6,17 +6,28 @@ import Image from "next/image";
 import { DotIcon, Trash2Icon } from "lucide-react";
 import EditDialog from "../create-product/components/EditDialog";
 
-export type Product = {
-  id?: string;
-  productName: string;
-  sku: string;
-  image: string;
-  category: string;
-  unitPrice: number;
-  products: number;
-  status: string;
-  store: string;
-};
+
+
+interface category {
+  id : number;
+  name : string;
+  parent :{
+        id : number,
+        name : string,
+  }
+}
+
+type Product  = {
+  id : number,
+  name : string,
+  price : number,
+  quantity : number,
+  in_stock : boolean,
+  main_image :string,
+  product_location: string,
+  slug: string,
+  catagory : category
+}
 
 export const statusStyles: Record<string, string> = {
   Active: "bg-green-500/5 text-green-500 rounded-md",
@@ -55,15 +66,15 @@ export const columns: ColumnDef<Product>[] = [
       return (
         <div className="flex items-center gap-2 px-2 font-roboto">
           <Image
-            src={row.original.image}
-            alt={row.original.productName}
+            src={row.original.main_image}
+            alt={row.original.name}
             width={40}
             height={40}
             className="rounded-md shadow-sm border-2 border-gray-300"
           />
           <div className="flex flex-col gap-2">
-            <p className="">{row.original.productName}</p>
-            <p className="text-[.8rem] font-roboto font-medium text-gray-400">{row.original.sku}</p>
+            <p className="">{row.original.name}</p>
+            <p className="text-[.8rem] font-roboto font-medium text-gray-400">{row.original.slug}</p>
           </div>
         </div>
       );
@@ -75,7 +86,7 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex items-center gap-2 px-2 font-roboto">
-          {row.original.category}
+          {row.original.catagory.parent.name}
         </div>
       );
     },
@@ -86,7 +97,7 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex text-left gap-2 font-roboto">
-          ${row.original.unitPrice}
+          ${row.original.price}
         </div>
       );
     },
@@ -97,7 +108,7 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex text-left gap-2 font-roboto">
-          {row.original.products}
+          {row.original.name}
         </div>
       );
     },
@@ -108,19 +119,18 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => {
       return (
         <Select
-          value={row.original.status}
-          onValueChange={(value: any) => {
-            // Handle status change
+          value={`${row.original.in_stock}`}
+          onValueChange={(value: string) => {
           }}
         >
           <SelectTrigger
             className={`w-[120px] px-2 py-4 rounded-sm text-xs font-medium capitalize flex items-center gap-2 font-roboto border-none ${
-              statusStyles[row.original.status] || "bg-gray-500 text-white"
+              statusStyles[`${row.original.in_stock}`] || "bg-gray-500 text-white"
             }`}
           >
             <DotIcon
               className={`${
-                row.original.status == "Active" ? "text-green-500" : "text-red-500"
+                row.original?.in_stock == true ? "text-green-500" : "text-red-500"
               } bg-none border-none w-3 h-3`}
             />
             <SelectValue placeholder="Select status" />
@@ -142,7 +152,7 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => {
       return (
         <div>
-          <p>{row.original.store}</p>
+          <p>{row.original.product_location}</p>
         </div>
       );
     },

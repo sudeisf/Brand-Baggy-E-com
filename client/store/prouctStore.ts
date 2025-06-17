@@ -1,36 +1,47 @@
 import api from "@/lib/axios";
-import { error } from "console";
 import {create} from "zustand";
 import { persist } from "zustand/middleware";
 import { useAuthStore } from "./authStore";
-import { headers } from "next/headers";
 
+
+
+interface category {
+      id : number;
+      name : string;
+      parent :{
+            id : number,
+            name : string,
+      }
+}
 
 type product  = {
-      productName: string;
-      unitPrice: number;
-      products: number;
-      status: string;
-      image: string;
-      sku: string;
-      category: "Men" | "Women" | "Kids";
-      store: "Addis Ababa" | "Dire Dawa" | "Hawassa";
+      id : number,
+      name : string,
+      price : number,
+      quantity : number,
+      in_stock : boolean,
+      main_image :string,
+      product_location: string,
+      slug: string,
+      catagory : category
 }
 
 interface productStore {
+      products: product[] | undefined;
       isLoading : boolean;
       error : string | null;
       createProductFn : (submitedData : any) => Promise<{
             success: boolean,
             message : string
       }|void>;
-      featchProductFn : () => Promise<{product : product}|void>
+      fetchProductFn : () => Promise<{products? : product[] , error? : string , success? : boolean}|void>
 }
 
 
 export const useProductStore = create<productStore>()(
   persist(
     (set, get) => ({
+      products: [],
       isLoading : false,
       error : null,
       createProductFn : async (submitedData: any) => {
@@ -66,7 +77,7 @@ export const useProductStore = create<productStore>()(
                   }
             }
       },
-      featchProductFn :async () => {
+      fetchProductFn :async () => {
             try {
                   set({isLoading: true, error: null});
                   const {accessToken} = useAuthStore.getState();
@@ -79,7 +90,11 @@ export const useProductStore = create<productStore>()(
                         }    
                   );
                   if(response.status == 200){
-                        set({isLoading : false, error: null})
+                        set({ products: response.data.results, isLoading: false, error: null });
+                        return {
+                              success : true ,
+                              product : response.data.results
+                        }
                   }
             }catch(error){
                   console.log(error)
@@ -89,6 +104,10 @@ export const useProductStore = create<productStore>()(
                         error: error instanceof Error ? error.message : 'An error occurred'
                        }
                   )
+                  return {
+                        success: false,
+                        error: error instanceof Error ? error.message : 'An error occurred'
+                  }
             }
       }
     }),

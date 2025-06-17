@@ -42,17 +42,51 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { endOfDay, startOfDay } from "date-fns";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { columns, Product, data } from "./lib/productTable";
+import { columns } from "./lib/productTable";
+import { useProductStore } from "@/store/prouctStore";
+interface category {
+      id : number;
+      name : string;
+      parent :{
+            id : number,
+            name : string,
+      }
+    }
+    type product  = {
+      id : number,
+      name : string,
+      price : number,
+      quantity : number,
+      in_stock : boolean,
+      main_image :string,
+      product_location: string,
+      slug: string,
+      catagory : category
+    }
 
-export default function RecentOrdersTable() {
+type props = {
+      initialProducts : product[]
+}
+
+export default function ProductListPage({initialProducts}:props) {
+
+  const isLoading = useProductStore((state)=> state.isLoading);
+  const fetchProductFn = useProductStore((state)=> state.fetchProductFn);
+  const products = useProductStore((state)=> state.products);
+  const error = useProductStore((state)=> state.error);
+  
+  useEffect(() => {
+    useProductStore.setState({ products: initialProducts })
+  }, [initialProducts])
+
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const table = useReactTable<Product>({
-    data,
+  const table = useReactTable<product>({
+    data: products,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
