@@ -49,19 +49,15 @@ export default function LoginPage() {
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
         const result  = await login(values.email , values.password);
 
+        if(result?.success === true && user?.user_role === "buyer"){
+          router.replace('/');
+        }else if(result?.success === true && user?.user_role === "seller"){
+          router.replace('/dashboard');
+      }
         if(result?.error){
            setError("root" , {message : result?.error})
-        }else{
-          setRedirecting(true);
-          if(user?.user_role === "buyer"){
-            router.replace('/');
-          }else if(user?.user_role === "seller"){
-            router.replace('/dashboard');
-          }
         }
   }
-
-
   return (
     <>
       {

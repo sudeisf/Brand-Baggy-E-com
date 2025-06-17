@@ -22,7 +22,7 @@ type AuthState = {
     isLoading: boolean;
     error: string | Record<string, string[]> | null;
     otpEmail : string | null;
-    login: (email: string, password: string) => Promise<{ error?: string } | void>;
+    login: (email: string, password: string) => Promise<{ error?: string ,  success? : boolean } | void>;
     register: (
         email: string,
         username: string,
