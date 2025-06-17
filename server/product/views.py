@@ -110,22 +110,21 @@ class SellerProductDashboardView(generics.ListAPIView):
 class UpdateSellerProductAPIView(APIView):
     permission_classes = [IsSeller]
     
-    def patch(self, request, product_id):  # Changed from put to patch for semantic correctness
+    def patch(self, request, product_id):  
         try:
             product = Product.objects.get(id=product_id, seller=request.user)
         except Product.DoesNotExist:
             return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Add partial=True here ↓
         serializer = UpdateProductSerializer(
             product, 
             data=request.data, 
-            partial=True  # ← This is the critical change
+            partial=True  
         )
         
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data,status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 

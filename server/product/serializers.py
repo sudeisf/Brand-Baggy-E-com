@@ -4,6 +4,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from cloudinary.models import CloudinaryField
 from accounts.serializer import UserSerializer
+from django.utils import timezone
 
 
 User = get_user_model()
@@ -244,9 +245,16 @@ class SellerProductListSerializer(serializers.ModelSerializer):
       
 
 class UpdateProductSerializer(serializers.ModelSerializer):
+    discount_value = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
+    discount_type = serializers.ChoiceField(choices=Discount.DiscountType.choices, required=False)
+    discount_start_date = serializers.DateTimeField(required=False)
+    discount_end_date = serializers.DateTimeField(required=False)
+    is_active = serializers.BooleanField(required=False)
+    product_location = serializers.CharField(max_length=100, required=False)
+
     class Meta:
         model = Product
-        feilds = [
+        fields = [
             'name',
             'description',
             'price',
@@ -255,7 +263,14 @@ class UpdateProductSerializer(serializers.ModelSerializer):
             'brand',
             'model_number',
             'product_code',
-            'main_image'  
+            'main_image',
+            'gender',
+            'product_location',
+            'discount_value',
+            'discount_type',
+            'discount_start_date',
+            'discount_end_date',
+            'is_active'
         ]
         extra_kwargs = {
             'name': {'required': False},
@@ -266,26 +281,61 @@ class UpdateProductSerializer(serializers.ModelSerializer):
                 'required': False,
                 'write_only': True 
             },
-            'in_stock' :{'required': False},
-            'brand' : {'required': False},
-            'model_number' : {'required': False},
-            'product_code' : {'required': False}
+            'in_stock': {'required': False},
+            'brand': {'required': False},
+            'model_number': {'required': False},
+            'product_code': {'required': False},
+            'gender': {'required': False}
         }
 
-        def update(self, instance, validated_data):
-            """Handle partial updates with image replacement"""
-            new_image = validated_data.pop('main_image', None)
-            
+    def validate_product_location(self, value):
+        location, _ = ProductLocation.objects.get_or_create(name=value)
+        return location
 
-            instance = super().update(instance, validated_data)
-    
-            if new_image:
-                if instance.main_image: 
-                    instance.main_image.delete()
-                instance.main_image = new_image
-                instance.save()
+    def update(self, instance, validated_data):
+        """Handle partial updates with image replacement and discount management"""
+        discount_value = validated_data.pop('discount_value', None)
+        discount_type = validated_data.pop('discount_type', None)
+        discount_start_date = validated_data.pop('discount_start_date', None)
+        discount_end_date = validated_data.pop('discount_end_date', None)
+        is_active = validated_data.pop('is_active', None)
+        new_image = validated_data.pop('main_image', None)
+
+        instance = super().update(instance, validated_data)
+        if new_image:
+            if instance.main_image: 
+                instance.main_image.delete()
+            instance.main_image = new_image
+            instance.save()
+
+        if any([discount_value, discount_type, discount_start_date, discount_end_date, is_active is not None]):
+            latest_discount_link = instance.discount.order_by('-created_at').first()
             
-            return instance
+            if latest_discount_link and latest_discount_link.discount:
+                discount = latest_discount_link.discount
+                if discount_value is not None:
+                    discount.value = discount_value
+                if discount_type is not None:
+                    discount.discount_type = discount_type
+                if discount_start_date is not None:
+                    discount.start_date = discount_start_date
+                if discount_end_date is not None:
+                    discount.end_date = discount_end_date
+                if is_active is not None:
+                    discount.is_active = is_active
+                discount.save()
+            else:
+                discount = Discount.objects.create(
+                    name=f"Discount for {instance.name}",
+                    description=f"Auto-generated discount for {instance.name}",
+                    discount_type=discount_type or Discount.DiscountType.PERCENTAGE,
+                    value=discount_value or 0,
+                    start_date=discount_start_date,
+                    end_date=discount_end_date,
+                    is_active=is_active if is_active is not None else True
+                )
+                ProductDiscount.objects.create(product=instance, discount=discount)
+        return instance
 
     
     
