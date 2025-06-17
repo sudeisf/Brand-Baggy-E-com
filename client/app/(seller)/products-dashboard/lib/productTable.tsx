@@ -8,26 +8,27 @@ import EditDialog from "../create-product/components/EditDialog";
 
 
 
-interface category {
-  id : number;
-  name : string;
-  parent :{
-        id : number,
-        name : string,
-  }
+interface Category {
+  id: number;
+  name: string;
+  parent: {
+    id: number;
+    name: string;
+  };
 }
 
-type Product  = {
-  id : number,
-  name : string,
-  price : number,
-  quantity : number,
-  in_stock : boolean,
-  main_image :string,
-  product_location: string,
-  slug: string,
-  catagory : category
-}
+type Product = {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  in_stock: boolean;
+  main_image_url: string;
+  product_location: string;
+  slug: string;
+  category: Category;
+};
+
 
 export const statusStyles: Record<string, string> = {
   Active: "bg-green-500/5 text-green-500 rounded-md",
@@ -66,7 +67,7 @@ export const columns: ColumnDef<Product>[] = [
       return (
         <div className="flex items-center gap-2 px-2 font-roboto">
           <Image
-            src={row.original.main_image}
+            src={row.original.main_image_url}
             alt={row.original.name}
             width={40}
             height={40}
@@ -86,7 +87,7 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex items-center gap-2 px-2 font-roboto">
-          {row.original.catagory.parent.name}
+          {row.original.category.parent.name}
         </div>
       );
     },

@@ -46,28 +46,29 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { columns } from "./lib/productTable";
 import { useProductStore } from "@/store/prouctStore";
-interface category {
-      id : number;
-      name : string;
-      parent :{
-            id : number,
-            name : string,
-      }
+interface Category {
+      id: number;
+      name: string;
+      parent: {
+        id: number;
+        name: string;
+      };
     }
-    type product  = {
-      id : number,
-      name : string,
-      price : number,
-      quantity : number,
-      in_stock : boolean,
-      main_image :string,
-      product_location: string,
-      slug: string,
-      catagory : category
-    }
+    
+    type Product = {
+      id: number;
+      name: string;
+      price: number;
+      quantity: number;
+      in_stock: boolean;
+      main_image_url: string;
+      product_location: string;
+      slug: string;
+      category: Category;
+    };
 
 type props = {
-      initialProducts : product[]
+      initialProducts : Product[]
 }
 
 export default function ProductListPage({initialProducts}:props) {
@@ -85,7 +86,7 @@ export default function ProductListPage({initialProducts}:props) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const table = useReactTable<product>({
+  const table = useReactTable<Product>({
     data: products,
     columns,
     onSortingChange: setSorting,

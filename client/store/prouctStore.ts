@@ -5,36 +5,36 @@ import { useAuthStore } from "./authStore";
 
 
 
-interface category {
-      id : number;
-      name : string;
-      parent :{
-            id : number,
-            name : string,
-      }
-}
-
-type product  = {
-      id : number,
-      name : string,
-      price : number,
-      quantity : number,
-      in_stock : boolean,
-      main_image :string,
-      product_location: string,
-      slug: string,
-      catagory : category
-}
+interface Category {
+      id: number;
+      name: string;
+      parent: {
+        id: number;
+        name: string;
+      };
+    }
+    
+    type Product = {
+      id: number;
+      name: string;
+      price: number;
+      quantity: number;
+      in_stock: boolean;
+      main_image_url: string;
+      product_location: string;
+      slug: string;
+      category: Category;
+    };
 
 interface productStore {
-      products: product[] | undefined;
+      products: Product[] | undefined;
       isLoading : boolean;
       error : string | null;
       createProductFn : (submitedData : any) => Promise<{
             success: boolean,
             message : string
       }|void>;
-      fetchProductFn : () => Promise<{products? : product[] , error? : string , success? : boolean}|void>
+      fetchProductFn : () => Promise<{products? : Product[] , error? : string , success? : boolean}|void>
 }
 
 

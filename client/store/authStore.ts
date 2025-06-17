@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import api from '@/lib/axios';
+import { setCookie } from "cookies-next";
 type User = {
     id: string,
     email: string;
@@ -94,6 +95,10 @@ export const useAuthStore = create<AuthState>()(
                                 isLoading: false,
                             }
                         );
+                        setCookie('accessToken', access, {
+                            maxAge: 60 * 60,
+                            path: '/',
+                          });
                         return { success: true  , user};
                     }catch(err : any){
                         set({error: err, isLoading: false});
@@ -131,7 +136,6 @@ export const useAuthStore = create<AuthState>()(
                       const fieldErrors: Record<string, string> = {};
                       
                       if (error.response?.data) {
-                        // Handle both nested {message, code} and direct string errors
                         for (const [field, details] of Object.entries(error.response.data)) {
                           if (typeof details === 'object' && details !== null && 'message' in details) {
                             fieldErrors[field] = (details as { message: string }).message;
