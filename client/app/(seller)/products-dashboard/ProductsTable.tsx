@@ -43,6 +43,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { columns } from "./lib/productTable";
 import { useProductStore } from "@/store/prouctStore";
+import { useProducts } from "@/app/(seller)/products-dashboard/lib/queries/useProducts";
+import { HydrationBoundary, useQueryClient } from "@tanstack/react-query";
 interface Category {
       id: number;
       name: string;
@@ -69,11 +71,9 @@ type props = {
 }
 
 export default function ProductListPage({initialProducts}:props) {
-
-  const isLoading = useProductStore((state)=> state.isLoading);
-  const fetchProductFn = useProductStore((state)=> state.fetchProductFn);
   const products = useProductStore((state)=> state.products);
-  const error = useProductStore((state)=> state.error);
+  const {data : queryProducts, isFetching , error: queryError } = useProducts()
+  const queryClient = useQueryClient();
   
   useEffect(() => {
     useProductStore.setState({ products: initialProducts })
@@ -115,6 +115,7 @@ export default function ProductListPage({initialProducts}:props) {
   };
 
   return (
+    <HydrationBoundary state={{ queries: [{ queryKey: ['products'], state: { data: initialProducts } }] }} >
     <div className="w-[1250px] bg-white rounded-md mb-4 mx-auto">
       <div className="p-4 rounded-t-md border-b-0 mb-4">
         <div className="space-y-2">
@@ -382,5 +383,6 @@ export default function ProductListPage({initialProducts}:props) {
         </div>
       </div>
     </div>
+    </HydrationBoundary>
   );
 }

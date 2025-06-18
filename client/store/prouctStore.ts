@@ -27,6 +27,7 @@ interface Category {
     };
 
 interface productStore {
+      setProducts: (products: Product[]) => void;
       products: Product[] | undefined;
       isLoading : boolean;
       error : string | null;
@@ -35,7 +36,7 @@ interface productStore {
             message : string
       }|void>;
       fetchProductFn : () => Promise<{products? : Product[] , error? : string , success? : boolean}|void>;
-      deleteProductFn : (id:any) => Promise<{products? : Product[] , error? : string , success? : boolean}|void>;
+      deleteProductFn : (id:any) => Promise<{message? : string , error? : string , success? : boolean}|void>;
 }
 
 
@@ -45,6 +46,7 @@ export const useProductStore = create<productStore>()(
       products: [],
       isLoading : false,
       error : null,
+      setProducts: (products: Product[]) => set({ products, isLoading: false, error: null }),
       createProductFn : async (submitedData: any) => {
             try{
                   set({isLoading:true,error:null})

@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated , AllowAny
 from accounts.permisions import IsSeller 
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
+import cloudinary
 
 
 class ProductListView(generics.ListAPIView):
@@ -130,9 +131,9 @@ class UpdateSellerProductAPIView(APIView):
 
 class DeleteSellerProductAPIVIew(APIView):
     permission_classes = [IsAuthenticated,IsSeller]
-    def delete(self,request,pk):
+    def delete(self,request,id):
         try:
-            product = Product.objects.get(id=pk, seller=request.user)
+            product = Product.objects.get(id=id, seller=request.user)
             self._delete_related_objects(product)
             product.delete()
             return Response({'message': 'Product deleted'}, status=status.HTTP_204_NO_CONTENT)
@@ -140,10 +141,10 @@ class DeleteSellerProductAPIVIew(APIView):
             return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
 
     def _delete_related_objects(self, product):
-
         for image in product.images.all():
-            image.image.delete() 
-            image.delete()  
+            # Delete the image from Cloudinary
+            cloudinary.uploader.destroy(str(image.image))
+            image.delete()
         product.variants.all().delete()
         product.favorites.all().delete()
 

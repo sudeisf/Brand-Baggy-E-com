@@ -5,6 +5,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import Image from "next/image";
 import { DotIcon, Trash2Icon } from "lucide-react";
 import EditDialog from "../create-product/components/EditDialog";
+import DeleteProduct from "../components/DeleteProduct";
 
 
 
@@ -195,9 +196,7 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => (
       <div className="flex items-center justify-end gap-2 w-full">
         <EditDialog />
-        <button className="text-gray-600" aria-label="Delete product">
-          <Trash2Icon className="text-sm w-4 h-4" />
-        </button>
+        <DeleteProduct id={row.original.id}/>
       </div>
     ),
   },
