@@ -34,7 +34,8 @@ interface productStore {
             success: boolean,
             message : string
       }|void>;
-      fetchProductFn : () => Promise<{products? : Product[] , error? : string , success? : boolean}|void>
+      fetchProductFn : () => Promise<{products? : Product[] , error? : string , success? : boolean}|void>;
+      deleteProductFn : (id:any) => Promise<{products? : Product[] , error? : string , success? : boolean}|void>;
 }
 
 
@@ -84,7 +85,6 @@ export const useProductStore = create<productStore>()(
                   const response = await api.get('/product/seller/dashboard/',
                         {
                               headers : {
-                                    "Content-Type" : 'multipart/form-data',
                                     'Authorization': `Bearer ${accessToken}`,
                               }
                         }    
@@ -109,6 +109,38 @@ export const useProductStore = create<productStore>()(
                         error: error instanceof Error ? error.message : 'An error occurred'
                   }
             }
+      },
+      deleteProductFn : async (id) => {
+             try{
+                  set({isLoading: true, error: null});
+                  const {accessToken} = useAuthStore.getState();
+                  const response = await api.delete(`/product/seller/${id}/delete/`,
+                        {
+                              headers : {
+                                    'Authorization': `Bearer ${accessToken}`,
+                              }
+                        }    
+                  );
+                  if(response.status == 204){
+                        set({ isLoading: false, error: null });
+                        return {
+                              success : true ,
+                              message : response.data.message
+                        }
+                  }
+             }catch(error){
+                  console.log(error)
+                  set(
+                       {
+                        isLoading: false,
+                        error: error instanceof Error ? error.message : 'An error occurred'
+                       }
+                  )
+                  return {
+                        success: false,
+                        error: error instanceof Error ? error.message : 'An error occurred'
+                  }
+             }
       }
     }),
     {

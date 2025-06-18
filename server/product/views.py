@@ -129,7 +129,7 @@ class UpdateSellerProductAPIView(APIView):
     
 
 class DeleteSellerProductAPIVIew(APIView):
-    permission_classes = [IsSeller]
+    permission_classes = [IsAuthenticated,IsSeller]
     def delete(self,request,pk):
         try:
             product = Product.objects.get(id=pk, seller=request.user)
