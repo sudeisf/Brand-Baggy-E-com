@@ -59,7 +59,7 @@ export const columns: ColumnDef<Product>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "productName",
+    accessorKey: "name",
     header: "Product Name",
     cell: ({ row }) => {
       return (
@@ -80,8 +80,9 @@ export const columns: ColumnDef<Product>[] = [
     },
   },
   {
-    accessorKey: "category",
-    header: "Catagory",
+    id: "category.parent.name",
+    accessorKey: "category.parent.name",
+    header: "Category",
     cell: ({ row }) => {
       return (
         <div className="flex items-center gap-2 px-2 font-roboto">
@@ -89,9 +90,14 @@ export const columns: ColumnDef<Product>[] = [
         </div>
       );
     },
+    filterFn: (row, id, value) => {
+      console.log(value.toLowerCase())
+      if (!value) return true;
+      return row.original.category.parent.name.toLowerCase().includes(value.toLowerCase());
+    },
   },
   {
-    accessorKey: "unitPrice",
+    accessorKey: "price",
     header: "Product Unit Price",
     cell: ({ row }) => {
       return (
@@ -100,20 +106,37 @@ export const columns: ColumnDef<Product>[] = [
         </div>
       );
     },
+    filterFn: (row, id, value) => {
+      if (!value) return true;
+      const price = row.original.price;
+      
+      switch (value) {
+        case "Under $50":
+          return price < 50;
+        case "$50 - $100":
+          return price >= 50 && price <= 100;
+        case "$100 - $200":
+          return price >= 100 && price <= 200;
+        case "Over $200":
+          return price > 200;
+        default:
+          return true;
+      }
+    }
   },
   {
-    accessorKey: "products",
+    accessorKey: "quantity",
     header: "Products",
     cell: ({ row }) => {
       return (
         <div className="flex text-left gap-2 font-roboto">
-          {row.original.name}
+          {row.original.quantity}
         </div>
       );
     },
   },
   {
-    accessorKey: "status",
+    accessorKey: "in_stock",
     header: "Status",
     cell: ({ row }) => {
       const status = row.original.in_stock ? "Active" : "Inactive";
@@ -144,12 +167,15 @@ export const columns: ColumnDef<Product>[] = [
         </Select>
       );
     },
+    filterFn: (row, id, value) => {
+      const status = row.original.in_stock ? "Active" : "Inactive";
+      return status === value;
+    }
   },
   {
-    id: "store",
+    accessorKey: "product_location",
     header: "Store",
     cell: ({ row }) => {
-      console.log('Store location:', row.original.product_location);
       return (
         <div>
           <p className="text-gray-700 capitalize">{row.original.product_location || "N/A"}</p>

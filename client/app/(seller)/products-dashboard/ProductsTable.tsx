@@ -1,14 +1,11 @@
-
 "use client";
 import {
-  ColumnDef,
   ColumnFiltersState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  Row,
   SortingState,
   useReactTable,
   VisibilityState,
@@ -105,25 +102,16 @@ export default function ProductListPage({initialProducts}:props) {
     },
   });
 
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: new Date(2025, 4, 7),
-    to: new Date(2025, 4, 21),
-  });
-
   const [searchValue, setSearchValue] = useState("");
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
-    table.getColumn("productName")?.setFilterValue(value);
+    table.getColumn("name")?.setFilterValue(value);
   };
 
-  const handleDateRange = (range: DateRange | undefined) => {
-    setDateRange(range);
-    table.getColumn("orderDate")?.setFilterValue(
-      range?.from && range?.to
-        ? [startOfDay(range.from), endOfDay(range.to)]
-        : undefined
-    );
+  const handlePriceRange = (range: string) => {
+    console.log('Selected range:', range);
+    table.getColumn("price")?.setFilterValue(range);
   };
 
   return (
@@ -150,18 +138,18 @@ export default function ProductListPage({initialProducts}:props) {
               <DropdownMenuTrigger className="ml-auto font-roboto border flex items-center px-4 py-2 gap-2 rounded-sm text-gray-600 text-sm font-medium shadow-none z-10">
                 <ArrowDownUp className="w-4 h-4" />
                 <span className="text-gray-400 text-sm">Sort:</span>
-                {table.getColumn("status")?.getIsSorted() === "asc" ? "Asc" : "Desc"}
+                {table.getColumn("name")?.getIsSorted() === "asc" ? "Asc" : "Desc"}
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-white border p-2 rounded-md z-10 w-40">
                 <DropdownMenuItem
-                  onClick={() => table.getColumn("status")?.toggleSorting(false)}
+                  onClick={() => table.getColumn("name")?.toggleSorting(false)}
                   className="cursor-pointer hover:bg-gray-100 rounded-sm px-2 text-sm text-gray-700 py-1.5"
                 >
                   <ArrowUp className="mr-2 h-4 w-4" />
                   Ascending
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => table.getColumn("status")?.toggleSorting(true)}
+                  onClick={() => table.getColumn("name")?.toggleSorting(true)}
                   className="cursor-pointer hover:bg-gray-100 rounded-sm px-2 text-sm text-gray-700 py-1.5"
                 >
                   <ArrowDown className="mr-2 h-4 w-4" />
@@ -210,26 +198,29 @@ export default function ProductListPage({initialProducts}:props) {
               <h1 className="text-sm font-medium text-gray-600">Category</h1>
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  onClick={() => table.getColumn("category")?.setFilterValue(undefined)}
+                  onClick={() => table.getColumn("category.parent.name")?.setFilterValue(undefined)}
                   className="w-full font-roboto bg-gray-50 border flex items-center justify-between px-4 py-2 rounded-sm text-gray-600 text-sm font-medium shadow-none"
                 >
-                  {table.getColumn("category")?.getFilterValue() as string || "All categories"}
+                  {table.getColumn("category.parent.name")?.getFilterValue() as string || "All categories"}
                   <ChevronDown className="w-4 h-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white border p-2 rounded-b-md w-full">
                   <DropdownMenuItem
-                    onClick={() => table.getColumn("category")?.setFilterValue(undefined)}
+                    onClick={() => table.getColumn("category.parent.name")?.setFilterValue(undefined)}
                     className="cursor-pointer hover:bg-gray-100 rounded-sm px-2 text-sm font-medium text-[#331d67] py-1 mb-1"
                   >
                     All Categories
                   </DropdownMenuItem>
-                  {["Men", "Women", "Kids"].map((category) => (
+                  {[...new Set(initialProducts
+                    .filter(product => product.category && product.category.parent)
+                    .map(product => product.category.parent.name)
+                  )].map((categoryName, index) => (
                     <DropdownMenuItem
-                      key={category}
-                      onClick={() => table.getColumn("category")?.setFilterValue(category)}
+                      key={index}
+                      onClick={() => table.getColumn("category.parent.name")?.setFilterValue(categoryName)}
                       className="cursor-pointer hover:bg-gray-100 rounded-sm px-2 text-sm font-medium text-gray-600 py-1 mb-1"
                     >
-                      {category}
+                      {categoryName}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -239,15 +230,15 @@ export default function ProductListPage({initialProducts}:props) {
               <h1 className="text-sm font-medium text-gray-600">Status</h1>
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  onClick={() => table.getColumn("status")?.setFilterValue(undefined)}
+                  onClick={() => table.getColumn("in_stock")?.setFilterValue(undefined)}
                   className="w-full font-roboto bg-gray-50 border flex items-center justify-between px-4 py-2 rounded-sm text-gray-600 text-sm font-medium shadow-none"
                 >
-                  {table.getColumn("status")?.getFilterValue() as string || "All Status"}
+                  {table.getColumn("in_stock")?.getFilterValue() as string || "All Status"}
                   <ChevronDown className="w-4 h-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white border p-2 rounded-b-md w-full">
                   <DropdownMenuItem
-                    onClick={() => table.getColumn("status")?.setFilterValue(undefined)}
+                    onClick={() => table.getColumn("in_stock")?.setFilterValue(undefined)}
                     className="cursor-pointer hover:bg-gray-100 rounded-sm px-2 text-sm font-medium text-[#331d67] py-1 mb-1"
                   >
                     All Status
@@ -255,7 +246,7 @@ export default function ProductListPage({initialProducts}:props) {
                   {["Active", "Inactive"].map((status) => (
                     <DropdownMenuItem
                       key={status}
-                      onClick={() => table.getColumn("status")?.setFilterValue(status)}
+                      onClick={() => table.getColumn("in_stock")?.setFilterValue(status === "Active")}
                       className="cursor-pointer hover:bg-gray-100 rounded-sm px-2 text-sm font-medium text-gray-600 py-1 mb-1"
                     >
                       {status}
@@ -268,23 +259,23 @@ export default function ProductListPage({initialProducts}:props) {
               <h1 className="text-sm font-medium text-gray-600">Price</h1>
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  onClick={() => table.getColumn("unitPrice")?.setFilterValue(undefined)}
+                  onClick={() => table.getColumn("price")?.setFilterValue(undefined)}
                   className="w-full font-roboto bg-gray-50 border flex items-center justify-between px-4 py-2 rounded-sm text-gray-600 text-sm font-medium shadow-none"
                 >
-                  {table.getColumn("unitPrice")?.getFilterValue() as string || "All Prices"}
+                  {table.getColumn("price")?.getFilterValue() as string || "All Prices"}
                   <ChevronDown className="w-4 h-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white border p-2 rounded-b-md w-full">
                   <DropdownMenuItem
-                    onClick={() => table.getColumn("unitPrice")?.setFilterValue(undefined)}
+                    onClick={() => table.getColumn("price")?.setFilterValue(undefined)}
                     className="cursor-pointer hover:bg-gray-100 rounded-sm px-2 text-sm font-medium text-[#331d67] py-1 mb-1"
                   >
                     All Prices
                   </DropdownMenuItem>
-                  {["Under $100", "$100 - $200", "$200 - $300", "Over $300"].map((priceRange) => (
+                  {["Under $50", "$50 - $100", "$100 - $200", "Over $200"].map((priceRange) => (
                     <DropdownMenuItem
                       key={priceRange}
-                      onClick={() => table.getColumn("unitPrice")?.setFilterValue(priceRange)}
+                      onClick={() => handlePriceRange(priceRange)}
                       className="cursor-pointer hover:bg-gray-100 rounded-sm px-2 text-sm font-medium text-gray-600 py-1 mb-1"
                     >
                       {priceRange}
@@ -297,23 +288,23 @@ export default function ProductListPage({initialProducts}:props) {
               <h1 className="text-sm font-medium text-gray-600">Store</h1>
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  onClick={() => table.getColumn("store")?.setFilterValue(undefined)}
+                  onClick={() => table.getColumn("product_location")?.setFilterValue(undefined)}
                   className="w-full font-roboto bg-gray-50 border flex items-center justify-between px-4 py-2 rounded-sm text-gray-600 text-sm font-medium shadow-none"
                 >
-                  {table.getColumn("store")?.getFilterValue() as string || "All Stores"}
+                  {table.getColumn("product_location")?.getFilterValue() as string || "All Stores"}
                   <ChevronDown className="w-4 h-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white border p-2 rounded-b-md w-full">
                   <DropdownMenuItem
-                    onClick={() => table.getColumn("store")?.setFilterValue(undefined)}
+                    onClick={() => table.getColumn("product_location")?.setFilterValue(undefined)}
                     className="cursor-pointer hover:bg-gray-100 rounded-sm px-2 text-sm font-medium text-[#331d67] py-1 mb-1"
                   >
                     All Stores
                   </DropdownMenuItem>
-                  {["Addis Ababa", "Dire Dawa", "Hawassa"].map((store) => (
+                  {[...new Set(initialProducts.map(product => product.product_location))].map((store) => (
                     <DropdownMenuItem
                       key={store}
-                      onClick={() => table.getColumn("store")?.setFilterValue(store)}
+                      onClick={() => table.getColumn("product_location")?.setFilterValue(store)}
                       className="cursor-pointer hover:bg-gray-100 rounded-sm px-2 text-sm font-medium text-gray-600 py-1 mb-1"
                     >
                       {store}
