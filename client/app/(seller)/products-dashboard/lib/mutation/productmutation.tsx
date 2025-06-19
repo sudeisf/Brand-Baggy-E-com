@@ -66,11 +66,37 @@ export const  useCreateProductMutation =  () =>{
       
 }
 
-export  const  useDeleteProdcutMutation = async () =>{
-      
+export  const  useDeleteProdcutMutation =  () =>{
+      const accessToken = useAuthStore((state)=> state.accessToken);
+      const queryClient = useQueryClient();
+      return useMutation<response,Error,number>(
+            {
+                  mutationKey: ['deleteProduct'],
+                  mutationFn : async (id:number) => {
+                        const result =  await api.delete(`/product/seller/${id}/delete/`,
+                              {
+                                    headers : {
+                                          'Authorization': `Bearer ${accessToken}`,
+                                    }
+                              }
+                        );
+                        if(result?.status !== 204){
+                              throw Error("couldn't delete the product")
+                        }
+                        return{
+                              success : true,
+                              message : "product deleted succefully"
+                        }
+
+                  },
+                  onSuccess(data, variables, context) {
+                        queryClient.invalidateQueries({queryKey : ["products"]});
+                  },   
+            }
+      )
 }
 
-export  const  useUpdateProductMutaion = async () =>{
+export  const  useUpdateProductMutaion =  () =>{
       
 }
 

@@ -159,7 +159,7 @@ export default function CreateProduct() {
             createProductFn(submitData,{
                 onSuccess: (data)=> {
                     toast.success(data.message);
-                    router.push('/products');
+                    router.push('/products-dashboard');
                     reset();
                     setSelectedSizes([]);
                     setImages([]);

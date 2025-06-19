@@ -3,26 +3,24 @@
 import { useProductStore } from "@/store/prouctStore"
 import { Loader2Icon, Trash2Icon } from "lucide-react";
 import { toast } from "sonner";
+import { useDeleteProdcutMutation } from "../lib/mutation/productmutation";
+import { data } from "../data";
 
 interface props {
       id : any
 }
 
 export default function DeleteProduct({id}:props) {
-      const deleteFn = useProductStore((state)=> state.deleteProductFn);
-      const isLoading = useProductStore((state)=> state.isLoading);
+      const {mutate : deleteFn , isPending : isLoading , error} = useDeleteProdcutMutation();
       const handleDelete = async ()=>{
-            const result = await deleteFn(id);
-            if (result?.success === true){
-            toast.success("Product deleted Successfuly" ,{
-                  style :{
-                        background : "green",
-                        color: "#ffffff"
+            deleteFn(id,{
+                  onSuccess : (data)=> {
+                        toast.success(data.message)
+                  },
+                  onError : (error) =>{
+                        toast.error(error.message)
                   }
-            });
-            }else {
-                  toast.error("couldn't delete the product")
-            }
+            })
       }
       return (
             <>
