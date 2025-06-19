@@ -367,8 +367,8 @@ export default function CreateProduct() {
                                         </Select>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4 p-4">
-                                    <div className="flex flex-col gap-2 p-2">
+                                <div className="grid grid-cols-2 gap-4 ">
+                                    <div className="flex flex-col gap-2 ">
                                         <label htmlFor="discount-start" className="capitalize font-roboto text-sm">discount Start Date</label>
                                         <DatePicker 
                                             onChange={(date) => setValue('discountStartDate', date)} disabled={false}                                        />
@@ -376,7 +376,7 @@ export default function CreateProduct() {
                                             <span className="text-red-500 text-sm">{errors.discountStartDate.message}</span>
                                         )}
                                     </div>
-                                    <div className="flex flex-col gap-2 p-2">
+                                    <div className="flex flex-col gap-2">
                                         <label htmlFor="discount-end" className="capitalize font-roboto text-sm">discount end date</label>
                                         <DatePicker 
                                         disabled={false} 
