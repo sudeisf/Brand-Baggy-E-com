@@ -1,10 +1,9 @@
 "use client"
 
-import { useProductStore } from "@/store/prouctStore"
+
 import { Loader2Icon, Trash2Icon } from "lucide-react";
 import { toast } from "sonner";
 import { useDeleteProdcutMutation } from "../lib/mutation/productmutation";
-import { data } from "../data";
 
 interface props {
       id : any
