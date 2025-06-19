@@ -166,3 +166,27 @@ class CategorySubListView(APIView):
         queryset = Category.objects.filter(parent__isnull=False)
         serializer = CatagorySerializer(queryset, many=True)
         return Response(serializer.data)
+
+class ProductStockUpdateView(APIView):
+    permission_classes = [IsAuthenticated, IsSeller]
+
+    def patch(self, request, pk):
+        product = get_object_or_404(Product, id=pk, seller=request.user)
+        data = request.data
+        if "in_stock" not in data:
+            return Response(
+                {"error": "in_stock is missing from the request"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        serializer = ProductSerialier(
+            product,
+            data={'in_stock': data['in_stock']},
+            partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "stock status updated"},
+                status=status.HTTP_200_OK
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

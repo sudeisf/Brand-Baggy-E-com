@@ -11,7 +11,8 @@ from .views import (
     DeleteSellerProductAPIVIew,
     ProductDetailSellerView,
     CategoryListView,
-    CategorySubListView
+    CategorySubListView,
+    ProductStockUpdateView
     )
 
 
@@ -28,8 +29,9 @@ urlpatterns =[
     path('seller/create-product/', ProductCreateAPIView.as_view(), name='create-product'),
     path('seller/<int:id>/delete/',DeleteSellerProductAPIVIew.as_view(),name="delete-product"),
     path('seller/<int:product_id>/detail/',ProductDetailSellerView.as_view(),name='product-detail'),
-   
-   path('catagory-list',CategoryListView.as_view(),name="catagory-list"),
-   path('catagory-sub-list',CategorySubListView.as_view(),name="catagory-sub-list")
+    path('seller/<int:pk>/update-stock/', ProductStockUpdateView.as_view(), name='update-stock'),
+    path('catagory-list',CategoryListView.as_view(),name="catagory-list"),
+    path('catagory-sub-list',CategorySubListView.as_view(),name="catagory-sub-list"),
+
 
 ]   

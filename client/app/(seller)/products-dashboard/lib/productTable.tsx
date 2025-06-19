@@ -6,6 +6,7 @@ import Image from "next/image";
 import { DotIcon, Trash2Icon } from "lucide-react";
 import EditDialog from "../create-product/components/EditDialog";
 import DeleteProduct from "../components/DeleteProduct";
+import UpdateProductStatus from "../components/statusUpdate";
 
 
 
@@ -28,10 +29,6 @@ type Product = {
   product_location: string;
   slug: string;
   category: Category;
-};
-export const statusStyles: Record<string, string> = {
-  "true": "bg-green-500/5 text-green-500 rounded-md",
-  "false": "bg-red-500/5 text-red-500",
 };
 
 export const columns: ColumnDef<Product>[] = [
@@ -140,33 +137,11 @@ export const columns: ColumnDef<Product>[] = [
     accessorKey: "in_stock",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.original.in_stock ? "Active" : "Inactive";
-      return (
-        <Select
-          value={status}
-          onValueChange={(value: string) => {}}
-        >
-          <SelectTrigger
-            className={`w-[120px] px-2 py-4 rounded-sm text-xs font-medium capitalize flex items-center gap-2 font-roboto border-none ${
-              statusStyles[String(row.original.in_stock)]
-            }`}
-          >
-            <DotIcon
-              className={`${
-                row.original.in_stock ? "text-green-500" : "text-red-500"
-              } bg-none border-none w-3 h-3`}
-            />
-            <SelectValue placeholder="Select status" />
-          </SelectTrigger>
-          <SelectContent className="bg-gray-50 border-1 p-2 rounded-b-md">
-            {["Active", "Inactive"].map((status) => (
-              <SelectItem key={status} value={status}>
-                {status}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      );
+     return (
+        <div>
+        <UpdateProductStatus id={row.original.id} in_stock={row.original.in_stock} />
+        </div>
+     )
     },
     filterFn: (row, id, value) => {
       const status = row.original.in_stock ? "Active" : "Inactive";

@@ -97,7 +97,37 @@ export  const  useDeleteProdcutMutation =  () =>{
 }
 
 export  const  useUpdateProductMutaion =  () =>{
-      
+}
+
+
+export  const  useUpdateStockProductMutaion =  () =>{
+      const accessToken = useAuthStore((state)=> state.accessToken);
+      const queryClient = useQueryClient();
+      return useMutation<response,Error,{ id: number, in_stock: boolean }>(
+            {
+                  mutationKey: ['updateStockProdudctStatus'],
+                  mutationFn : async ({ id, in_stock }:{ id: number, in_stock: boolean }) => {
+                        const result =  await api.patch(`/product/seller/${id}/update-stock/`,
+                              { in_stock },
+                              {
+                                    headers : {
+                                          'Authorization': `Bearer ${accessToken}`,
+                                    }
+                              }
+                        );
+                        if(result?.status !== 200){
+                              throw Error("couldn't update the product stock")
+                        }
+                        return{
+                              success : true,
+                              message : "product stock updated succefully"
+                        }
+                  },
+                  onSuccess(data, variables, context) {
+                        queryClient.invalidateQueries({queryKey : ["products"]});
+                  },   
+            }
+      )
 }
 
 
