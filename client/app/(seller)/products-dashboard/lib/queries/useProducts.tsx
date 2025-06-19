@@ -1,4 +1,4 @@
-'use client';
+
 import { useAuthStore } from '@/store/authStore';
 import { useProductStore } from '@/store/prouctStore';
 import { useQuery } from '@tanstack/react-query';

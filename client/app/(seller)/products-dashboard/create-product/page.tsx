@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useCreateProductMutation } from "../lib/mutation/productmutation";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
@@ -19,6 +20,7 @@ import api from "@/lib/axios"
 import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
 import { useProductStore } from "@/store/prouctStore";
+import { useRouter } from "next/navigation";
 
 const productSchema = z.object({
     name: z.string().min(1, "Product name is required"),
@@ -43,13 +45,9 @@ const productSchema = z.object({
 type ProductFormData = z.infer<typeof productSchema>;
 
 export default function CreateProduct() {
+    const { mutate : createProductFn, isPending : isLoading, error } = useCreateProductMutation();
     const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-
-    const isLoading = useProductStore((state)=> state.isLoading)
-    const error = useProductStore((state)=> state.error)
-    const CreateProductFn = useProductStore((state)=> state.createProductFn)
-    
-    
+    const router = useRouter();    
     const [images, setImages] = useState<File[]>([]);
     const [parentCategory, setParentCategory] = useState<Array<{
         id: number;
@@ -158,17 +156,21 @@ export default function CreateProduct() {
                 stock: Math.floor(data.stock / data.sizes.length)
             }));
             submitData.append('variants', JSON.stringify(variants));
+            createProductFn(submitData,{
+                onSuccess: (data)=> {
+                    toast.success(data.message);
+                    router.push('/products');
+                    reset();
+                    setSelectedSizes([]);
+                    setImages([]);
+                },
+                onError : (err)=>{
+                    toast.error(error?.message)
+                }
+            })
 
-            const response = await CreateProductFn(submitData);
-            if(response?.success === true){
-                toast.success(response.message)
-                reset();
-                setSelectedSizes([]);
-                setImages([]);
-            }
         } catch (err) {
             console.error('Error creating product:', err);
-            toast.error(error)
         }
     };
 

@@ -35,7 +35,6 @@ interface productStore {
             success: boolean,
             message : string
       }|void>;
-      fetchProductFn : () => Promise<{products? : Product[] , error? : string , success? : boolean}|void>;
       deleteProductFn : (id:any) => Promise<{message? : string , error? : string , success? : boolean}|void>;
 }
 
@@ -77,38 +76,6 @@ export const useProductStore = create<productStore>()(
                   return{
                         success : false,
                         message : "product can't be created"
-                  }
-            }
-      },
-      fetchProductFn :async () => {
-            try {
-                  set({isLoading: true, error: null});
-                  const {accessToken} = useAuthStore.getState();
-                  const response = await api.get('/product/seller/dashboard/',
-                        {
-                              headers : {
-                                    'Authorization': `Bearer ${accessToken}`,
-                              }
-                        }    
-                  );
-                  if(response.status == 200){
-                        set({ products: response.data.results, isLoading: false, error: null });
-                        return {
-                              success : true ,
-                              product : response.data.results
-                        }
-                  }
-            }catch(error){
-                  console.log(error)
-                  set(
-                       {
-                        isLoading: false,
-                        error: error instanceof Error ? error.message : 'An error occurred'
-                       }
-                  )
-                  return {
-                        success: false,
-                        error: error instanceof Error ? error.message : 'An error occurred'
                   }
             }
       },

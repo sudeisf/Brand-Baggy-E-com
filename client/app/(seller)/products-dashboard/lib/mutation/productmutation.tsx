@@ -1,0 +1,78 @@
+"use client"
+import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "@/lib/axios";
+import { useAuthStore } from "@/store/authStore"
+import { useProductStore } from "@/store/prouctStore";
+
+
+interface response {
+      success : boolean,
+      message : string
+}
+
+interface Category {
+      id: number;
+      name: string;
+      parent: {
+        id: number;
+        name: string;
+      };
+    }
+    
+    type Product = {
+      id: number;
+      name: string;
+      price: number;
+      quantity: number;
+      in_stock: boolean;
+      main_image: string;
+      product_location: string;
+      slug: string;
+      category: Category;
+    };
+
+export const  useCreateProductMutation =  () =>{
+      const accessToken = useAuthStore((state)=> state.accessToken);
+      const setProducts = useProductStore((state)=>state.setProducts)
+      const queryClient = useQueryClient();
+      return useMutation<response,Error,FormData>(
+            {     
+                  mutationKey: ['createProduct'],
+                  mutationFn : async (submitedData:FormData) => {
+                        const result = await api.post('/product/seller/create-product/',
+                              submitedData,{
+                                    headers : {
+                                          "Content-Type" : 'multipart/form-data',
+                                          'Authorization': `Bearer ${accessToken}`,
+                                    }
+                              }
+                        );
+                        if(result?.status !== 201){
+                              throw Error("couldn't create the product")
+                        }
+                        return{
+                              success : true,
+                              message : "product created succefully"
+                        }
+
+                  },
+                  onSuccess(data, variables, context) {
+                        queryClient.invalidateQueries({queryKey : ["products"]});
+                  },
+                  
+            },
+      )
+      
+      
+}
+
+export  const  useDeleteProdcutMutation = async () =>{
+      
+}
+
+export  const  useUpdateProductMutaion = async () =>{
+      
+}
+
+
+
