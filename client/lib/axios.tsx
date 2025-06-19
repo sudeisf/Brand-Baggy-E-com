@@ -16,6 +16,10 @@ api.interceptors.request.use(
           return config;
         }
         const accessToken  = useAuthStore.getState().accessToken;
+        console.log("Access Token:", accessToken);
+        if (typeof window === "undefined" && !accessToken) {
+          console.warn("No access token found during SSR. Authenticated requests will fail.");
+        }
         if(accessToken){
             config.headers.Authorization = `Bearer ${accessToken}`;
         }

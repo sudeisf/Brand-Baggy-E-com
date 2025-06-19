@@ -372,6 +372,10 @@ export const useAuthStore = create<AuthState>()(
                     try {
                         const response = await api.post('accounts/token/refresh/', { refresh: refreshToken });
                         const { access } = response.data;
+                        setCookie('accessToken', access, {
+                            maxAge: 60 * 60,
+                            path: '/',
+                          });
                         set({ accessToken: access });
                     } catch (err: any) {
                         set({ error: 'Failed to refresh token', isAuthenticated: false });
