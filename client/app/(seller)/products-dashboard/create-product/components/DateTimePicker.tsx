@@ -14,12 +14,11 @@ import {
 interface props {
       disabled : boolean;
       onChange? : (date : Date | undefined) => void;
+      value?: string | null;
 }
  
-export function DatePicker({onChange,disabled}:props) {
-  const [date, setDate] = React.useState<Date>()
+export function DatePicker({onChange,disabled,value}:props) {
   const handleDateSelect = (newDate: Date | undefined) => {
-      setDate(newDate);
       onChange?.(newDate);
     }
   return (
@@ -29,18 +28,18 @@ export function DatePicker({onChange,disabled}:props) {
           variant={"outline"}
           className={cn(
             "w-full justify-start h-12 text-left font-normal",
-            !date && "text-muted-foreground"
+            !value && "text-muted-foreground"
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(date, "PPP") : <span>Pick a date</span>}
+          {value ? format(new Date(value as string), "PPP") : <span>Pick a date</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
-          disabled = {disabled}
+          disabled={disabled}
           mode="single"
-          selected={date}
+          selected={value ? new Date(value as string) : undefined}
           onSelect={handleDateSelect}
           initialFocus
         />

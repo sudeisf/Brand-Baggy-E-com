@@ -453,18 +453,22 @@ class ProductDiscountSerializer(serializers.ModelSerializer):
             'time_used'
         ]
 
+class ProductLoactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductLocation
+        fields = '__all__'
 
 class SellerProductDetailSerializer(serializers.ModelSerializer):
-    product_size = ProductSizeSerializer(read_only=True)
     discount = serializers.SerializerMethodField()
     variants = ProductVariantSerializer(many=True, read_only=True)
     category = CatagorySerializer(read_only=True)
+    product_location = ProductLoactionSerializer(read_only=True)
 
     class Meta:
         model = Product
         fields = [ 
-            'id', 'name', 'description', 'main_image', 'brand', 'category',
-            'product_size', 'discount', 'variants', 'seller'
+            'id', 'name', 'description', 'main_image', 'brand', 'category','price','gender',
+            'quantity','discount', 'variants', 'seller', "product_location"
         ]
     
     def get_discount(self, obj):

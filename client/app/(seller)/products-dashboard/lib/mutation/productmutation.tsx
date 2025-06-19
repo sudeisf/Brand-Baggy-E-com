@@ -129,6 +129,38 @@ export  const  useUpdateStockProductMutaion =  () =>{
             }
       )
 }
+interface detailResponse {
+      success : true,
+      detail : any
+      message : "product detail fetched updated succefully"
+}
+export  const  useProductBeforeMutation =  () =>{
+      const accessToken = useAuthStore((state)=> state.accessToken);
+      const queryClient = useQueryClient();
+      return useMutation<detailResponse,Error ,number>(
+            {
+                  mutationKey: ['productDetailFn'],
+                  mutationFn : async (id:number) => {
+                        const result = await api.get(
+                              `/product/seller/${id}/detail/`,
+                              {
+                                    headers: {
+                                          'Authorization': `Bearer ${accessToken}`,
+                                    }
+                              }
+                        );
+                        if (result?.status !== 200) {
+                              throw Error("couldn't fetch the product detail");
+                        }
+                        return{
+                              success : true,
+                              detail: result.data,
+                              message : "product detail fetched updated succefully"
+                        }
+                  }   
+            }
+      )
+}
 
 
 

@@ -170,7 +170,7 @@ export const columns: ColumnDef<Product>[] = [
     },
     cell: ({ row }) => (
       <div className="flex items-center justify-end gap-2 w-full">
-        <EditDialog />
+        <EditDialog id={row.original.id} />
         <DeleteProduct id={row.original.id}/>
       </div>
     ),

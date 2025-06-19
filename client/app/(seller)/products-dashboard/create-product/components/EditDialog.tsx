@@ -17,12 +17,52 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Toggle } from "@/components/ui/toggle"
 import { Edit2Icon, InfoIcon } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { DatePicker } from "./DateTimePicker"
+import { useProductBeforeMutation } from "../../lib/mutation/productmutation"
+import { toast } from "sonner"
 
-export default function EditDialog() {
-  const [selectedSizes, setSelectedSizes] = useState<string[]>(["M"])
-  const [isDiscountEnabled, setIsDiscountEnabled] = useState(true)
+interface ProductVariant {
+  size: { name: string }
+}
+// "discount": {
+//         "discount_type": "percentage",
+//         "value": "20.00",
+//         "start_date": "2025-06-16T21:00:00Z",
+//         "end_date": "2025-06-25T21:00:00Z",
+//         "is_active": true,
+//         "usage_limit": null,
+//         "time_used": 0
+//     },
+interface ProductDiscount {
+  discount_type :string ;
+  value : string,
+  start_date : string;
+  end_date : string ;
+  is_active : boolean
+}
+interface ProductLoaction {
+  name : string
+}
+interface ProductDetail {
+  name:string;
+  description :string;
+  gender :string;
+  price : string;
+  quantity: number;
+  variants?: ProductVariant[];
+  discount : ProductDiscount;
+  product_location : ProductLoaction;
+}
+
+interface props{
+  id : number
+}
+export default function EditDialog({ id }: props) {
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [productDetail, setProductDetail] = useState<ProductDetail>();
+  const [isDiscountEnabled, setIsDiscountEnabled] = useState<boolean| undefined>(productDetail?.discount?.is_active);
+  const { mutate: productDetailFn, isPending, error } = useProductBeforeMutation();
 
   const toggleSize = (size: string) => {
     setSelectedSizes(prev => 
@@ -31,6 +71,26 @@ export default function EditDialog() {
         : [...prev, size]
     )
   }
+  useEffect(()=>{
+    productDetailFn(id,
+      {
+        onSuccess:(data) => {
+          console.log("API response:", data);
+            setProductDetail(data.detail)
+        },onError : (error) => {
+          toast.error(error.message || "Failed to fetch product");
+        }
+      }
+    );
+    
+  },[id])
+  useEffect(() => {
+    if (productDetail?.variants) {
+      const sizes = productDetail.variants.map((variant) => variant.size.name);
+      setSelectedSizes(sizes);
+    }
+  }, [productDetail]);
+
 
   return (
     <Dialog>
@@ -61,8 +121,8 @@ export default function EditDialog() {
                   <InfoIcon className="h-4 w-4 text-gray-400" />
                 </div>
                 <Input 
-                  id="product-name" 
-                  placeholder="Enter product name" 
+                  id="product-name"  
+                  placeholder={productDetail?.name}
                   className="bg-white font-roboto text-gray-700 h-12 shadow-none border capitalize rounded-sm focus:ring-2 focus:ring-[#331d67] focus:border-transparent" 
                 />
               </div>
@@ -73,7 +133,7 @@ export default function EditDialog() {
                 </div>
                 <Textarea 
                   id="product-description" 
-                  placeholder="Add your product description" 
+                  placeholder={productDetail?.description} 
                   rows={4} 
                   className="bg-white font-roboto shadow-none text-gray-700 capitalize rounded-sm min-h-[100px] focus:ring-2 focus:ring-[#331d67] focus:border-transparent" 
                 />
@@ -108,7 +168,7 @@ export default function EditDialog() {
                   <h1 className="capitalize font-roboto text-lg font-medium text-gray-700">Gender</h1>
                   <p className="font-roboto font-medium text-sm text-gray-500">Select target gender</p>
                 </div>
-                <RadioGroup defaultValue="men" className="flex mt-5">
+                <RadioGroup defaultValue={productDetail?.gender} className="flex mt-5">
                   <div className="flex items-center gap-3">
                     <RadioGroupItem value="men" id="r1" />
                     <Label htmlFor="r1" className="font-roboto text-sm capitalize text-gray-500">Men</Label>
@@ -129,7 +189,7 @@ export default function EditDialog() {
                     <label htmlFor="base-price" className="capitalize font-roboto text-sm">Base Price</label>
                     <Input 
                       id="base-price" 
-                      placeholder="$12.99" 
+                      placeholder={`${productDetail?.price}`} 
                       className="capitalize font-roboto bg-white h-12 focus:ring-2 focus:ring-[#331d67] focus:border-transparent" 
                     />
                   </div>
@@ -140,7 +200,7 @@ export default function EditDialog() {
                     </div>
                     <Input 
                       id="discount" 
-                      placeholder="10%" 
+                      placeholder={productDetail?.discount.value} 
                       className="capitalize font-roboto bg-white h-12 focus:ring-2 focus:ring-[#331d67] focus:border-transparent" 
                       disabled={!isDiscountEnabled}
                     />
@@ -151,13 +211,13 @@ export default function EditDialog() {
                     <label htmlFor="stock" className="capitalize font-roboto text-sm">Stock</label>
                     <Input 
                       id="stock" 
-                      placeholder="100" 
+                      placeholder={productDetail?.quantity !== undefined ? `${productDetail.quantity}` : "Loading..."} 
                       className="capitalize font-roboto bg-white h-12 focus:ring-2 focus:ring-[#331d67] focus:border-transparent" 
                     />
                   </div>
                   <div className="flex flex-col gap-2 p-2">
                     <label htmlFor="discount-type" className="capitalize font-roboto text-sm">Discount Type</label>
-                    <Select defaultValue="percentage" disabled={!isDiscountEnabled}>
+                    <Select defaultValue={productDetail?.discount.discount_type} disabled={!isDiscountEnabled}>
                       <SelectTrigger className="w-full bg-white py-6 focus:ring-2 focus:ring-[#331d67] focus:border-transparent">
                         <SelectValue placeholder="Select discount type" />
                       </SelectTrigger>
@@ -172,32 +232,40 @@ export default function EditDialog() {
                 
               </div>
               <div className="grid grid-cols-2 gap-4">
-                                    <div className="flex flex-col gap-2">
-                                        <label htmlFor="discount-start" className="capitalize font-roboto text-sm">discount Start Date</label>
-                                        <DatePicker 
-                    onChange={(date) => console.log(date)} disabled={!isDiscountEnabled}                                        />
-                                       
-                                    </div>
-                                    <div className="flex flex-col gap-2">
-                                        <label htmlFor="discount-end" className="capitalize font-roboto text-sm">discount end date</label>
-                                        <DatePicker 
-                                             
-                    onChange={(date) => console.log(date)} disabled={!isDiscountEnabled}                                        />
-  
-                                    </div>
-                                </div>
+                <div className="flex flex-col gap-2">
+                    <label 
+                    htmlFor="discount-start" 
+                    className="capitalize font-roboto text-sm">discount Start Date</label>
+                    <DatePicker 
+                      onChange={(date) => console.log(date)}
+                      disabled={!isDiscountEnabled}   
+                      value={productDetail?.discount.start_date}                                     
+                      />
+                </div>
+                <div className="flex flex-col gap-2">
+                    <label 
+                    htmlFor="discount-end" 
+                    className="capitalize font-roboto text-sm">discount end date</label>
+                    <DatePicker    
+                      onChange={(date) => console.log(date)} 
+                      disabled={!isDiscountEnabled}     
+                      value={productDetail?.discount.end_date}                                   
+                      />
+                </div>
+            </div>
              
             </div>
             <div className="p-2 flex items-center gap-5">
               <Toggle 
+                    className="font-normal text-xs"
                     pressed={isDiscountEnabled}
                     onPressedChange={setIsDiscountEnabled}
-                    variant={`${isDiscountEnabled ? "active" : "notActive"}`}
+                    variant={`${!isDiscountEnabled ? "active" : "notActive"}`}
                   >
-                    {isDiscountEnabled ? "Disable Discount" : "Enable Discount"}
+                    {!isDiscountEnabled ? "Disable Discount" : "Enable Discount"}
                       </Toggle>
                       <p>
-                {isDiscountEnabled ? "Discount has been disabled" : "Discount has been Enabled"}
+                {!isDiscountEnabled ? "Discount has been Enabled" : "Discount has been Disabled"}
                 </p>
                 </div>
                 
@@ -208,7 +276,7 @@ export default function EditDialog() {
                 <p className="font-roboto text-gray-500 text-sm">Select your store location</p>
               </div>
               <Input 
-                placeholder="Enter store location" 
+                placeholder={productDetail?.product_location.name}
                 className="capitalize font-roboto mt-2 focus:ring-2 focus:ring-[#331d67] focus:border-transparent border-none bg-white h-12" 
               />
             </div>
