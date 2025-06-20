@@ -97,18 +97,14 @@ export  const  useDeleteProdcutMutation =  () =>{
 }
 
 export  const  useUpdateProductMutaion =  () =>{
-}
-
-
-export  const  useUpdateStockProductMutaion =  () =>{
       const accessToken = useAuthStore((state)=> state.accessToken);
       const queryClient = useQueryClient();
-      return useMutation<response,Error,{ id: number, in_stock: boolean }>(
+      return useMutation<response,Error,{ id: number, payload: Record<string, any> }>(
             {
-                  mutationKey: ['updateStockProdudctStatus'],
-                  mutationFn : async ({ id, in_stock }:{ id: number, in_stock: boolean }) => {
-                        const result =  await api.patch(`/product/seller/${id}/update-stock/`,
-                              { in_stock },
+                  mutationKey: ['updateProduct'],
+                  mutationFn : async ({ id, payload }:{ id: number, payload: Record<string, any>}) => {
+                        const result =  await api.patch(`/product/seller/${id}/update/`,
+                              payload ,
                               {
                                     headers : {
                                           'Authorization': `Bearer ${accessToken}`,
@@ -118,9 +114,41 @@ export  const  useUpdateStockProductMutaion =  () =>{
                         if(result?.status !== 200){
                               throw Error("couldn't update the product stock")
                         }
+                        console.log(payload)
                         return{
                               success : true,
                               message : "product stock updated succefully"
+                        }
+                  },
+                  onSuccess(data, variables, context) {
+                        queryClient.invalidateQueries({queryKey : ["products"]});
+                  },   
+            }
+      )
+}
+
+
+export  const  useUpdateStockProductMutaion =  () =>{
+      const accessToken = useAuthStore((state)=> state.accessToken);
+      const queryClient = useQueryClient();
+      return useMutation<response,Error,{ id: number, in_stock: boolean }>(
+            {
+                  mutationKey: ['updateStockStatus'],
+                  mutationFn : async ({ id, in_stock }: { id: number, in_stock: boolean }) => {
+                        const result =  await api.patch(`/product/seller/${id}/update-stock/`,
+                              {in_stock},
+                              {
+                                    headers : {
+                                          'Authorization': `Bearer ${accessToken}`,
+                                    }
+                              }
+                        );
+                        if(result?.status !== 200){
+                              throw Error("couldn't update the product")
+                        }
+                        return{
+                              success : true,
+                              message : "product updated succefully"
                         }
                   },
                   onSuccess(data, variables, context) {
@@ -139,7 +167,7 @@ export  const  useProductBeforeMutation =  () =>{
       const queryClient = useQueryClient();
       return useMutation<detailResponse,Error ,number>(
             {
-                  mutationKey: ['productDetailFn'],
+                  mutationKey: ['getProductDetail'],
                   mutationFn : async (id:number) => {
                         const result = await api.get(
                               `/product/seller/${id}/detail/`,

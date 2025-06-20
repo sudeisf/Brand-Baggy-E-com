@@ -467,7 +467,8 @@ class SellerProductDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [ 
-            'id', 'name', 'description', 'main_image', 'brand', 'category','price','gender',
+            'id', 'name', 'description','model_number',"product_code" ,
+            'main_image', 'brand',"" 'category','price','gender',
             'quantity','discount', 'variants', 'seller', "product_location"
         ]
     
@@ -638,7 +639,6 @@ class UpdateProductSerializer(serializers.ModelSerializer):
             'brand',
             'model_number',
             'product_code',
-            'main_image',
             'gender',
             'product_location',
             'discount_value',
@@ -652,10 +652,6 @@ class UpdateProductSerializer(serializers.ModelSerializer):
             'description': {'required': False},
             'price': {'required': False, 'min_value': 0.01},
             'quantity': {'required': False, 'min_value': 0},
-            'main_image': {
-                'required': False,
-                'write_only': True 
-            },
             'in_stock': {'required': False},
             'brand': {'required': False},
             'model_number': {'required': False},
@@ -674,14 +670,8 @@ class UpdateProductSerializer(serializers.ModelSerializer):
         discount_start_date = validated_data.pop('discount_start_date', None)
         discount_end_date = validated_data.pop('discount_end_date', None)
         is_active = validated_data.pop('is_active', None)
-        new_image = validated_data.pop('main_image', None)
-
+        
         instance = super().update(instance, validated_data)
-        if new_image:
-            if instance.main_image: 
-                instance.main_image.delete()
-            instance.main_image = new_image
-            instance.save()
 
         if any([discount_value, discount_type, discount_start_date, discount_end_date, is_active is not None]):
             latest_discount_link = instance.discount.order_by('-created_at').first()

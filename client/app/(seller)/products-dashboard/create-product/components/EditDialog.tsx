@@ -19,21 +19,38 @@ import { Toggle } from "@/components/ui/toggle"
 import { Edit2Icon, InfoIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { DatePicker } from "./DateTimePicker"
-import { useProductBeforeMutation } from "../../lib/mutation/productmutation"
+import { useProductBeforeMutation , useUpdateProductMutaion } from "../../lib/mutation/productmutation"
 import { toast } from "sonner"
+import {z} from "zod";
+import { Controller, useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+
+
+
+const productSchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  brand: z.string().optional(),
+  productNumber: z.string().optional(),
+  modelNumber: z.string().optional(),
+  sizes: z.array(z.string()).optional(),
+  gender: z.enum(["men", "women", "kids"]).optional(),
+  basePrice: z.number().min(0).optional(),
+  stock: z.number().min(0).optional(),
+  discount: z.number().optional(),
+  discountType: z.enum(["percentage", "fixed_amount"]).optional(),
+  discountStartDate: z.date().optional(),
+  discountEndDate: z.date().optional(),
+  storeLocation: z.string().optional(),
+  isDiscountOn: z.boolean().optional()
+});
+
+
+type  ProductFormData = z.infer<typeof productSchema>;
 
 interface ProductVariant {
   size: { name: string }
 }
-// "discount": {
-//         "discount_type": "percentage",
-//         "value": "20.00",
-//         "start_date": "2025-06-16T21:00:00Z",
-//         "end_date": "2025-06-25T21:00:00Z",
-//         "is_active": true,
-//         "usage_limit": null,
-//         "time_used": 0
-//     },
 interface ProductDiscount {
   discount_type :string ;
   value : string,
@@ -50,6 +67,9 @@ interface ProductDetail {
   gender :string;
   price : string;
   quantity: number;
+  brand : string,
+  model_number : string;
+  product_code : string;
   variants?: ProductVariant[];
   discount : ProductDiscount;
   product_location : ProductLoaction;
@@ -62,15 +82,11 @@ export default function EditDialog({ id }: props) {
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [productDetail, setProductDetail] = useState<ProductDetail>();
   const [isDiscountEnabled, setIsDiscountEnabled] = useState<boolean| undefined>(productDetail?.discount?.is_active);
-  const { mutate: productDetailFn, isPending, error } = useProductBeforeMutation();
+  const { mutate: productDetailFn} = useProductBeforeMutation();
+  const { mutate: updateFn, isPending : isLoading, error} = useUpdateProductMutaion();
 
-  const toggleSize = (size: string) => {
-    setSelectedSizes(prev => 
-      prev.includes(size) 
-        ? prev.filter(s => s !== size)
-        : [...prev, size]
-    )
-  }
+  
+  
   useEffect(()=>{
     productDetailFn(id,
       {
@@ -84,12 +100,136 @@ export default function EditDialog({ id }: props) {
     );
     
   },[id])
+
+
+
+  const {
+    register,
+    control,
+    reset,
+    watch,
+    setValue,
+    handleSubmit,
+    formState
+  } = useForm<ProductFormData>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+      sizes: [],
+      gender: undefined,
+      brand: '',
+      modelNumber: '',
+      productNumber: '',
+      basePrice: undefined,
+      stock: undefined,
+      storeLocation: '',
+      isDiscountOn: false,
+    },
+  });
   useEffect(() => {
     if (productDetail?.variants) {
       const sizes = productDetail.variants.map((variant) => variant.size.name);
       setSelectedSizes(sizes);
+      setValue("sizes", sizes);
     }
   }, [productDetail]);
+
+  useEffect(() => {
+    if (productDetail) {
+      reset({
+        name: productDetail.name,
+        description: productDetail.description,
+        sizes: productDetail.variants?.map(v => v.size.name) || [],
+        gender: productDetail.gender as any,
+        basePrice: Number(productDetail.price),
+        stock: productDetail.quantity,
+        brand : productDetail.brand,
+        modelNumber: productDetail.model_number,
+        productNumber : productDetail.product_code,
+        discount: Number(productDetail.discount?.value || 0),
+        discountType: productDetail.discount?.discount_type as any,
+        isDiscountOn : productDetail.discount.is_active,
+        discountStartDate: productDetail.discount?.start_date
+          ? new Date(productDetail.discount.start_date)
+          : undefined,
+        discountEndDate: productDetail.discount?.end_date
+          ? new Date(productDetail.discount.end_date)
+          : undefined,
+        storeLocation: productDetail.product_location.name,
+      });
+      setIsDiscountEnabled(productDetail.discount?.is_active);
+
+    }
+  }, [productDetail]);
+
+  const toggleSize = (size: string) => {
+    const currentSizes = watch("sizes") ?? [];
+    const updatedSizes = currentSizes.includes(size)
+      ? currentSizes.filter((s: string) => s !== size)
+      : [...currentSizes, size];
+    setValue("sizes", updatedSizes, { shouldDirty: true });
+    setSelectedSizes(updatedSizes);
+  };
+  const onSubmit = async (values: ProductFormData) => {
+    const dirty = formState.dirtyFields;
+    const payload: Record<string, any> = {};
+  
+    for (const key in dirty) {
+      const value = values[key as keyof ProductFormData];
+  
+      switch (key) {
+        case "basePrice":
+          payload["price"] = value;
+          break;
+        case "stock":
+          payload["quantity"] = value;
+          break;
+        case "modelNumber":
+          payload["model_number"] = value;
+          break;
+        case "productNumber":
+          payload["product_code"] = value;
+          break;
+        case "storeLocation":
+          payload["product_location"] = value;
+          break;
+        case "discount":
+          payload["discount_value"] = value;
+          break;
+        case "discountType":
+          payload["discount_type"] = value;
+          break;
+        case "discountStartDate":
+          payload["discount_start_date"] = value instanceof Date ? value.toISOString() : value;
+        case "discountEndDate":
+          payload["discount_end_date"] = value instanceof Date ? value.toISOString() : value;
+          break;
+        case "isDiscountOn":
+          payload["is_active"] = value;
+          break;
+        default:
+          payload[key] = value;
+          break;
+      }
+    }
+
+      updateFn({
+        id ,
+        payload
+      },{
+        onSuccess : (data) =>{
+          toast.success(data.message);
+        },onError : (error)=>{
+          toast.error(error.message)
+        }
+      }
+    )
+  };
+  
+  
+
+
 
 
   return (
@@ -110,8 +250,8 @@ export default function EditDialog({ id }: props) {
             Make changes to your product information here. Click save when you're done.
           </DialogDescription>
         </DialogHeader>
-        
-        <form className="space-y-6 overflow-y-auto max-h-[600px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+  
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 overflow-y-auto max-h-[600px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <div className="space-y-4">
             <div className="space-y-4 p-2">
               <h1 className="capitalize font-inter font-medium text-gray-900 px-2">General Information</h1>
@@ -121,8 +261,8 @@ export default function EditDialog({ id }: props) {
                   <InfoIcon className="h-4 w-4 text-gray-400" />
                 </div>
                 <Input 
+                  {...register("name")}
                   id="product-name"  
-                  placeholder={productDetail?.name}
                   className="bg-white font-roboto text-gray-700 h-12 shadow-none border capitalize rounded-sm focus:ring-2 focus:ring-[#331d67] focus:border-transparent" 
                 />
               </div>
@@ -132,20 +272,52 @@ export default function EditDialog({ id }: props) {
                   <InfoIcon className="h-4 w-4 text-gray-400" />
                 </div>
                 <Textarea 
+                 {...register('description')}
                   id="product-description" 
-                  placeholder={productDetail?.description} 
                   rows={4} 
                   className="bg-white font-roboto shadow-none text-gray-700 capitalize rounded-sm min-h-[100px] focus:ring-2 focus:ring-[#331d67] focus:border-transparent" 
                 />
               </div>
             </div>
-
+            <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-2 px-2">
+                    <label htmlFor="brand" className="capitalize font-roboto font-medium text-gray-500">brand</label>
+                    <Input 
+                        {...register("brand")}
+                        id="brand"
+                        className="bg-white font-roboto text-gray-700 h-12 shadow-none border capitalize rounded-sm"
+                        
+                    />
+                </div>
+                <div className="flex flex-col gap-2 px-2">
+                    <label htmlFor="productNumber" className="capitalize font-roboto font-medium text-gray-500">product number</label>
+                    <Input 
+                        {...register("productNumber")}
+                        id="productNumber"
+                        className="bg-white font-roboto text-gray-700 h-12 shadow-none border capitalize rounded-sm"
+                        
+                    />
+                </div>
+                <div className="flex flex-col gap-2 px-2">
+                    <label htmlFor="modelNumber" className="capitalize font-roboto font-medium text-gray-500">model number</label>
+                    <Input 
+                        {...register("modelNumber")}
+                        id="modelNumber"
+                        className="bg-white font-roboto text-gray-700 h-12 shadow-none border capitalize rounded-sm"
+                        
+                    />
+                </div>
+            </div>
             <div className="flex w-full gap-4">
               <div className="p-4 w-full">
                 <h1 className="capitalize text-lg font-roboto font-medium text-gray-700">Size</h1>
                 <p className="font-roboto font-medium text-gray-500 text-sm">Select available sizes</p>
                 <div className="mt-2">
-                  <div className="flex flex-wrap gap-2 w-full items-center">
+                  <Controller
+                    control={control}
+                    name="sizes"
+                    render={({ field }) => (
+                    <div className="flex flex-wrap gap-2 w-full items-center">
                     {["XS","S", "M", "L", "XL", "XXL"].map((size) => (
                       <button
                         type="button"
@@ -161,6 +333,12 @@ export default function EditDialog({ id }: props) {
                       </button>
                     ))}
                   </div>
+                    )}
+                  />
+                  
+                  {formState.errors.sizes && (
+                    <span className="text-red-500 text-xs">{formState.errors.sizes.message}</span>
+                  )}
                 </div>
               </div>
               <div className="p-4 w-full flex flex-col">
@@ -168,16 +346,26 @@ export default function EditDialog({ id }: props) {
                   <h1 className="capitalize font-roboto text-lg font-medium text-gray-700">Gender</h1>
                   <p className="font-roboto font-medium text-sm text-gray-500">Select target gender</p>
                 </div>
-                <RadioGroup defaultValue={productDetail?.gender} className="flex mt-5">
-                  <div className="flex items-center gap-3">
-                    <RadioGroupItem value="men" id="r1" />
-                    <Label htmlFor="r1" className="font-roboto text-sm capitalize text-gray-500">Men</Label>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <RadioGroupItem value="women" id="r2" />
-                    <Label htmlFor="r2" className="font-roboto text-sm capitalize text-gray-500">Women</Label>
-                  </div>
-                </RadioGroup>
+                <Controller
+                  control={control}
+                  name="gender"
+                  render={({ field }) => (
+                    <RadioGroup
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      className="flex mt-5"
+                    >
+                      <div className="flex items-center gap-3">
+                        <RadioGroupItem value="men" id="r1" />
+                        <Label htmlFor="r1">Men</Label>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <RadioGroupItem value="women" id="r2" />
+                        <Label htmlFor="r2">Women</Label>
+                      </div>
+                    </RadioGroup>
+                  )}
+                />
               </div>
             </div>
 
@@ -188,8 +376,8 @@ export default function EditDialog({ id }: props) {
                   <div className="flex flex-col gap-2 p-2">
                     <label htmlFor="base-price" className="capitalize font-roboto text-sm">Base Price</label>
                     <Input 
+                      {...register("basePrice", { valueAsNumber: true })}
                       id="base-price" 
-                      placeholder={`${productDetail?.price}`} 
                       className="capitalize font-roboto bg-white h-12 focus:ring-2 focus:ring-[#331d67] focus:border-transparent" 
                     />
                   </div>
@@ -199,10 +387,10 @@ export default function EditDialog({ id }: props) {
                       
                     </div>
                     <Input 
+                      {...register("discount", { valueAsNumber: true })}
                       id="discount" 
-                      placeholder={productDetail?.discount.value} 
                       className="capitalize font-roboto bg-white h-12 focus:ring-2 focus:ring-[#331d67] focus:border-transparent" 
-                      disabled={isDiscountEnabled}
+                      disabled={!isDiscountEnabled}
                     />
                   </div>
                 </div>
@@ -210,64 +398,92 @@ export default function EditDialog({ id }: props) {
                   <div className="flex flex-col gap-2 p-2">
                     <label htmlFor="stock" className="capitalize font-roboto text-sm">Stock</label>
                     <Input 
+                      {...register("stock", { valueAsNumber: true })}
                       id="stock" 
-                      placeholder={productDetail?.quantity !== undefined ? `${productDetail.quantity}` : "Loading..."} 
                       className="capitalize font-roboto bg-white h-12 focus:ring-2 focus:ring-[#331d67] focus:border-transparent" 
                     />
                   </div>
                   <div className="flex flex-col gap-2 p-2">
                     <label htmlFor="discount-type" className="capitalize font-roboto text-sm">Discount Type</label>
-                    <Select defaultValue={productDetail?.discount.discount_type} disabled={isDiscountEnabled}>
-                      <SelectTrigger className="w-full bg-white py-6 focus:ring-2 focus:ring-[#331d67] focus:border-transparent">
-                        <SelectValue placeholder="Select discount type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="percentage">Percentage</SelectItem>
-                        <SelectItem value="fixed">Fixed Amount</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Controller
+                      control={control}
+                      name="discountType"
+                      render={({ field }) => (
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          disabled={!isDiscountEnabled}
+                        >
+                          <SelectTrigger className="...">
+                            <SelectValue placeholder="Select discount type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="percentage">Percentage</SelectItem>
+                            <SelectItem value="fixed_amount">Fixed Amount</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
                   </div>
                 </div>
-                
-                
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
                     <label 
                     htmlFor="discount-start" 
                     className="capitalize font-roboto text-sm">discount Start Date</label>
-                    <DatePicker 
-                      onChange={(date) => console.log(date)}
-                      disabled={!isDiscountEnabled}   
-                      value={productDetail?.discount.start_date}                                     
-                      />
+                    <Controller
+                      control={control}
+                      name="discountStartDate"
+                      render={({ field }) => (
+                        <DatePicker 
+                        value={field.value instanceof Date ? field.value.toLocaleDateString('en-CA') : null}
+                          onChange={field.onChange} 
+                          disabled={!isDiscountEnabled}
+                        />
+                      )}
+                    />
                 </div>
                 <div className="flex flex-col gap-2">
                     <label 
                     htmlFor="discount-end" 
                     className="capitalize font-roboto text-sm">discount end date</label>
-                    <DatePicker    
-                      onChange={(date) => console.log(date)} 
-                      disabled={!isDiscountEnabled}     
-                      value={productDetail?.discount.end_date}                                   
+                    <Controller
+                        control={control}
+                        name="discountEndDate"
+                        render={({ field }) => (
+                          <DatePicker 
+                          value={field.value instanceof Date ? field.value.toISOString().split('T')[0]: null}
+                            onChange={field.onChange} 
+                            disabled={!isDiscountEnabled}
+                          />
+                        )}
                       />
                 </div>
             </div>
              
             </div>
-            <div className="p-2 flex items-center gap-5">
-              <Toggle 
-                    className="font-normal text-xs"
-                    pressed={isDiscountEnabled}
-                    onPressedChange={setIsDiscountEnabled}
-                    variant={`${!isDiscountEnabled ? "active" : "notActive"}`}
-                  >
-                    {!isDiscountEnabled ? "Disable Discount" : "Enable Discount"}
-                      </Toggle>
-                      <p>
-                {!isDiscountEnabled ? "Discount has been Enabled" : "Discount has been Disabled"}
-                </p>
-                </div>
+            <Controller
+                control={control}
+                name="isDiscountOn"
+                defaultValue={productDetail?.discount?.is_active ?? false}
+                render={({ field }) => (
+                  <div className="p-2 flex items-center gap-5">
+                    <Toggle 
+                      className="font-normal text-xs"
+                      pressed={field.value}
+                      onPressedChange={field.onChange}
+                      variant={`${field.value ? "active" : "notActive"}`}
+                    >
+                      {field.value ? "Disable Discount" : "Enable Discount"}
+                    </Toggle>
+                    <p>
+                      {field.value ? "Discount has been Enabled" : "Discount has been Disabled"}
+                    </p>
+                  </div>
+                )}
+              />
+
                 
 
             <div className="w-full rounded-md shadow-xs p-4 bg-gray-50">
@@ -276,7 +492,7 @@ export default function EditDialog({ id }: props) {
                 <p className="font-roboto text-gray-500 text-sm">Select your store location</p>
               </div>
               <Input 
-                placeholder={productDetail?.product_location.name}
+                {...register("storeLocation")}
                 className="capitalize font-roboto mt-2 focus:ring-2 focus:ring-[#331d67] focus:border-transparent border-none bg-white h-12" 
               />
             </div>

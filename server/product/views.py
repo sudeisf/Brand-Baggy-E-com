@@ -109,11 +109,11 @@ class SellerProductDashboardView(generics.ListAPIView):
         ).select_related('category').prefetch_related('variants')
 
 class UpdateSellerProductAPIView(APIView):
-    permission_classes = [IsSeller]
+    permission_classes = [IsAuthenticated,IsSeller]
     
-    def patch(self, request, product_id):  
+    def patch(self, request,pk):  
         try:
-            product = Product.objects.get(id=product_id, seller=request.user)
+            product = Product.objects.get(id=pk, seller=request.user)
         except Product.DoesNotExist:
             return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
 
