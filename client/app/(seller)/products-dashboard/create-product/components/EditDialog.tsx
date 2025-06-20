@@ -202,7 +202,7 @@ export default function EditDialog({ id }: props) {
                       id="discount" 
                       placeholder={productDetail?.discount.value} 
                       className="capitalize font-roboto bg-white h-12 focus:ring-2 focus:ring-[#331d67] focus:border-transparent" 
-                      disabled={!isDiscountEnabled}
+                      disabled={isDiscountEnabled}
                     />
                   </div>
                 </div>
@@ -217,7 +217,7 @@ export default function EditDialog({ id }: props) {
                   </div>
                   <div className="flex flex-col gap-2 p-2">
                     <label htmlFor="discount-type" className="capitalize font-roboto text-sm">Discount Type</label>
-                    <Select defaultValue={productDetail?.discount.discount_type} disabled={!isDiscountEnabled}>
+                    <Select defaultValue={productDetail?.discount.discount_type} disabled={isDiscountEnabled}>
                       <SelectTrigger className="w-full bg-white py-6 focus:ring-2 focus:ring-[#331d67] focus:border-transparent">
                         <SelectValue placeholder="Select discount type" />
                       </SelectTrigger>
