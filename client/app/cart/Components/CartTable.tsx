@@ -2,7 +2,8 @@
 import Image from "next/image"
 import QuantityButton from "@/app/cart/Components/QuantityButton"
 import {useCartStore} from "@/store/cartStore"
-import { Trash2 } from "lucide-react"
+import {  Trash2 } from "lucide-react"
+import Link from "next/link"
 
 
 
@@ -16,7 +17,9 @@ export default function CartTable() {
           { cartItems.length ===0 ?(
             <div className="text-center py-10 text-[#331d67]">
             <h2 className="text-xl font-semibold">🛒 Your cart is empty</h2>
-            <p className="text-sm mt-2">Start shopping and add items to your cart!</p>
+            <Link href="/products" className="underline">
+               <p className="text-sm mt-2">Start shopping and add items to your cart!</p>
+            </Link>
           </div>
           ):(
             <>

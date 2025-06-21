@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import React, { useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
+import { useCartStore } from "@/store/cartStore";
 
 export default function Header(){
     const router = useRouter();
@@ -21,6 +22,9 @@ export default function Header(){
     const logout = useAuthStore((state) => state.logout);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const totalQuantity = useCartStore((state)=> state.totalQuantity())
+    const totalPrice = useCartStore((state)=> state.totalPrice())
+
 
     return(
         <header className="flex justify-between items-center px-4 sm:px-8 md:px-10 lg:px-10 py-2 bg-inherit w-full">
@@ -100,12 +104,14 @@ export default function Header(){
                         <Link href="/cart" className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2">
                             <ShoppingCart className="text-[#2d1a4d] w-4 h-4 sm:w-5 sm:h-5" />
                             <span className="hidden sm:inline text-[#2d1a4d] text-sm font-semibold">
-                                $220.00
+                            ${totalPrice.toFixed(2)}
                             </span>
                         </Link>
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                            3
-                        </span>
+                        {totalQuantity > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                {totalQuantity}
+                                </span>
+                            )}
                     </div>
                     <div className="bg-white rounded-full w-10 h-10 flex items-center justify-center border border-gray-400 relative">
                         <Link href="/favorites" className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2">

@@ -18,6 +18,8 @@ interface CartStore {
       updateItmeQuantity : (id:string , quantity : number) => void;
       clearCart: () => void;
       mergeCart: (items: CartItem[]) => void;
+      totalQuantity :() => number;
+      totalPrice : () => number;
 }
 
 export const useCartStore = create<CartStore>()(persist(
@@ -57,6 +59,8 @@ export const useCartStore = create<CartStore>()(persist(
             clearCart: () => {
                   set({items:[]})
             },
+            totalQuantity: () => get().items.reduce((acc, item) => acc + item.quantity, 0),
+            totalPrice: () => get().items.reduce((acc, item) => acc + item.price * item.quantity, 0),
             mergeCart: (newItems) => {
                   const currentItems  =  get().items;
                   const merged = [...currentItems]
