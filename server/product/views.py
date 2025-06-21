@@ -3,7 +3,7 @@ from requests import request
 from rest_framework.views import APIView
 from rest_framework import generics , status , filters
 from rest_framework.decorators import api_view
-from .serializers import ProductSerialier ,ProductDetailSerializer ,ProductReviewSerializer , CreateProductSerializer, SellerProductDetailSerializer  , UpdateProductSerializer ,SellerProductListSerializer
+from .serializers import ProductSerialier ,ProductDetailSerializer , ProductPublicSerializer, ProductReviewSerializer , CreateProductSerializer, SellerProductDetailSerializer  , UpdateProductSerializer ,SellerProductListSerializer
 from .models import Product , FavoriteProduct , ProductReview
 from accounts.models import CustomUser
 from rest_framework.permissions import IsAuthenticated , AllowAny 
@@ -14,7 +14,7 @@ import cloudinary
 
 
 class ProductListView(generics.ListAPIView):
-    serializer_class = ProductSerialier
+    serializer_class = ProductPublicSerializer
     queryset = Product.objects.all()
     permission_classes = [AllowAny]
 

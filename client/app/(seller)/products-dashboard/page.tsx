@@ -48,8 +48,8 @@ const getProducts  = async () =>{
     }
     return [];
   }catch(error){
-    console.error("lose",error);
-    return [];
+      console.error("lose",error);
+      return [];
   }
 }
 

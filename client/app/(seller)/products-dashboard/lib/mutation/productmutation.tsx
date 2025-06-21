@@ -1,8 +1,7 @@
 "use client"
-import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query";
+import {  useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import { useAuthStore } from "@/store/authStore"
-import { useProductStore } from "@/store/prouctStore";
 
 
 interface response {
@@ -33,7 +32,6 @@ interface Category {
 
 export const  useCreateProductMutation =  () =>{
       const accessToken = useAuthStore((state)=> state.accessToken);
-      const setProducts = useProductStore((state)=>state.setProducts)
       const queryClient = useQueryClient();
       return useMutation<response,Error,FormData>(
             {     
@@ -59,10 +57,8 @@ export const  useCreateProductMutation =  () =>{
                   onSuccess(data, variables, context) {
                         queryClient.invalidateQueries({queryKey : ["products"]});
                   },
-                  
             },
       )
-      
       
 }
 

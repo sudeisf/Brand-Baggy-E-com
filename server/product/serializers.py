@@ -408,6 +408,12 @@ class ProductVariantSerializer(serializers.ModelSerializer):
         model = ProductVariants
         fields = ['id', 'stock', 'sku', 'size']
 
+class ProductPublicSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'price', 'description' , "main_image"]
+
 class ProductSerialier(serializers.ModelSerializer):
     variants = ProductVariantSerializer(many=True)
     class Meta:
