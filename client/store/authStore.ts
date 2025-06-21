@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import api from '@/lib/axios';
-import { setCookie } from "cookies-next";
+import { setCookie , deleteCookie } from "cookies-next";
 type User = {
     id: string,
     email: string;
@@ -166,6 +166,9 @@ export const useAuthStore = create<AuthState>()(
                         set({ isLoading: true, error: null });
                        const response = await api.post('accounts/logout/', { refresh: refreshToken });
                        if(response.status === 205){
+                        deleteCookie(
+                            'accessToken',
+                        );
                         set({
                             isLoading: false,
                             isAuthenticated: false,
