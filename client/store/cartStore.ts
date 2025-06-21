@@ -4,6 +4,7 @@ import { persist, createJSONStorage } from "zustand/middleware"
 
 interface CartItem {
       id : string;
+      main_image : string;
       name : string;
       size : string;
       quantity : number;
@@ -19,7 +20,7 @@ interface CartStore {
       mergeCart: (items: CartItem[]) => void;
 }
 
-const useCartStore = create<CartStore>()(persist(
+export const useCartStore = create<CartStore>()(persist(
       (set,get) => ({
             items : [],
             addCartItem : (newItem) =>{
