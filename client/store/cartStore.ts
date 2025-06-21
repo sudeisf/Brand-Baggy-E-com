@@ -56,7 +56,19 @@ const useCartStore = create<CartStore>()(persist(
             clearCart: () => {
                   set({items:[]})
             },
-            mergeCart: (items: CartItem[]) => {}
+            mergeCart: (newItems) => {
+                  const currentItems  =  get().items;
+                  const merged = [...currentItems]
+                  newItems.forEach(newItem => {
+                        const index = merged.findIndex(i => i.id === newItem.id);
+                        if(index > -1){
+                              merged[index].quantity += newItem.quantity;
+                        }else{
+                              merged.push(newItem);
+                        }
+                  })
+                  set({ items: merged });
+            }
       }),
       {
       name: "cart-store",
