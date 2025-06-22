@@ -25,14 +25,14 @@ interface CartStore {
 export const useCartStore = create<CartStore>()(persist(
       (set,get) => ({
             items : [],
-            addCartItem : (newItem) =>{
-                  const existingItem  = get().items.filter(item =>  item.id !== newItem.id);
-                  if(existingItem){
+            addCartItem : (newItem) => {
+                  const existingItem = get().items.find(item => item.id === newItem.id && item.size === newItem.size);
+                  if (existingItem) {
                         set({
-                              items : get().items.map(item =>
-                                    item.id === newItem.id 
-                                    ? {...item ,quantity : item.quantity + newItem.quantity }
-                                    : item
+                              items: get().items.map(item =>
+                                    item.id === newItem.id && item.size === newItem.size
+                                          ? { ...item, quantity: item.quantity + newItem.quantity }
+                                          : item
                               )
                         });
                   } else {
@@ -46,13 +46,11 @@ export const useCartStore = create<CartStore>()(persist(
                   if (quantity <= 0) {
                         get().removeItem(id);
                         return;
-                      }
+                  }
                   set({
-                        items : get().items.filter(item => 
+                        items : get().items.map(item => 
                               item.id === id ? 
-                              {
-                              ...item , quantity 
-                              } : item
+                              { ...item , quantity } : item
                         )
                   })
             },

@@ -83,13 +83,20 @@ export default function ProductPage(){
     const availableSizes = product?.variants
             .filter(variant => variant.stock > 0)
             .map(variant => variant.size.code);
-            
+
     const today = new Date();
     const fiveDaysLater = new Date();
     fiveDaysLater.setDate(today.getDate() + 5);
 
     const estimatedArrival = `${formatDate(today)} - ${formatDate(fiveDaysLater)}`;
-
+    const CartItem  = {
+        id : product?.id,
+        main_image : product?.main_image,
+        name : product?.name,
+        size : selectedSize,
+        quantity : 1,
+        price : product?.price,
+    }
     return(
         <div 
             className="flex flex-col mx-auto min-h-screen ">
@@ -114,8 +121,16 @@ export default function ProductPage(){
                        />
 
                     <AddToCartButton
-                        isHeart ={isHeart} 
-                        onHeartClick={()=> setIsHeart(!isHeart)} 
+                        isHeart={isHeart}
+                        onHeartClick={() => setIsHeart(!isHeart)}
+                        cartItem={{
+                            id: product?.id?.toString() ?? "",
+                            main_image: product?.main_image ?? "",
+                            name: product?.name ?? "",
+                            size: selectedSize,
+                            quantity: 1,
+                            price: product?.price ?? "",
+                        }}
                      />
 
                     <ProductDesciption 

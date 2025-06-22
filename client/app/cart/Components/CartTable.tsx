@@ -4,12 +4,15 @@ import QuantityButton from "@/app/cart/Components/QuantityButton"
 import {useCartStore} from "@/store/cartStore"
 import {  Trash2 } from "lucide-react"
 import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 
 
 export default function CartTable() {
     const cartItems = useCartStore(state=>state.items);
     const updateItemQuantity = useCartStore((state) => state.updateItmeQuantity);
+    const removeItem = useCartStore((state) => state.removeItem);
+
 
     return (
         <div className=" *:font-roboto w-[70%] ">
@@ -53,7 +56,9 @@ export default function CartTable() {
                         <p>${item.quantity * item.price}</p>
                     </div>
                     <div className="col-span-2 text-center font-roboto">
+                        <Button variant="ghost" onClick={()=> removeItem(item.id)}>
                         <Trash2  className="w-5 h-5 text-[#331d67] mx-auto" />
+                        </Button>
                     </div>
                 </div>
             ))}
