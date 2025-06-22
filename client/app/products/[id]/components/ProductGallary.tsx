@@ -1,6 +1,6 @@
 "use client"
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 interface ProductGalleryProps {
     mainImage : string;
     images : string [];
@@ -10,6 +10,11 @@ interface ProductGalleryProps {
 
 export default function ProductGalary({mainImage,images,name} :ProductGalleryProps) {
     const [selectedImage, setSelectedImage] = useState<string>(mainImage);
+
+  useEffect(() => {
+    setSelectedImage(mainImage);
+  }, [mainImage]);
+
     return (
         <div className=" relative w-full "> 
                     <div className="relative flex gap-2 top-5 bottom-0 left-0 w-full px-4 z-10">

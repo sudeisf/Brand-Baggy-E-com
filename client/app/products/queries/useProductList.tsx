@@ -10,7 +10,7 @@ type Product = {
   main_image: string;
 };
 
-const fetchProducts = async (token: string) => {
+const fetchProducts = async () => {
   try {
     const response = await api.get('/product/product-list/', {
     });
@@ -31,12 +31,93 @@ const fetchProducts = async (token: string) => {
 };
 
 export const useProductsList = () => {
-  const token = useAuthStore((state) => state.accessToken);
 
   return useQuery<Product[], Error>({
     queryKey: ['productsList'],
-    queryFn: () => fetchProducts(token as string),
-    enabled: !!token,
+    queryFn: () => fetchProducts(),
     staleTime: 5 * 60 * 1000,
   });
 };
+
+
+
+interface Size {
+  id: number;
+  name: string;
+  code: string;
+  is_favourited: boolean;
+}
+
+interface Variant {
+  id: number;
+  stock: number;
+  sku: string;
+  size: Size;
+}
+
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  parent: number;
+}
+
+interface Seller {
+  id: number;
+  username: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  gender: string;
+  birth_date: string;
+  user_role: string;
+  profile_url: string;
+}
+
+interface Review {
+  // Define review structure if needed
+  // Example:
+  // id: number;
+  // rating: number;
+  // comment: string;
+}
+
+interface ProductDetail {
+  id: number;
+  name: string;
+  description: string;
+  main_image: string;
+  brand: string;
+  category: Category;
+  images: string[];
+  reviews: Review[];
+  variants: Variant[];
+  seller: Seller;
+  price: string
+}
+
+
+
+
+const fetchProductDetail = async (id: number) : Promise<ProductDetail | null> => {
+  try {
+    const response = await api.get<ProductDetail>(`/product/${id}/detail/`);
+    if (response.status === 200) {
+      return response.data;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return null;
+  }
+};
+export const useProductDetail = (id: number) => {
+  return useQuery<ProductDetail | null, Error>({
+    queryKey: ['productPublicDetail',id],
+    queryFn: () => fetchProductDetail(id),
+    staleTime: 5 * 60 * 1000,
+  });
+}

@@ -4,7 +4,7 @@
 interface ProductHeaderProps{
    catagory : string;
    name : string;
-   price: number;
+   price: string;
 }
 
 

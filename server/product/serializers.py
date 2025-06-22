@@ -434,7 +434,7 @@ class ProductSerialier(serializers.ModelSerializer):
         return product
     
 class ProductDetailSerializer(serializers.ModelSerializer):
-    images = ProductImageSerializer(many=True, read_only=True)
+    images = serializers.SerializerMethodField(read_only=True)
     reviews = ProductReviewSerializer(many=True, read_only=True)
     category = CatagorySerializer( read_only=True)
     variants = ProductVariantSerializer(many=True, read_only=True)
@@ -446,11 +446,24 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         model = Product
         fields = [
             'id', 'name', 'description', 'main_image', 'brand', 'category',
-            'images', 'reviews', 'variants' , 'seller'
+            'images', 'reviews', 'variants' , 'seller' ,'price'
         ]
 
     def get_main_image(self, obj):
-        return obj.main_image.url if obj.main_image else None
+        if obj.main_image:
+            public_id = str(obj.main_image)
+            return CloudinaryImage(public_id).build_url(secure=True)
+        
+    def get_images(self, obj):
+        images = obj.images.all()
+        return [self._build_cloudinary_url(image.image) for image in images]
+    
+    def _build_cloudinary_url(self, image_field):
+        if image_field:
+            public_id = str(image_field)
+            return CloudinaryImage(public_id).build_url(secure=True)
+        return None
+
 
 class ProductDiscountSerializer(serializers.ModelSerializer):
     class Meta:

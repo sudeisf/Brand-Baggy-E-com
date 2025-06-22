@@ -1,5 +1,4 @@
 "use client"
-
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import ProductGalary from "./components/ProductGallary";
@@ -10,6 +9,8 @@ import ProductDesciption from "./components/ProductDescription";
 import ShippingInfo from "./components/ShippingInfo";
 import ProductReviews from "./components/ProductReviews";
 import RelatedProducts from "./components/RelatedProducts";
+import { useProductDetail } from "../queries/useProductList";
+// import {fetchProductDetail} from "../server"
 
 const products = [
     {
@@ -43,18 +44,6 @@ const products = [
     }
 ]   
 
-const product = {
-    id: 1,
-    name: "loose fit hoodie",
-    price: 29.99,
-    description: "This premium loose-fit zip hoodie combines streetwear style with everyday comfort. Designed with a relaxed silhouette, it offers unrestricted movement while maintaining a fashionable oversized look. The full-zip front allows for versatile styling options, making it perfect for layering or wearing solo.",
-    mainImage: "/assets/products/product4.jpg",
-    images: [
-        "/assets/products/product1.jpg",
-        "/assets/products/product2.jpg",
-        "/assets/products/product3.jpg"
-    ]
-}
 
 const reviews = [
     {
@@ -80,9 +69,14 @@ const reviews = [
     }
 ];
 
+
+
 export default function ProductPage(){
     const [selectedSize, setSelectedSize] = useState<string>("");
     const [isHeart, setIsHeart] = useState<boolean>(false);
+    const params = useParams();
+    const productId = Number(params.id);
+    const {data:product , isLoading , error} = useProductDetail(productId)
 
     return(
         <div 
@@ -90,15 +84,15 @@ export default function ProductPage(){
             <div
               className="flex flex-row p-2 mb-2 gap-4 max-w-[1250px] h-[750px] mx-auto rounded-lg">
                 <ProductGalary
-                    mainImage={product.mainImage}
-                    images={product.images}
-                    name={product.name}
+                    mainImage={product?.main_image ?? ""}
+                    images={product?.images ?? []}
+                    name={product?.name ?? ""}
                 />
                 <div className="w-full px-3 flex flex-col">
                     <ProductHeader
                         catagory="Men Fashion"
-                        name={product.name}
-                        price={product.price}
+                        name={product?.name ?? ""}
+                        price={product?.price ?? ""}
                     />
 
                     <SizeSelector
@@ -112,7 +106,7 @@ export default function ProductPage(){
                      />
 
                     <ProductDesciption 
-                        description={product.description} 
+                        description={product?.description ?? ""} 
                     />
 
                     <ShippingInfo 
