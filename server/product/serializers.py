@@ -409,12 +409,18 @@ class ProductVariantSerializer(serializers.ModelSerializer):
         fields = ['id', 'stock', 'sku', 'size']
 
 class ProductPublicSerializer(serializers.ModelSerializer):
-    
+    main_image = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Product
         fields = ['id', 'name', 'price', 'description' , "main_image"]
+    
+    def get_main_image(self,obj):
+        if obj.main_image:
+            public_id = str(obj.main_image)
+            return CloudinaryImage(public_id).build_url(secure=True)
+        return None
 
-class ProductSerialier(serializers.ModelSerializer):
+class ProductSerialier(serializers.ModelSerializer):    
     variants = ProductVariantSerializer(many=True)
     class Meta:
         model = Product

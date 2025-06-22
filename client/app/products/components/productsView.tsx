@@ -1,5 +1,4 @@
-// app/products/page.tsx
-"use client";
+
 import { ProductList } from "./ProductList";
 import { PaginationDemo } from "./pagination";
 import { AppliedFilters } from "./AppliedFilters";

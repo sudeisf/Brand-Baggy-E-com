@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useProductsList } from "../queries/useProductList";
 import { useQueryClient } from "@tanstack/react-query";
+import { useCartStore } from "@/store/cartStore";
 
 type Product = {
   id: number;
@@ -18,9 +19,9 @@ type Props = {
 
 export function ProductList({ products }: Props) {
   const queryClient = useQueryClient();
-  queryClient.setQueryData(['productsList'], products); // Initialize cache
+  queryClient.setQueryData(['productsList'], products); 
   const { data, isLoading, error } = useProductsList();
-
+  const addCartItemFn = useCartStore((state)=> state.addCartItem)
   return (
     <div>
       <div className="relative w-full">
@@ -50,12 +51,12 @@ export function ProductList({ products }: Props) {
                 <p className="text-sm md:text-base text-gray-600 mb-2 line-clamp-2 text-left">{product.description}</p>
                 <div className="flex justify-between w-full mt-2 mb-2">
                   <p className="text-base md:text-lg font-bold text-[#331d67]">${product.price}</p>
-                  <button
+                  <Link href={`/products/${product.id}`}
                     className="w-fit h-fit bg-[#331d67] rounded-md shadow-xs text-sm space-x-2 px-3 py-2 font-roboto capitalize flex items-center text-white"
                     aria-label={`Add ${product.name} to cart`}
-                  >
+                    >
                     <Plus className="text-white w-4 h-4 md:w-4 md:h-4 mr-2" /> add to Cart
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>

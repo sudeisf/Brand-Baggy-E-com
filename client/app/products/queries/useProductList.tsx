@@ -12,10 +12,7 @@ type Product = {
 
 const fetchProducts = async (token: string) => {
   try {
-    const response = await api.get('/products/product-list/', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const response = await api.get('/product/product-list/', {
     });
     if (response.status === 200) {
       return response.data.results.map((item: Product) => ({

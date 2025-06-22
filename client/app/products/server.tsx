@@ -1,6 +1,5 @@
 
 import api from "@/lib/axios";
-import { cookies } from "next/headers";
 
 type Product = {
   id: number;
@@ -12,10 +11,7 @@ type Product = {
 
 export async function fetchProducts() {
   try {
-    const token = (await cookies()).get("accessToken")?.value;
-    const response = await api.get('/products/product-list/', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await api.get('/product/product-list/',);
     if (response.status === 200) {
       return response.data.results.map((item: Product) => ({
         id: item.id,

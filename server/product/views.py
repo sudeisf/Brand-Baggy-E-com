@@ -22,7 +22,7 @@ class ProductListView(generics.ListAPIView):
 class ProductDetailView(generics.RetrieveAPIView):
     serializer_class = ProductDetailSerializer
     queryset = Product.objects.prefetch_related('images').all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend,filters.SearchFilter]
     filterset_fields = ['category', 'brand']
     search_fields = ['name', "description"]
