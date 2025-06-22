@@ -14,6 +14,7 @@ import {
 import React, { useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import { useCartStore } from "@/store/cartStore";
+import { useFavoritesStore } from "@/store/favStore";
 
 export default function Header(){
     const router = useRouter();
@@ -24,6 +25,7 @@ export default function Header(){
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const totalQuantity = useCartStore((state)=> state.totalQuantity())
     const totalPrice = useCartStore((state)=> state.totalPrice())
+    const totalFavorites = useFavoritesStore((state) => state.totalFavorite());
 
 
     return(
@@ -117,9 +119,11 @@ export default function Header(){
                         <Link href="/favorites" className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2">
                             <Heart className="text-[#2d1a4d] w-4 h-4 sm:w-5 sm:h-5" />
                         </Link>
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                            3
-                        </span>
+                        {totalFavorites > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                {totalFavorites}
+                            </span>
+                        )}
                     </div>
                 </div>
             </div>

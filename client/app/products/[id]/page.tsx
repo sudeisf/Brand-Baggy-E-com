@@ -130,6 +130,7 @@ export default function ProductPage(){
                             size: selectedSize,
                             quantity: 1,
                             price: product?.price ?? "",
+                            in_stock : product?.in_stock?? false
                         }}
                      />
 

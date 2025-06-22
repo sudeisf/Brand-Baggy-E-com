@@ -102,6 +102,7 @@ interface ProductDetail {
   seller: Seller;
   price: string;
   discount : discount;
+  in_stock : boolean
 }
 
 

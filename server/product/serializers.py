@@ -447,7 +447,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         model = Product
         fields = [
             'id', 'name', 'description', 'main_image', 'brand', 'category',
-            'images', 'reviews', 'variants' , 'seller' ,'price', "discount"
+            'images', 'reviews', 'variants' , 'seller' ,'price', "discount" ,"in_stock"
         ]
 
     def get_main_image(self, obj):
