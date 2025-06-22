@@ -440,20 +440,35 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     variants = ProductVariantSerializer(many=True, read_only=True)
     main_image = serializers.SerializerMethodField()
     seller = UserSerializer(read_only=True)
+    discount = serializers.SerializerMethodField(read_only= True)
     # average_rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = [
             'id', 'name', 'description', 'main_image', 'brand', 'category',
-            'images', 'reviews', 'variants' , 'seller' ,'price'
+            'images', 'reviews', 'variants' , 'seller' ,'price', "discount"
         ]
 
     def get_main_image(self, obj):
         if obj.main_image:
             public_id = str(obj.main_image)
             return CloudinaryImage(public_id).build_url(secure=True)
-        
+    
+    def get_discount(self, obj):
+        product_discounts = obj.discount.all()
+        for pd in product_discounts:
+            discount = pd.discount
+            if discount and discount.is_valid():
+                return {
+                    "type": discount.discount_type,
+                    "value": str(discount.value),
+                    "is_active": True
+                }
+        return {
+            "is_active": False
+        }
+    
     def get_images(self, obj):
         images = obj.images.all()
         return [self._build_cloudinary_url(image.image) for image in images]

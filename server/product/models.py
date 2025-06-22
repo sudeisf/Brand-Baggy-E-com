@@ -182,8 +182,7 @@ class Discount(models.Model):
         now = timezone.now()
         return(
             self.is_active and 
-            self.start_date <= now < self.end_date and
-            self.usage_limit is None and self.time_used < self.usage_limit
+            self.start_date <= now < self.end_date
         )
 
     def calcualteDiscount(self, orignial_price):

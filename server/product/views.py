@@ -1,11 +1,8 @@
-from django.shortcuts import get_object_or_404, render
-from requests import request
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework import generics , status , filters
-from rest_framework.decorators import api_view
 from .serializers import ProductSerialier ,ProductDetailSerializer , ProductPublicSerializer, ProductReviewSerializer , CreateProductSerializer, SellerProductDetailSerializer  , UpdateProductSerializer ,SellerProductListSerializer
 from .models import Product , FavoriteProduct , ProductReview
-from accounts.models import CustomUser
 from rest_framework.permissions import IsAuthenticated , AllowAny 
 from accounts.permisions import IsSeller 
 from rest_framework.response import Response

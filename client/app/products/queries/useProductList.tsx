@@ -84,7 +84,11 @@ interface Review {
   // rating: number;
   // comment: string;
 }
-
+interface discount {
+  type: string;
+  value: string;
+  is_active : boolean
+}
 interface ProductDetail {
   id: number;
   name: string;
@@ -96,7 +100,8 @@ interface ProductDetail {
   reviews: Review[];
   variants: Variant[];
   seller: Seller;
-  price: string
+  price: string;
+  discount : discount;
 }
 
 

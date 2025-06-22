@@ -69,7 +69,10 @@ const reviews = [
     }
 ];
 
-
+function formatDate(date: Date) {
+    const options: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'long', year: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+}
 
 export default function ProductPage(){
     const [selectedSize, setSelectedSize] = useState<string>("");
@@ -77,6 +80,15 @@ export default function ProductPage(){
     const params = useParams();
     const productId = Number(params.id);
     const {data:product , isLoading , error} = useProductDetail(productId)
+    const availableSizes = product?.variants
+            .filter(variant => variant.stock > 0)
+            .map(variant => variant.size.code);
+            
+    const today = new Date();
+    const fiveDaysLater = new Date();
+    fiveDaysLater.setDate(today.getDate() + 5);
+
+    const estimatedArrival = `${formatDate(today)} - ${formatDate(fiveDaysLater)}`;
 
     return(
         <div 
@@ -98,6 +110,7 @@ export default function ProductPage(){
                     <SizeSelector
                         selectedSize={selectedSize}
                         onSizeChange={setSelectedSize}
+                        availableSizes={availableSizes?? []}
                        />
 
                     <AddToCartButton
@@ -110,10 +123,10 @@ export default function ProductPage(){
                     />
 
                     <ShippingInfo 
-                        discount="Desc 50%" 
+                        discount={`Desc ${Number(product?.discount.value)}%`} 
                         packageType="Regular package" 
                         deliveryTime="3-5 Working days" 
-                        estimatedArrival="10-15 october 2025" 
+                        estimatedArrival={estimatedArrival}
                     />
                 </div> 
             </div>
