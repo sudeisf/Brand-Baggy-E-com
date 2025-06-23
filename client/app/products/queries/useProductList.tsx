@@ -120,10 +120,15 @@ const fetchProductDetail = async (id: number) : Promise<ProductDetail | null> =>
     return null;
   }
 };
-export const useProductDetail = (id: number) => {
+export const useProductDetail = (
+  id: number , 
+  options : { intialData? : ProductDetail | null} = {} 
+) => {
   return useQuery<ProductDetail | null, Error>({
     queryKey: ['productPublicDetail',id],
     queryFn: () => fetchProductDetail(id),
     staleTime: 5 * 60 * 1000,
+    initialData : options.intialData,
+    enabled : !!id
   });
 }
