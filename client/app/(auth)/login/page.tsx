@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { useAuthStore } from "@/store/authStore"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
+import { syncMerge } from "@/utils/syncMerge"
 import {
   Form,
   FormControl,
@@ -49,6 +50,7 @@ export default function LoginPage() {
         const user = result?.user;
 
         if(user?.user_role === "buyer"){
+          await syncMerge()
           setRedirecting(true)
           router.replace('/');
         } else if(user?.user_role === "seller"){

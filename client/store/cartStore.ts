@@ -13,6 +13,7 @@ interface CartItem {
 
 interface CartStore {
       items : CartItem[];
+      setCart : (items:CartItem[]) => void;
       addCartItem : (item:CartItem) => void;
       removeItem : (id : string ,size: string) => void;
       updateItmeQuantity : (id:string , quantity : number , size: string) => void;
@@ -25,6 +26,7 @@ interface CartStore {
 export const useCartStore = create<CartStore>()(persist(
       (set,get) => ({
             items : [],
+            setCart: (items) => set({ items }),
             addCartItem : (newItem) => {
                   const existingItem = get().items.find(item => item.id === newItem.id && item.size === newItem.size);
                   if (existingItem) {

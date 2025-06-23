@@ -146,7 +146,7 @@ export const useAuthStore = create<AuthState>()(
                           }
                         }
                         
-                        // Get first error message if no specific field errors
+                        
                         if (Object.keys(fieldErrors).length === 0 && error.response.data.message) {
                           errorMsg = error.response.data.message;
                         }
@@ -206,19 +206,19 @@ export const useAuthStore = create<AuthState>()(
 
                         if(error?.response?.data){
 
-                            // Handle array format errors (like {"email": ["Error message"]})
+                          
                             if (Array.isArray(error.response.data.email)) {
                                 fieldErrors.email = error.response.data.email.join(', ');
                             }
-                            // Handle object format errors (like {"email": "Error message"})
+                          
                             else if (typeof error.response.data.email === 'string') {
                                 fieldErrors.email = error.response.data.email;
                             }
-                            // Handle general message
+                          
                             else if (error.response.data.message) {
                                 errorMsg = error.response.data.message;
                             }
-                            // Handle non-field errors
+                           
                             else if (error.response.data.detail) {
                                 errorMsg = error.response.data.detail;
                             }

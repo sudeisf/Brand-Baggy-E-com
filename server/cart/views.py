@@ -30,7 +30,7 @@ class RemoveCartItemView(generics.DestroyAPIView):
     queryset = CartItem.objects.all()
     lookup_field = 'pk'
 
-class GetCartView(generics.ListAPIView):
+class GetCartView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -84,13 +84,15 @@ class MergeCartItemsView(APIView):
         for item in data:
             product_id = item.get("product_id")
             quantity = item.get("quantity")
+            size = item.get("size")
 
             product  = get_object_or_404(Product, id=product_id)
 
             cartItem , created = CartItem.objects.get_or_create(
-                cart,
-                product,
-                defaults ={'quantity': quantity}
+                cart=cart,
+                product=product,
+                size=size,
+                defaults={'quantity': quantity}
             )
 
             if not created:

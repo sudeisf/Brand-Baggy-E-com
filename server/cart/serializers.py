@@ -3,21 +3,32 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from product.models import Product
 from .utils import get_or_create_cart
+from cloudinary import CloudinaryImage
 # Create your views here.
 
 User = get_user_model()
 
 class CartItemSerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(source = 'product.name')
+    name = serializers.CharField(source='product.name')
+    price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2)
+    main_image = serializers.SerializerMethodField()
+
     class Meta:
         model = CartItem
-        fields = ['id' , 'product' , 'product_name' , 'quantity']
+        fields = ['id', 'name', 'price', 'main_image', 'quantity', 'size']
+
+    def get_main_image(self, obj):
+        if obj.product.main_image:
+            public_id = str(obj.product.main_image)
+            return CloudinaryImage(public_id).build_url(secure=True)
+        return None
 
 class CartSerializer(serializers.ModelSerializer):
-    items  = CartItemSerializer(many = True , read_only = True)
+    items = CartItemSerializer(many=True, read_only=True)
+
     class Meta:
         model = Cart
-        fields = ['id', 'user', 'items']
+        fields = ['id', 'items']
 
 class AddCartItemSerializer(serializers.Serializer):
      product_id = serializers.IntegerField()
