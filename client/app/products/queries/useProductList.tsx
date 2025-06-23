@@ -1,5 +1,6 @@
 import { useAuthStore } from '@/store/authStore';
 import { useQuery } from '@tanstack/react-query';
+import { ProductDetail } from '@/types/product';
 import api from '@/lib/axios';
 
 type Product = {
@@ -40,70 +41,6 @@ export const useProductsList = () => {
 };
 
 
-
-interface Size {
-  id: number;
-  name: string;
-  code: string;
-  is_favourited: boolean;
-}
-
-interface Variant {
-  id: number;
-  stock: number;
-  sku: string;
-  size: Size;
-}
-
-
-interface Category {
-  id: number;
-  name: string;
-  slug: string;
-  description: string;
-  parent: number;
-}
-
-interface Seller {
-  id: number;
-  username: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone_number: string;
-  gender: string;
-  birth_date: string;
-  user_role: string;
-  profile_url: string;
-}
-
-interface Review {
-  // Define review structure if needed
-  // Example:
-  // id: number;
-  // rating: number;
-  // comment: string;
-}
-interface discount {
-  type: string;
-  value: string;
-  is_active : boolean
-}
-interface ProductDetail {
-  id: number;
-  name: string;
-  description: string;
-  main_image: string;
-  brand: string;
-  category: Category;
-  images: string[];
-  reviews: Review[];
-  variants: Variant[];
-  seller: Seller;
-  price: string;
-  discount : discount;
-  in_stock : boolean
-}
 
 
 

@@ -34,7 +34,7 @@ export default function CartTable() {
         </div>
         <div className="space-y-6 py-4">
             {cartItems.map((item) => (
-                <div key={item.id} className="grid not-last:border-b-1 *:font-roboto grid-cols-12 gap-4 items-center">
+                <div key={`${item.id}-${item.size}`} className="grid not-last:border-b-1 *:font-roboto grid-cols-12 gap-4 items-center">
                 <div className="col-span-6   flex items-center gap-4">
                     <Image src={item.main_image} 
                     alt={item.name} 
@@ -49,14 +49,14 @@ export default function CartTable() {
                     </div>
                     <div className="col-span-2 text-center items-center font-roboto">
                         <QuantityButton quantity={item.quantity} onQuantityChange={(newQty) => {
-                            updateItemQuantity(item.id, newQty)
+                            updateItemQuantity(item.id, newQty , item.size)
                         }} />
                     </div>
                     <div className="col-span-2 text-[#331d67] text-center font-medium font-roboto">
                         <p>${item.quantity * item.price}</p>
                     </div>
                     <div className="col-span-2 text-center font-roboto">
-                        <Button variant="ghost" onClick={()=> removeItem(item.id)}>
+                        <Button variant="ghost" onClick={()=> removeItem(item.id ,item.size)}>
                         <Trash2  className="w-5 h-5 text-[#331d67] mx-auto" />
                         </Button>
                     </div>

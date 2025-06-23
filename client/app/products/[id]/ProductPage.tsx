@@ -82,6 +82,7 @@ interface ProductPageProps {
 
 export default function ProductPage({ initialProduct }: ProductPageProps) {
     const [selectedSize, setSelectedSize] = useState<string>("");
+    const isSlectedSize = selectedSize ? true : false
     const [isHeart, setIsHeart] = useState<boolean>(false);
     const params = useParams();
     const productId = Number(params.id);
@@ -130,6 +131,7 @@ export default function ProductPage({ initialProduct }: ProductPageProps) {
                        />
 
                     <AddToCartButton
+                        isSizeSelected={isSlectedSize}
                         isHeart={isHeart}
                         onHeartClick={() => setIsHeart(!isHeart)}
                         cartItem={{
