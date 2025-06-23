@@ -5,13 +5,23 @@ import {useCartStore} from "@/store/cartStore"
 import {  Trash2 } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { useCart } from "@/hooks/useCart"
 
-
+interface CartItem {
+    id : string;
+    main_image : string;
+    name : string;
+    size : string;
+    quantity : number;
+    price : number;
+}
 
 export default function CartTable() {
-    const cartItems = useCartStore(state=>state.items);
+    const items = useCartStore(state=>state.items);
     const updateItemQuantity = useCartStore((state) => state.updateItmeQuantity);
     const removeItem = useCartStore((state) => state.removeItem);
+    const {data:fetechedCart , isLoading , error} = useCart();
+    const cartItems = fetechedCart ?? items
 
 
     return (
@@ -33,7 +43,7 @@ export default function CartTable() {
             <div className="col-span-2 text-center font-roboto text-[#331d67] font-medium">Action</div>
         </div>
         <div className="space-y-6 py-4">
-            {cartItems.map((item) => (
+            {cartItems.map((item :CartItem) => (
                 <div key={`${item.id}-${item.size}`} className="grid not-last:border-b-1 *:font-roboto grid-cols-12 gap-4 items-center">
                 <div className="col-span-6   flex items-center gap-4">
                     <Image src={item.main_image} 

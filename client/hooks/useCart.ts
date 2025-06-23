@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import { useAuthStore } from "@/store/authStore";
 
-const useCart = ()=>{
+export const useCart = ()=>{
       const setCart = useCartStore((state)=> state.setCart);
       return useQuery({
             queryKey: ['cart'],

@@ -6,6 +6,9 @@ import OrderSummary from "@/app/cart/Components/OrderCard"
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { MoveLeftIcon, MoveRightIcon } from "lucide-react";
+import {useCart} from "@/hooks/useCart"
+
+
 export default function CartPage() {
   return (
     <div className="container mx-auto px-4 py-5 mb-10">
