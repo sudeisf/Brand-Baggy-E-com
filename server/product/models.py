@@ -143,7 +143,7 @@ class ProductVariants(models.Model):
             self.sku = f"{self.product.id}-{self.size.code}"
             super().save(update_fields=['sku'])  
 
-class FavoriteProduct(models.Model):
+class FavoriteProduct(models.Model): #uiop
     product = models.ForeignKey(Product ,on_delete=models.CASCADE, related_name='favorites')
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

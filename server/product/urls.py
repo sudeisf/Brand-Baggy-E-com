@@ -13,6 +13,7 @@ from .views import (
     CategoryListView,
     CategorySubListView,
     ProductStockUpdateView
+    ,MergeFavProductView
     )
 
 
@@ -33,5 +34,6 @@ urlpatterns =[
     path('catagory-list',CategoryListView.as_view(),name="catagory-list"),
     path('catagory-sub-list',CategorySubListView.as_view(),name="catagory-sub-list"),
 
-
+    #fav product
+    path("favorite-product/merged",MergeFavProductView.as_view(),name="merge-fav-product")
 ]   

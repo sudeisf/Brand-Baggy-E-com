@@ -1,15 +1,17 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from rest_framework import generics , request , status
 from rest_framework.response import Response
 from rest_framework.views import APIView 
 from rest_framework.permissions import AllowAny , IsAuthenticated
+
+from product.models import Product
 from .serializers import (
     CartSerializer,
     AddCartItemSerializer,
     UpdateCartItemSerializer
 )
 from .models import CartItem , Cart
-from .utils import get_or_create_cart
+
 
 
 class AddCartItemView(APIView):
@@ -29,11 +31,11 @@ class RemoveCartItemView(generics.DestroyAPIView):
     lookup_field = 'pk'
 
 class GetCartView(generics.ListAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        cart = get_or_create_cart(request)
-        serializer = CartSerializer(cart)
+        queryset = get_object_or_404(Cart , user= request.user)
+        serializer = CartSerializer(queryset)
         return Response(serializer.data)
 
 
@@ -69,4 +71,33 @@ class ClearCartItemView(APIView):
 
         return Response({"detail": "Cart cleared."}, status=status.HTTP_204_NO_CONTENT)
 
+
+class MergeCartItemsView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        cart = Cart.objects.get_or_create(user=request.user)
+        data = request.data
+
+        if isinstance(data,list):
+            return Response({"detail": "the api expects list"} , status=status)
+
+        for item in data:
+            product_id = item.get("product_id")
+            quantity = item.get("quantity")
+
+            product  = get_object_or_404(Product, id=product_id)
+
+            cartItem , created = CartItem.objects.get_or_create(
+                cart,
+                product,
+                defaults ={'quantity': quantity}
+            )
+
+            if not created:
+                cartItem.quantity += quantity
+                cartItem.save()
+            
+            return Response({
+                "detail" : "cart merged successfully"
+            }, status=status.HTTP_200_OK)
 

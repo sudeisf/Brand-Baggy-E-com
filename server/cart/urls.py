@@ -5,6 +5,7 @@ from .views import (
     GetCartView,
     UpdateCartItemView,
     ClearCartItemView,
+    MergeCartItemsView
 )
 
 urlpatterns = [
@@ -13,4 +14,5 @@ urlpatterns = [
     path('get-cart/', GetCartView.as_view(), name='get-cart'),
     path('<int:pk>/update/', UpdateCartItemView.as_view(), name='update-cart-item'),
     path('clear/', ClearCartItemView.as_view(), name='clear-cart'),
+    path('merge/', MergeCartItemsView.as_view(),name="merge-user-cart-with-db")
 ]

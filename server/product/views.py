@@ -187,3 +187,40 @@ class ProductStockUpdateView(APIView):
                 status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class MergeFavProductView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self,request):
+        user = request.user
+        data = request.data
+        product_id = data.get("product_id")
+
+        if not product_id:
+            return Response({"detail": "Product ID is required"}, status=400)
+
+        product = get_object_or_404(Product, id=product_id)
+        
+        Favorite_product , created = FavoriteProduct.objects.get_or_create(
+                user=user,
+                product=product
+            )
+        
+        if not created:
+           Favorite_product.delete()
+           return Response({"detail": "Removed from favorites"}, status=200)
+            
+        
+        return Response(
+            {
+                "detail" : "favorite product merged"
+            },
+            status=status.HTTP_201_CREATED
+        )
+        
+
+        
+        
+        
+
+        
