@@ -1,7 +1,16 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework import generics , status , filters
-from .serializers import ProductSerialier ,ProductDetailSerializer , ProductPublicSerializer, ProductReviewSerializer , CreateProductSerializer, SellerProductDetailSerializer  , UpdateProductSerializer ,SellerProductListSerializer
+from .serializers import (ProductSerialier ,
+                          ProductDetailSerializer , 
+                          ProductPublicSerializer, 
+                          ProductReviewSerializer , 
+                          CreateProductSerializer, 
+                          SellerProductDetailSerializer,
+                          UpdateProductSerializer ,
+                          SellerProductListSerializer,
+                          FavoriteProductSerializer
+                          )
 from .models import Product , FavoriteProduct , ProductReview
 from rest_framework.permissions import IsAuthenticated , AllowAny 
 from accounts.permisions import IsSeller 
@@ -193,24 +202,25 @@ class MergeFavProductView(APIView):
 
     def post(self,request):
         user = request.user
-        data = request.data
-        product_id = data.get("product_id")
+        data = request.data.get("items",[])
 
-        if not product_id:
-            return Response({"detail": "Product ID is required"}, status=400)
+        if not isinstance(data, list):
+            return Response({"detail": "Expected a list of items"}, status=status.HTTP_400_BAD_REQUEST)
 
-        product = get_object_or_404(Product, id=product_id)
-        
-        Favorite_product , created = FavoriteProduct.objects.get_or_create(
-                user=user,
-                product=product
+        for item in data:
+            if not isinstance(item, dict):
+                return Response({"detail": "Each item must be an object"}, status=status.HTTP_400_BAD_REQUEST)
+
+            product_id = item.get("id")
+            print(product_id)
+            product = get_object_or_404(Product,id=product_id)
+            fav_item , created = FavoriteProduct.objects.get_or_create(
+                product = product,
+                user = user
             )
-        
-        if not created:
-           Favorite_product.delete()
-           return Response({"detail": "Removed from favorites"}, status=200)
-            
-        
+
+            if not created:
+                continue
         return Response(
             {
                 "detail" : "favorite product merged"
@@ -219,6 +229,12 @@ class MergeFavProductView(APIView):
         )
         
 
+class GetFavProductView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        fav_products = FavoriteProduct.objects.filter(user=request.user)
+        serializer = FavoriteProductSerializer(fav_products, many=True)
+        return Response(serializer.data)
         
         
         

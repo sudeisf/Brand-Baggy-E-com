@@ -382,10 +382,39 @@ class ProductImageSerializer(serializers.ModelSerializer):
     def get_image(self, obj):
         return obj.image.url if obj.image else None
 
+
+# id: string;
+#       main_image: string;
+#       name: string;
+#       price: string;
+#       in_stock : boolean
+
+class ProductPublicSerializer(serializers.ModelSerializer):
+    main_image = serializers.SerializerMethodField(read_only=True)
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'name',
+            'main_image',
+            'price',
+            'in_stock'
+        ]
+    
+    def get_main_image(self,obj):
+        if obj.main_image:
+            public_id = str(obj.main_image)
+            return CloudinaryImage(public_id).build_url(secure=True)
+        return
+
 class FavoriteProductSerializer(serializers.ModelSerializer):
+    product = ProductPublicSerializer(read_only=True)
     class Meta:
         model = FavoriteProduct
-        fields = '__all__'
+        fields = [
+            'id',
+            'product'
+        ]
 
 class ProductSizeSerializer(serializers.ModelSerializer):
     is_favourited  = serializers.SerializerMethodField()

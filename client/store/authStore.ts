@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import api from '@/lib/axios';
 import { setCookie , deleteCookie } from "cookies-next";
+import { useCartStore } from './cartStore';
+import { useFavoritesStore } from './favStore';
 type User = {
     id: string,
     email: string;
@@ -67,6 +69,9 @@ type AuthState = {
         fieldErrors?: Record<string, string> 
     } | void>;
 }
+
+const setCart = useCartStore.getState().setCart;
+const setFav = useFavoritesStore.getState().setFav;
 
 export const useAuthStore = create<AuthState>()(
     persist(
@@ -176,6 +181,8 @@ export const useAuthStore = create<AuthState>()(
                             refreshToken: null,
                             user: null,
                         });
+                        setFav([])
+                        setCart([])mw
                         return { success: true };
                        }
                     } catch (error: any) {

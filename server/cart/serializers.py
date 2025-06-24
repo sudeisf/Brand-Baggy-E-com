@@ -4,7 +4,6 @@ from rest_framework import serializers
 from product.models import Product
 from .utils import get_or_create_cart
 from cloudinary import CloudinaryImage
-# Create your views here.
 
 User = get_user_model()
 

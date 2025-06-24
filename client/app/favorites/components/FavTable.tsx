@@ -5,10 +5,22 @@ import { ProductCrum } from "@/app/products/components/ProductCrum"
 import { Button } from "@/components/ui/button"
 import { useFavoritesStore } from "@/store/favStore"
 import Link from "next/link"
+import { useFav } from "@/hooks/useFav"
 
 export default function FavTable() {
-    const favItems = useFavoritesStore((state) => state.favorites)
+    const fav_items = useFavoritesStore((state) => state.favorites)
     const removeItem = useFavoritesStore((state) => state.removeItem)
+    const { data: fetchFavItems, isLoading, error } = useFav({ requireAuth: true });
+    const flatFavorites = fetchFavItems?.map(fav => ({
+        id: String(fav.product.id),
+        main_image: fav.product.main_image ?? "",
+        name: fav.product.name,
+        price: fav.product.price,
+        in_stock: fav.product.in_stock,
+      }));
+    const favItems = Array.isArray(flatFavorites)
+        ? flatFavorites
+        : (Array.isArray(fav_items) ? fav_items : [])
 
     return (
         <div className="bg-gray-50 min-h-screen pb-12">
@@ -38,7 +50,7 @@ export default function FavTable() {
                                 </Link>
                             </div>
                         ) : (
-                            favItems.map((item) => (
+                            favItems.map((item : any) => (
                                 <div key={item.id} className="grid grid-cols-12 gap-4 items-center px-6 py-4 hover:bg-gray-50 transition-colors">
                                     {/* Product Info */}
                                     <div className="col-span-6 flex items-center space-x-4">
@@ -55,6 +67,7 @@ export default function FavTable() {
                                                 src={item.main_image}
                                                 alt={item.name}
                                                 fill
+                                                sizes="72px"
                                                 className="rounded-md object-cover"
                                             />
                                         </div>
@@ -68,7 +81,7 @@ export default function FavTable() {
                                     </div>
 
                                     {/* Price */}
-                                    <div className="col-span-2 text-center font-bold text-[#331d67]">
+                                    <div className="col-span-2 text-center font-medium text-[#331d67] font-roboto ">
                                         ${item.price}
                                     </div>
 

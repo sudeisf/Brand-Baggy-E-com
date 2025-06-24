@@ -17,13 +17,14 @@ interface FavoritesStore {
   removeItem : (id: string) => void;
   clearAllItem : () => void;
   totalFavorite : ()=> number;
+  setFav : (items: FavoriteItem[]) => void,
 }
 
 export const useFavoritesStore = create<FavoritesStore>()(
   persist(
     (set, get) => ({
       favorites: [],
-      
+      setFav : (items) => set({favorites: items}),
       isFavorite: (id: string) => {
         return get().favorites.some(item => item.id === id);
       },
