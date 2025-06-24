@@ -20,14 +20,14 @@ export default function CartTable() {
     const items = useCartStore(state=>state.items);
     const updateItemQuantity = useCartStore((state) => state.updateItmeQuantity);
     const removeItem = useCartStore((state) => state.removeItem);
-    const {data:fetechedCart , isLoading , error} = useCart();
-    const cartItems = fetechedCart ?? items
+    const {data:fetechedCart , isLoading , error} = useCart({requireAuth:true});
+    const cartItems = fetechedCart?.items ?? items;
 
 
     return (
         <div className=" *:font-roboto w-[70%] ">
         <div className="  border-gray-200 rounded-xl p-4">
-          { cartItems.length ===0 ?(
+          { cartItems.length === 0 ?(
             <div className="text-center py-10 text-[#331d67]">
             <h2 className="text-xl font-semibold">🛒 Your cart is empty</h2>
             <Link href="/products" className="underline">

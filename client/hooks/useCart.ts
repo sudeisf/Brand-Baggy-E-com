@@ -2,17 +2,58 @@ import { useCartStore } from "@/store/cartStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import { useAuthStore } from "@/store/authStore";
+import { UseQueryOptions } from "@tanstack/react-query";
+import axios from "axios";
 
-export const useCart = ()=>{
-      const setCart = useCartStore((state)=> state.setCart);
-      return useQuery({
-            queryKey: ['cart'],
-            queryFn: async () => {
-                   const res = await api.get('/cart/get-cart/')
-                   setCart(res.data.items)
-                   return res.data.items
+
+interface CartItem {
+      id: string;
+      main_image: string;
+      name: string;
+      size: string;
+      quantity: number;
+      price: number;
+    }
+    
+    interface CartApiResponse {
+      items: CartItem[];
+    }
+    
+    export function useCart(
+      options?: Omit<UseQueryOptions<CartApiResponse>, 'queryKey' | 'queryFn'> & {
+        requireAuth?: boolean;
       }
-})}
+    ) {
+      const setCart = useCartStore((state) => state.setCart);
+      const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+      const token  = useAuthStore((state)=> state.accessToken)
+    
+      return useQuery<CartApiResponse>({
+        queryKey: ['cart'],
+        queryFn: async () => {
+          try {
+            const fullUrl = `${api.defaults.baseURL}cart/get-cart/`;
+            console.log("🌐 Requesting:", fullUrl);
+            const { data } = await api.get('cart/get-cart/', {
+                  headers : {
+                        "Authorization" : `Bearer ${token}`
+                  }
+            });
+            setCart(data.items);
+            return data;
+          } catch (error: any) {
+
+            if (error?.response?.status === 401) {
+              setCart([]);
+            }
+            throw error;
+          }
+        },
+        ...options,
+        enabled: options?.requireAuth ? isAuthenticated : true,
+        refetchOnWindowFocus: false,
+      });
+    }
 
 
 const useAddCart = ()=>{

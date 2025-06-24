@@ -34,9 +34,16 @@ class GetCartView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        queryset = get_object_or_404(Cart , user= request.user)
-        serializer = CartSerializer(queryset)
+        cart = Cart.objects.filter(user=request.user).first()
+        if not cart:
+            return Response({
+                "items": [],
+                "total": 0,
+                "detail": "Cart is empty."
+            }, status=status.HTTP_200_OK)
+        serializer = CartSerializer(cart)
         return Response(serializer.data)
+
 
 
 class UpdateCartItemView(generics.UpdateAPIView):
@@ -74,21 +81,28 @@ class ClearCartItemView(APIView):
 
 class MergeCartItemsView(APIView):
     permission_classes = [IsAuthenticated]
-    def post(self, request):
-        cart = Cart.objects.get_or_create(user=request.user)
-        data = request.data
 
-        if isinstance(data,list):
-            return Response({"detail": "the api expects list"} , status=status)
+    def post(self, request):
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+        data = request.data.get("items", [])
+
+        if not isinstance(data, list):
+            return Response({"detail": "Expected a list of items"}, status=status.HTTP_400_BAD_REQUEST)
 
         for item in data:
-            product_id = item.get("product_id")
-            quantity = item.get("quantity")
-            size = item.get("size")
+            if not isinstance(item, dict):
+                return Response({"detail": "Each item must be an object"}, status=status.HTTP_400_BAD_REQUEST)
 
-            product  = get_object_or_404(Product, id=product_id)
+            product_id = item.get("id")  # ✅ corrected key
+            quantity = item.get("quantity", 1)
+            size = item.get("size", "default")
 
-            cartItem , created = CartItem.objects.get_or_create(
+            if not product_id:
+                continue  # or return error if required
+
+            product = get_object_or_404(Product, id=product_id)
+
+            cart_item, created = CartItem.objects.get_or_create(
                 cart=cart,
                 product=product,
                 size=size,
@@ -96,10 +110,8 @@ class MergeCartItemsView(APIView):
             )
 
             if not created:
-                cartItem.quantity += quantity
-                cartItem.save()
-            
-            return Response({
-                "detail" : "cart merged successfully"
-            }, status=status.HTTP_200_OK)
+                cart_item.quantity += quantity
+                cart_item.save()
+
+        return Response({"detail": "Cart merged successfully"}, status=status.HTTP_200_OK)
 
