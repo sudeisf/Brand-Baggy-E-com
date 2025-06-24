@@ -13,8 +13,6 @@ export async function syncMerge() {
      
       await api.post('/cart/merge/', {"items" : guestCart});
       localStorage.removeItem('cart-store');
-      console.log("✅ Cart merged");
-
     }
     if (guestFavorites.length > 0) {
       const payload = guestFavorites.map((item: any) => ({
@@ -22,7 +20,6 @@ export async function syncMerge() {
       }));
       await api.post('/product/favorite-product/merged', payload);
       localStorage.removeItem('favorites-store');
-      console.log("✅ Favorites merged");
     }
   } catch (error) {
     console.error("❌ Merge failed:", error);

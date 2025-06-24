@@ -11,7 +11,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import { useCartStore } from "@/store/cartStore";
 import { useFavoritesStore } from "@/store/favStore";
@@ -23,10 +23,16 @@ export default function Header(){
     const logout = useAuthStore((state) => state.logout);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const totalQuantity = useCartStore((state)=> state.totalQuantity())
-    const totalPrice = useCartStore((state)=> state.totalPrice())
-    const totalFavorites = useFavoritesStore((state) => state.totalFavorite());
+    const [mounted, setMounted] = useState(false);
+    
+    // Get store values only after mounting to prevent hydration mismatch
+    const totalQuantity = useCartStore((state) => mounted ? state.totalQuantity() : 0);
+    const totalPrice = useCartStore((state) => mounted ? state.totalPrice() : 0);
+    const totalFavorites = useFavoritesStore((state) => mounted ? state.totalFavorite() : 0);
 
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     return(
         <header className="flex justify-between items-center px-4 sm:px-8 md:px-10 lg:px-10 py-2 bg-inherit w-full">
@@ -86,7 +92,7 @@ export default function Header(){
 
                 <div className="flex items-center gap-2 sm:gap-4">
                 <div className="bg-white rounded-full border border-gray-300 w-10 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
-                        {isAuthenticated && user?.user_role === "buyer"  ? (
+                        {mounted && isAuthenticated && user?.user_role === "buyer"  ? (
                             <Link href="/profile" className="flex items-center justify-center w-full h-full">
                              <Avatar className="w-8 h-8">
                                 <AvatarImage src={user?.profile_url || undefined} />
@@ -106,10 +112,10 @@ export default function Header(){
                         <Link href="/cart" className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2">
                             <ShoppingCart className="text-[#2d1a4d] w-4 h-4 sm:w-5 sm:h-5" />
                             <span className="hidden sm:inline text-[#2d1a4d] text-sm font-semibold">
-                            ${totalPrice.toFixed(2)}
+                            ${mounted ? totalPrice.toFixed(2) : "0.00"}
                             </span>
                         </Link>
-                        {totalQuantity > 0 && (
+                        {mounted && totalQuantity > 0 && (
                                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                                 {totalQuantity}
                                 </span>
@@ -119,7 +125,7 @@ export default function Header(){
                         <Link href="/favorites" className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2">
                             <Heart className="text-[#2d1a4d] w-4 h-4 sm:w-5 sm:h-5" />
                         </Link>
-                        {totalFavorites > 0 && (
+                        {mounted && totalFavorites > 0 && (
                             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                                 {totalFavorites}
                             </span>
