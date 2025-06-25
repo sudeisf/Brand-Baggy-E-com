@@ -1,6 +1,7 @@
 // store/favoritesStore.ts
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { subscribeWithSelector } from "zustand/middleware";
 
 interface FavoriteItem {
   id: string;
@@ -22,6 +23,7 @@ interface FavoritesStore {
 
 export const useFavoritesStore = create<FavoritesStore>()(
   persist(
+    subscribeWithSelector(
     (set, get) => ({
       favorites: [],
       setFav : (items) => set({favorites: items}),
@@ -46,7 +48,7 @@ export const useFavoritesStore = create<FavoritesStore>()(
           }
         });
       }
-    }),
+    })),
     {
       name: "favorites-store",
       storage: createJSONStorage(() => localStorage),

@@ -6,21 +6,13 @@ import { Button } from "@/components/ui/button"
 import { useFavoritesStore } from "@/store/favStore"
 import Link from "next/link"
 import { useFav } from "@/hooks/useFav"
+import { useEffect, useState } from "react"
+import { useAuthStore } from "@/store/authStore"
 
 export default function FavTable() {
     const fav_items = useFavoritesStore((state) => state.favorites)
     const removeItem = useFavoritesStore((state) => state.removeItem)
-    const { data: fetchFavItems, isLoading, error } = useFav({ requireAuth: true });
-    const flatFavorites = fetchFavItems?.map(fav => ({
-        id: String(fav.product.id),
-        main_image: fav.product.main_image ?? "",
-        name: fav.product.name,
-        price: fav.product.price,
-        in_stock: fav.product.in_stock,
-      }));
-    const favItems = Array.isArray(flatFavorites)
-        ? flatFavorites
-        : (Array.isArray(fav_items) ? fav_items : [])
+    
 
     return (
         <div className="bg-gray-50 min-h-screen pb-12">
@@ -28,7 +20,7 @@ export default function FavTable() {
             <div className="max-w-[1250px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl md:text-4xl font-bold text-[#331d67]">Your Favorites</h1>
-                    <span className="text-gray-500">{favItems.length} items</span>
+                    <span className="text-gray-500">{fav_items.length} items</span>
                 </div>
 
                 <div className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -42,7 +34,7 @@ export default function FavTable() {
 
                     {/* Table Body */}
                     <div className="divide-y divide-gray-200">
-                        {favItems.length === 0 ? (
+                        {fav_items.length === 0 ? (
                             <div className="py-12 text-center">
                                 <p className="text-gray-500">Your favorites list is empty</p>
                                 <Link href="/products" className="mt-4 inline-block text-[#331d67] font-medium hover:underline">
@@ -50,7 +42,7 @@ export default function FavTable() {
                                 </Link>
                             </div>
                         ) : (
-                            favItems.map((item : any) => (
+                            fav_items.map((item : any) => (
                                 <div key={item.id} className="grid grid-cols-12 gap-4 items-center px-6 py-4 hover:bg-gray-50 transition-colors">
                                     {/* Product Info */}
                                     <div className="col-span-6 flex items-center space-x-4">
@@ -116,7 +108,7 @@ export default function FavTable() {
                     </div>
                 </div>
 
-                {favItems.length > 0 && (
+                {fav_items.length > 0 && (
                     <div className="mt-8 flex justify-end">
                         <Button 
                             variant="outline" 

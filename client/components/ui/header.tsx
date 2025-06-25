@@ -18,6 +18,7 @@ import { useFavoritesStore } from "@/store/favStore";
 import CartBadge from "./CartBadge";
 import FavBadge from "./FavBadge";
 import { useCart } from "@/hooks/useCart";
+import { useFav } from "@/hooks/useFav";
 
 export default function Header(){
     const router = useRouter();
@@ -28,6 +29,7 @@ export default function Header(){
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
     const {isLoading,error} = useCart({requireAuth:true});
+    const fetch = useFav({requireAuth:true})
 
     useEffect(() => {
         setMounted(true);
