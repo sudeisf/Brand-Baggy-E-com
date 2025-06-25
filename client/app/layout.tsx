@@ -17,25 +17,33 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const checkAuthFn = useAuthStore((state)=> state.checkAuth);
-  const [queryClient] = useState(() => new QueryClient());
-  useEffect(()=>{
-      checkAuthFn()
-  },[])
+  const [queryClient] = useState(
+    () =>
+        new QueryClient({
+            defaultOptions: {
+                queries: {
+                    refetchOnWindowFocus: false,
+                    refetchOnMount: false,
+                    staleTime: 5 * 60 * 1000,
+                    gcTime: 10 * 60 * 1000, 
+                },
+            },
+        })
+);
   return (
     <html lang="en" className="h-full">
-      <body className="h-full antialiased bg-gray-50">
-        <div className="relative flex min-h-screen flex-col w-full m-0 p-0">
-          <HeaderFooterWrapper>
-            <main className="flex-1">
-            <QueryClientProvider client={queryClient}>
-              <HydrationBoundary>{children}</HydrationBoundary>
-            </QueryClientProvider>
-            </main>
-          </HeaderFooterWrapper>
-          <Toaster/>
-        </div> 
-      </body>
-    </html>
+            <body className="h-full antialiased bg-white">
+                <div className="relative flex min-h-screen flex-col w-full m-0 p-0">
+                    <QueryClientProvider client={queryClient}>
+                        <HydrationBoundary>
+                            <HeaderFooterWrapper>
+                                <main className="flex-1">{children}</main>
+                            </HeaderFooterWrapper>
+                            <Toaster />
+                        </HydrationBoundary>
+                    </QueryClientProvider>
+                </div>
+            </body>
+        </html>
   );
 }

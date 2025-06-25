@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import { useAuthStore } from "@/store/authStore";
 import { UseQueryOptions } from "@tanstack/react-query";
-import axios from "axios";
 
 
 interface CartItem {
@@ -32,14 +31,12 @@ interface CartItem {
         queryKey: ['cart'],
         queryFn: async () => {
           try {
-            const fullUrl = `${api.defaults.baseURL}cart/get-cart/`;
-            console.log("🌐 Requesting:", fullUrl);
             const { data } = await api.get('cart/get-cart/', {
                   headers : {
                         "Authorization" : `Bearer ${token}`
                   }
             });
-            setCart(data.items);
+            setCart(data.items)
             return data;
           } catch (error: any) {
 
@@ -51,7 +48,8 @@ interface CartItem {
         },
         ...options,
         enabled: options?.requireAuth ? isAuthenticated : true,
-        refetchOnWindowFocus: false,
+        refetchOnWindowFocus: false, // Disable refetch on focus
+        staleTime: 5 * 60 * 1000, // Cache for 5 minutes
       });
     }
 

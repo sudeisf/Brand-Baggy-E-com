@@ -182,7 +182,7 @@ export const useAuthStore = create<AuthState>()(
                             user: null,
                         });
                         setFav([])
-                        setCart([])mw
+                        setCart([])
                         return { success: true };
                        }
                     } catch (error: any) {

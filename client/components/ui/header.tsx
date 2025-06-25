@@ -15,6 +15,9 @@ import React, { useState, useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import { useCartStore } from "@/store/cartStore";
 import { useFavoritesStore } from "@/store/favStore";
+import CartBadge from "./CartBadge";
+import FavBadge from "./FavBadge";
+import { useCart } from "@/hooks/useCart";
 
 export default function Header(){
     const router = useRouter();
@@ -24,11 +27,7 @@ export default function Header(){
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
-    
-    // Get store values only after mounting to prevent hydration mismatch
-    const totalQuantity = useCartStore((state) => mounted ? state.totalQuantity() : 0);
-    const totalPrice = useCartStore((state) => mounted ? state.totalPrice() : 0);
-    const totalFavorites = useFavoritesStore((state) => mounted ? state.totalFavorite() : 0);
+    const {isLoading,error} = useCart({requireAuth:true});
 
     useEffect(() => {
         setMounted(true);
@@ -107,30 +106,8 @@ export default function Header(){
                         </Link>
                         )}
                     </div>
-                    
-                    <div className="bg-white rounded-md p-1 sm:p-2  border-1 relative">
-                        <Link href="/cart" className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2">
-                            <ShoppingCart className="text-[#2d1a4d] w-4 h-4 sm:w-5 sm:h-5" />
-                            <span className="hidden sm:inline text-[#2d1a4d] text-sm font-semibold">
-                            ${mounted ? totalPrice.toFixed(2) : "0.00"}
-                            </span>
-                        </Link>
-                        {mounted && totalQuantity > 0 && (
-                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                {totalQuantity}
-                                </span>
-                            )}
-                    </div>
-                    <div className="bg-white rounded-full w-10 h-10 flex items-center justify-center border border-gray-400 relative">
-                        <Link href="/favorites" className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2">
-                            <Heart className="text-[#2d1a4d] w-4 h-4 sm:w-5 sm:h-5" />
-                        </Link>
-                        {mounted && totalFavorites > 0 && (
-                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                {totalFavorites}
-                            </span>
-                        )}
-                    </div>
+                    <CartBadge/>
+                    <FavBadge/>
                 </div>
             </div>
 

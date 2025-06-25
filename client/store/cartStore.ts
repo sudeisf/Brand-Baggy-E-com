@@ -1,5 +1,7 @@
 import {create} from "zustand"
 import { persist, createJSONStorage } from "zustand/middleware"
+import {produce} from "immer";
+import { subscribeWithSelector } from 'zustand/middleware'
 
 
 interface CartItem {
@@ -11,6 +13,7 @@ interface CartItem {
       price : number;
 }
 
+
 interface CartStore {
       items : CartItem[];
       setCart : (items:CartItem[]) => void;
@@ -21,62 +24,83 @@ interface CartStore {
       mergeCart: (items: CartItem[]) => void;
       totalQuantity :() => number;
       totalPrice : () => number;
+      subscribers : (()=>void)[];
+      subscribe : (callback : () => void) => void;
 }
 
 export const useCartStore = create<CartStore>()(persist(
-      (set,get) => ({
-            items : [],
-            setCart: (items) => set({ items }),
-            addCartItem : (newItem) => {
-                  const existingItem = get().items.find(item => item.id === newItem.id && item.size === newItem.size);
-                  if (existingItem) {
+      subscribeWithSelector(
+            (set,get) => ({
+                  items : [],
+                  subscribers: [],
+                  subscribe: (callback) => {
+                        set(
+                            produce((state) => {
+                                state.subscribers.push(callback);
+                            })
+                        );
+                        return () =>
+                            set(
+                                produce((state) => {
+                                    state.subscribers = state.subscribers.filter((sub: () => void) => sub !== callback);
+                                })
+                            );
+                    },
+                  setCart: (items) => {
+                        set({ items })
+                        get().subscribers.forEach(cb => cb());
+                  },
+                  addCartItem : (newItem) => {
+                        const existingItem = get().items.find(item => item.id === newItem.id && item.size === newItem.size);
+                        if (existingItem) {
+                              set({
+                                    items: get().items.map(item =>
+                                          item.id === newItem.id && item.size === newItem.size
+                                                ? { ...item, quantity: item.quantity + newItem.quantity }
+                                                : item
+                                    )
+                              });
+                        } else {
+                              set({ items: [...get().items, newItem] });
+                        }
+                  },
+                  removeItem : (id , size) => {
+                        set((state) => ({
+                              items: state.items.filter((i) => !(i.id === id && i.size === size)),
+                            }));
+                  },
+                  updateItmeQuantity : (id , quantity , size) => {
+                        if (quantity <= 0) {
+                              get().removeItem(id , size);
+                              return;
+                        }
                         set({
-                              items: get().items.map(item =>
-                                    item.id === newItem.id && item.size === newItem.size
-                                          ? { ...item, quantity: item.quantity + newItem.quantity }
-                                          : item
+                              items : get().items.map(item => 
+                                    item.id === id && item.size === size ? 
+                                    { ...item , quantity } : item
                               )
                         });
-                  } else {
-                        set({ items: [...get().items, newItem] });
+                  },
+                  clearCart: () => {
+                        set({items:[]})
+                  },
+                  totalQuantity: () => get().items.reduce((acc, item) => acc + item.quantity, 0),
+                  totalPrice: () => get().items.reduce((acc, item) => acc + item.price * item.quantity, 0),
+                  mergeCart: (newItems) => {
+                        const currentItems  =  get().items;
+                        const merged = [...currentItems]
+                        newItems.forEach(newItem => {
+                              const index = merged.findIndex(i => i.id === newItem.id);
+                              if(index > -1){
+                                    merged[index].quantity += newItem.quantity;
+                              }else{
+                                    merged.push(newItem);
+                              }
+                        })
+                        set({ items: merged });
                   }
-            },
-            removeItem : (id , size) => {
-                  set((state) => ({
-                        items: state.items.filter((i) => !(i.id === id && i.size === size)),
-                      }));
-            },
-            updateItmeQuantity : (id , quantity , size) => {
-                  if (quantity <= 0) {
-                        get().removeItem(id , size);
-                        return;
-                  }
-                  set({
-                        items : get().items.map(item => 
-                              item.id === id && item.size === size ? 
-                              { ...item , quantity } : item
-                        )
-                  });
-            },
-            clearCart: () => {
-                  set({items:[]})
-            },
-            totalQuantity: () => get().items.reduce((acc, item) => acc + item.quantity, 0),
-            totalPrice: () => get().items.reduce((acc, item) => acc + item.price * item.quantity, 0),
-            mergeCart: (newItems) => {
-                  const currentItems  =  get().items;
-                  const merged = [...currentItems]
-                  newItems.forEach(newItem => {
-                        const index = merged.findIndex(i => i.id === newItem.id);
-                        if(index > -1){
-                              merged[index].quantity += newItem.quantity;
-                        }else{
-                              merged.push(newItem);
-                        }
-                  })
-                  set({ items: merged });
-            }
-      }),
+            })
+      ),
       {
       name: "cart-store",
       storage: createJSONStorage(() => localStorage),
