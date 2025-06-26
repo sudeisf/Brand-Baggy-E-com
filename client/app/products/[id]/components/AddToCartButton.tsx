@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button"
 import { useCartStore } from "@/store/cartStore";
 import { useFavoritesStore } from "@/store/favStore";
 import { Heart } from "lucide-react";
+import {useAddCartMutation} from "@/hooks/useCart";
+import { error } from "console";
 
 
 interface CartItem {
@@ -30,12 +32,29 @@ export default function AddToCartButton({
     isSizeSelected,
     cartItem, 
     onAddToCartSuccess}:AddToCartButtonProps){
+
     const addToCart = useCartStore((state)=> state.addCartItem)
-    const handleAddToCart = () => {
-        addToCart({ ...cartItem, price: Number(cartItem.price) })
-        console.log("clicked" , cartItem)
-        if (onAddToCartSuccess) onAddToCartSuccess();
+    const mutation = useAddCartMutation();
+    const payload =  {
+        product_id : Number(cartItem.id),
+        quantity: Number(cartItem.quantity),
+        size : cartItem.size
     }
+
+    const handleAddToCart = () => {
+        mutation.mutate(
+            payload,{
+                onSuccess:()=>{
+                    addToCart({ ...cartItem, price: Number(cartItem.price) })
+                    if (onAddToCartSuccess) onAddToCartSuccess();
+                },onError : (error) =>{
+                    console.error("Failed to add to cart:",error);
+                }
+            }
+        );
+    }
+
+
     const { isFavorite, toggleFavorite } = useFavoritesStore();
     const handleToggleFavorite = () => {
         toggleFavorite({

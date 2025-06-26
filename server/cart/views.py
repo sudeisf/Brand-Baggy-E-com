@@ -17,10 +17,11 @@ from .models import CartItem , Cart
 
 
 class AddCartItemView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
-        serilaizer = AddCartItemSerializer(data=request.data,context = {'request' : request})
-        serilaizer.is_valid(raise_exception=True)
-        cart_item= serilaizer.save()
+        serializer  = AddCartItemSerializer(data=request.data,context = {'request' : request})
+        serializer .is_valid(raise_exception=True)
+        cart_item= serializer .save()
         return Response({
             "message": "Item added to cart",
             "item_id": cart_item.id,
@@ -28,11 +29,23 @@ class AddCartItemView(APIView):
             "quantity": cart_item.quantity
         })
 
-class RemoveCartItemView(generics.DestroyAPIView):
-    queryset = CartItem.objects.all()
-    lookup_field = 'pk'
+class RemoveCartItemView(APIView):
+    permission_classes = [IsAuthenticated]
 
-@method_decorator(cache_page(60*15), name='dispatch') 
+    def delete(self, request):
+        id = request.data.get('cart_id')
+        try:
+            cart_item = CartItem.objects.get(id=id, cart__user=request.user)
+            cart_item.delete()
+            return Response({"detail": "Cart item deleted."}, status=status.HTTP_204_NO_CONTENT)
+        except CartItem.DoesNotExist:
+            return Response({"detail": "Cart item does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        
+
+
+
+
+
 class GetCartView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -71,7 +84,6 @@ class ClearCartItemView(APIView):
         if request.user.is_authenticated:
             CartItem.objects.filter(cart__user=request.user).delete()
         else:
-            # Handle guest (session user)
             session_id = request.session.session_key
             if not session_id:
                 request.session.create()
@@ -96,12 +108,12 @@ class MergeCartItemsView(APIView):
             if not isinstance(item, dict):
                 return Response({"detail": "Each item must be an object"}, status=status.HTTP_400_BAD_REQUEST)
 
-            product_id = item.get("id")  # ✅ corrected key
+            product_id = item.get("id")  
             quantity = item.get("quantity", 1)
             size = item.get("size", "default")
 
             if not product_id:
-                continue  # or return error if required
+                continue 
 
             product = get_object_or_404(Product, id=product_id)
 

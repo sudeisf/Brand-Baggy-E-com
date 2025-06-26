@@ -5,7 +5,8 @@ import {useCartStore} from "@/store/cartStore"
 import {  Trash2 } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { useCart } from "@/hooks/useCart"
+import { useCart, useRemoveCart } from "@/hooks/useCart"
+import { useAuthStore } from "@/store/authStore"
 
 interface CartItem {
     id : string;
@@ -20,8 +21,25 @@ export default function CartTable() {
     const items = useCartStore(state=>state.items);
     const updateItemQuantity = useCartStore((state) => state.updateItmeQuantity);
     const removeItem = useCartStore((state) => state.removeItem);
+    const isAuthenticated = useAuthStore((state)=> state.isAuthenticated)
+    const mutation = useRemoveCart()
+    type removePayload = {
+        cart_id: number,
+    }
+    const handleRemoveItem = (value : removePayload) =>{
+        mutation.mutate(
+            value
+        )
+    }
 
-
+    const handleRemove = (item: CartItem) => {
+        removeItem(item.id, item.size);
+        if (isAuthenticated) {
+            handleRemoveItem({
+                cart_id: Number(item.id)
+            });
+        }
+    };
 
     return (
         <div className=" *:font-roboto w-[70%] ">
@@ -65,7 +83,7 @@ export default function CartTable() {
                         <p>${item.quantity * item.price}</p>
                     </div>
                     <div className="col-span-2 text-center font-roboto">
-                        <Button variant="ghost" onClick={()=> removeItem(item.id ,item.size)}>
+                        <Button variant="ghost" onClick={() => handleRemove(item)}>
                         <Trash2  className="w-5 h-5 text-[#331d67] mx-auto" />
                         </Button>
                     </div>

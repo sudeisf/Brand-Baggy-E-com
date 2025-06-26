@@ -10,7 +10,6 @@ class Cart(models.Model):
     def __str__(self):
         if self.user:
             return f"Cart of {self.user.username}"
-        return f"Cart for session {self.session_id}"
     
 
 class CartItem(models.Model):

@@ -99,14 +99,6 @@ export default function ProductPage({ initialProduct }: ProductPageProps) {
     fiveDaysLater.setDate(today.getDate() + 5);
 
     const estimatedArrival = `${formatDate(today)} - ${formatDate(fiveDaysLater)}`;
-    const CartItem  = {
-        id : product?.id,
-        main_image : product?.main_image,
-        name : product?.name,
-        size : selectedSize,
-        quantity : 1,
-        price : product?.price,
-    }
     return(
         <div 
             className="flex flex-col mx-auto min-h-screen ">

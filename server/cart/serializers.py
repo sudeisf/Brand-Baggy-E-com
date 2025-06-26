@@ -32,27 +32,41 @@ class CartSerializer(serializers.ModelSerializer):
 class AddCartItemSerializer(serializers.Serializer):
      product_id = serializers.IntegerField()
      quantity = serializers.IntegerField(min_value=1)
+     size = serializers.CharField()
 
-     def validate_productId(self , value):
+     def validate_size(self, value):
+      
+         if not value or value.strip() == "":
+             print("Validation error: Size is required.")
+             raise serializers.ValidationError("Size is required.")
+         return value
+
+     def validate_product_id(self , value):
+     
          try:
             product  = Product.objects.get(id=value)
+        
          except Product.DoesNotExist:
+             
              raise serializers.ValidationError('product does not exisit')
          return value
      
      def create(self, validated_data):
          request = self.context['request']
-         cart  = get_or_create_cart(request)
+         cart, _ = Cart.objects.get_or_create(user=request.user)
          product = Product.objects.get(id=validated_data['product_id'])
-
+         size = validated_data['size']
          cartItem, created = CartItem.objects.get_or_create(
              cart = cart,
              product = product,
+             size = size,
              defaults={'quantity' : validated_data['quantity']}
          )
+
          if not created:
              cartItem.quantity += validated_data['quantity']
              cartItem.save()
+             print(f"Updated CartItem quantity: {cartItem.quantity}")
 
          return cartItem
 

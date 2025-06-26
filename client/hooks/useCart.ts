@@ -48,21 +48,27 @@ interface CartItem {
         },
         ...options,
         enabled: options?.requireAuth ? isAuthenticated : true,
-        refetchOnWindowFocus: false, // Disable refetch on focus
-        staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+        refetchOnWindowFocus: false, 
+        staleTime: 5 * 60 * 1000, 
       });
     }
 
 
-const useAddCart = ()=>{
+interface AddPayLoad {
+      product_id: number;
+      size: string;
+      quantity: number;
+    }
+
+export const useAddCartMutation = ()=>{
       const addItem  = useCartStore((state)=> state.addCartItem)
       const token  = useAuthStore((state)=> state.accessToken)
       const queryClient = useQueryClient()
       return useMutation(
             {
                   mutationKey : ["addCart"],
-                  mutationFn: async (payload) => {
-                        const response = await api.post("/cart",
+                  mutationFn: async (payload : AddPayLoad) => {
+                        const response = await api.post("/cart/add/",
                               payload,
                               {headers : {
                                           "Authorization" : `Bearer ${token} `
@@ -72,34 +78,35 @@ const useAddCart = ()=>{
                         return response.data
                   },
                   onSuccess: (data) => {
-                        addItem(data);
                         queryClient.invalidateQueries({ queryKey: ['cart'] });
                   }
             }
       )
 }
-const useRemoveCart = () =>{
-      const addItem  = useCartStore((state)=> state.addCartItem)
+
+interface Removepayload {
+      cart_id: number;
+    }
+
+export const useRemoveCart = () =>{
       const token  = useAuthStore((state)=> state.accessToken)
       const queryClient = useQueryClient()
       return useMutation(
             {
                   mutationKey : ["removeCart"],
-                  mutationFn: async (payload) => {
-                        const response = await api.post("/cart",
-                              payload,
-                              {headers : {
-                                          "Authorization" : `Bearer ${token} `
-                                    }
+                  mutationFn: async (payload: Removepayload) => {
+                        const response = await api.delete("/cart/remove/", {
+                              data: payload,
+                              headers: {
+                                    "Authorization": `Bearer ${token} `
                               }
-                        );
+                        });
                         return response.data
                   },
-                  onSuccess: (data) => {
-                        addItem(data);
+                  onSuccess(data, variables, context) {
                         queryClient.invalidateQueries({ queryKey: ['cart'] });
                   }
-            }
+            },
       )
 }
 const useRemoveAllCart = () =>{
