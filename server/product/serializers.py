@@ -247,7 +247,7 @@ class CreateProductSerializer(serializers.ModelSerializer):
 #     def get_category(self,obj):
 #         if obj.category:
 #             return {
-#                 'id': obj.category.id,
+#                 'id': obj.category.id,w
 #                 'name': obj.category.name,
 #                 'parent': {
 #                     'id': obj.category.parent.id,

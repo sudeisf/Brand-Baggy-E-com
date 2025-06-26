@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14 
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: BMB8DB4L9RQ
+      POSTGRES_DB: first_django_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7 
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+
+  django:
+    build:
+      context: ./server
+    env_file:
+      - ./server/.env
+    command: >
+      sh -c "python manage.py wait_for_db && 
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  client:
+    build:
+      context: ./client
+    environment:
+      - NEXT_PUBLIC_API_URL=http://django:8000
+    depends_on:
+      - django
+
+  celery:
+    build: ./server
+    command: celery -A first_django_server worker --loglevel=info
+    depends_on:
+      - redis
+      - postgres
+
+  celery-beat:
+    build: ./server
+    command: celery -A first_django_server beat --loglevel=info
+    depends_on:
+      - redis
+      - postgres
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: app-network
+    driver: bridge

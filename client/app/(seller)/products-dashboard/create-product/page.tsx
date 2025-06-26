@@ -371,7 +371,10 @@ export default function CreateProduct() {
                                     <div className="flex flex-col gap-2 ">
                                         <label htmlFor="discount-start" className="capitalize font-roboto text-sm">discount Start Date</label>
                                         <DatePicker 
-                                            onChange={(date) => setValue('discountStartDate', date)} disabled={false}                                        />
+                                            value={watch('discountStartDate') ? watch('discountStartDate')?.toISOString() : null}
+                                            onChange={(date) => setValue('discountStartDate', date)}
+                                            disabled={false}
+                                        />
                                         {errors.discountStartDate && (
                                             <span className="text-red-500 text-sm">{errors.discountStartDate.message}</span>
                                         )}
@@ -379,8 +382,9 @@ export default function CreateProduct() {
                                     <div className="flex flex-col gap-2">
                                         <label htmlFor="discount-end" className="capitalize font-roboto text-sm">discount end date</label>
                                         <DatePicker 
-                                        disabled={false} 
+                                            value={watch('discountEndDate') ? watch('discountEndDate')?.toISOString() : null}
                                             onChange={(date) => setValue('discountEndDate', date)}
+                                            disabled={false}
                                         />
                                         {errors.discountEndDate && (
                                             <span className="text-red-500 text-sm">{errors.discountEndDate.message}</span>

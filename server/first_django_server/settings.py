@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-8__#a0r#&cfj-8l8w7eq+_45dl74#u^^3bz0l-!w^%*6+&l$mq
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 SECRET_KEY = os.getenv('SECRET_KEY')
 
  
@@ -65,9 +65,9 @@ INSTALLED_APPS = [
     "silk"
 ]
 
-# CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
-# CELERY_ACCEPT_CONTENT = ['json']
-# CELERY_TASK_SERIALIZER = 'json'
+CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://redis:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
