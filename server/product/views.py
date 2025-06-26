@@ -11,14 +11,18 @@ from .serializers import (ProductSerialier ,
                           SellerProductListSerializer,
                           FavoriteProductSerializer
                           )
+
 from .models import Product , FavoriteProduct , ProductReview
 from rest_framework.permissions import IsAuthenticated , AllowAny 
 from accounts.permisions import IsSeller 
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 import cloudinary
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
 
+@method_decorator(cache_page(60*15), name="dispatch")
 class ProductListView(generics.ListAPIView):
     serializer_class = ProductPublicSerializer
     queryset = Product.objects.all()
@@ -156,6 +160,8 @@ class DeleteSellerProductAPIVIew(APIView):
 
 from .models import Category
 from .serializers import CatagorySerializer
+
+@method_decorator(cache_page(60*15), name='dispatch') 
 class CategoryListView(APIView):
     permission_classes = [AllowAny]
     
@@ -164,7 +170,7 @@ class CategoryListView(APIView):
         serializer = CatagorySerializer(queryset, many=True)
         return Response(serializer.data)
 
-
+@method_decorator(cache_page(60*15), name='dispatch') 
 class CategorySubListView(APIView):
     permission_classes = [AllowAny]
     
@@ -228,7 +234,7 @@ class MergeFavProductView(APIView):
             status=status.HTTP_201_CREATED
         )
         
-
+@method_decorator(cache_page(60*15), name='dispatch') 
 class GetFavProductView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):

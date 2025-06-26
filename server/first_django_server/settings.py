@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-8__#a0r#&cfj-8l8w7eq+_45dl74#u^^3bz0l-!w^%*6+&l$mq
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = []
 SECRET_KEY = os.getenv('SECRET_KEY')
 
  
@@ -65,11 +65,9 @@ INSTALLED_APPS = [
     "silk"
 ]
 
-CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://redis:6379/0')
-CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://redis:6379/0')
-CELERY_TIMEZONE = 'UTC'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
+# CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+# CELERY_ACCEPT_CONTENT = ['json']
+# CELERY_TASK_SERIALIZER = 'json'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -208,17 +206,30 @@ TEMPLATES = [
 WSGI_APPLICATION = 'first_django_server.wsgi.application'
 
 
+
+
+#caching step up
+CACHES = {
+      "default" : {
+            "BACKEND" : "django_redis.cache.RedisCache",
+            "LOCATION": "redis://127.0.0.1:6379/1",
+            "OPTIONS" : {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            }
+      }
+}
+
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),  
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+        'NAME': 'first_django_db',
+        'USER': 'postgres',
+        'PASSWORD': 'BMB8DB4L9RQ',
+        'HOST': '127.0.0.1', 
+        'PORT': '5432',
     }
 }
 
@@ -265,3 +276,5 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+

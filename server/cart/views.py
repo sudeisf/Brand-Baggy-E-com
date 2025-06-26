@@ -3,6 +3,8 @@ from rest_framework import generics , request , status
 from rest_framework.response import Response
 from rest_framework.views import APIView 
 from rest_framework.permissions import AllowAny , IsAuthenticated
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
 from product.models import Product
 from .serializers import (
@@ -30,6 +32,7 @@ class RemoveCartItemView(generics.DestroyAPIView):
     queryset = CartItem.objects.all()
     lookup_field = 'pk'
 
+@method_decorator(cache_page(60*15), name='dispatch') 
 class GetCartView(APIView):
     permission_classes = [IsAuthenticated]
 
