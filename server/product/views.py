@@ -76,13 +76,25 @@ class RemoveFavouriteProductView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self , request , product_id):
-        fav_prod = FavoriteProduct.objects.filter(user = request.user , product_id = product_id)
+        product = Product.objects.get(id= product_id)
+        fav_prod = FavoriteProduct.objects.filter(user = request.user , product = product)
         if fav_prod.exists():
             fav_prod.delete()
             return Response({"message": "Removed from favorites"}, status=status.HTTP_204_NO_CONTENT)
         else:
             return Response({'message': 'Product was not in favorites'}, status=status.HTTP_400_BAD_REQUEST)
     
+class RemoveAllFavItems(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        fav_prod = FavoriteProduct.objects.filter(user=request.user)
+        deleted_count, _ = fav_prod.delete()
+        if deleted_count > 0:
+            return Response({"message": "Removed all favorites"}, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': 'No favorites to remove'}, status=status.HTTP_200_OK)
+
 
 class ProductReviewListCreateView(generics.ListAPIView):
     serializer_class = ProductReviewSerializer
@@ -234,7 +246,7 @@ class MergeFavProductView(APIView):
             status=status.HTTP_201_CREATED
         )
         
-@method_decorator(cache_page(60*15), name='dispatch') 
+
 class GetFavProductView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):

@@ -29,7 +29,7 @@ export default function Header(){
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
     const {isLoading,error} = useCart({requireAuth:true});
-    const fetch = useFav({requireAuth:true})
+    const {isLoading:loading,error:err} = useFav({requireAuth:true})
 
     useEffect(() => {
         setMounted(true);

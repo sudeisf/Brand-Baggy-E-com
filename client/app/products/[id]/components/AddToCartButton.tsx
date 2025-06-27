@@ -6,6 +6,9 @@ import { useFavoritesStore } from "@/store/favStore";
 import { Heart } from "lucide-react";
 import {useAddCartMutation} from "@/hooks/useCart";
 import { error } from "console";
+import { useAuthStore } from "@/store/authStore";
+import { useAddFavoriteItemMutation } from "@/hooks/useFav";
+import { number } from "zod";
 
 
 interface CartItem {
@@ -24,17 +27,21 @@ interface AddToCartButtonProps{
     cartItem : CartItem;
     onAddToCartSuccess?: () => void;
     isSizeSelected: boolean
+    product_id : number
 }
 
 export default function AddToCartButton({
     isHeart , 
     onHeartClick , 
+    product_id,
     isSizeSelected,
     cartItem, 
     onAddToCartSuccess}:AddToCartButtonProps){
 
     const addToCart = useCartStore((state)=> state.addCartItem)
+    const isAuthenticated = useAuthStore((state)=>state.isAuthenticated)
     const mutation = useAddCartMutation();
+    const fav_Mutation = useAddFavoriteItemMutation()
     const payload =  {
         product_id : Number(cartItem.id),
         quantity: Number(cartItem.quantity),
@@ -64,6 +71,11 @@ export default function AddToCartButton({
           price: cartItem.price,
           in_stock : cartItem.in_stock
         });
+        if(isAuthenticated){
+            fav_Mutation.mutate(
+                {product_id : product_id}
+            )
+        }
       };
     return(
         <div className="flex mt-4 gap-4 w-full items-center">

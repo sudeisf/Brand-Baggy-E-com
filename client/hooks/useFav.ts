@@ -1,8 +1,9 @@
 import { useAuthStore } from "@/store/authStore";
-import { UseQueryOptions } from "@tanstack/react-query";
+import { useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 import { useFavoritesStore } from "@/store/favStore";
 import api from "@/lib/axios";
 import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 
 interface FavProduct {
@@ -18,8 +19,7 @@ interface FavoriteItem {
       product: FavProduct;
 }    
 type FavApiResponse = FavoriteItem[];
-    
-    export function useFav(
+export function useFav(
       options?: Omit<UseQueryOptions<FavApiResponse>, 'queryKey' | 'queryFn'> & {
         requireAuth?: boolean;
       }
@@ -56,6 +56,68 @@ type FavApiResponse = FavoriteItem[];
         },
         ...options,
         enabled: options?.requireAuth ? isAuthenticated : true,
-        refetchOnWindowFocus: false,
+        refetchOnWindowFocus: false, 
+        staleTime: 5 * 60 * 1000,
       });
     }
+
+
+interface favPayload {
+  product_id : number;
+}
+export const useAddFavoriteItemMutation = () => {
+    const token  = useAuthStore((state)=> state.accessToken);
+    const queryClient = useQueryClient()
+    return useMutation({
+      mutationKey : ["addFavItem"],
+      mutationFn : async (payload:favPayload) =>{
+        const response = await api.post(`product/favorites/add/${payload.product_id}/`, {
+          headers : {
+                "Authorization" : `Bearer ${token}`
+          }
+    })
+    return response.data;
+  },
+  onSuccess :() =>{
+            queryClient.invalidateQueries({queryKey : ["favorites"]})
+  }
+    })
+}
+
+
+export const useRemoveFavorite = ()=>{
+  const token  = useAuthStore((state)=> state.accessToken);
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey : ["removeItem"],
+    mutationFn : async (payload:favPayload) =>{
+      const response = await api.post(`product/favorites/remove/${payload.product_id}/`, {
+        headers : {
+              "Authorization" : `Bearer ${token}`
+        }
+  })
+  return response.data;
+},
+onSuccess :() =>{
+          queryClient.invalidateQueries({queryKey : ["favorites"]})
+}
+  })
+}
+export const useRemoveAllFavorites = ()=>{
+  const token  = useAuthStore((state)=> state.accessToken);
+    const queryClient = useQueryClient()
+    return useMutation({
+      mutationKey : ["removeAllItem"],
+      mutationFn : async () =>{
+        const response = await api.post(`product/favorite-products/removeAll/`, {
+          headers : {
+                "Authorization" : `Bearer ${token}`
+          }
+    })
+    return response.data;
+  },
+  onSuccess :() =>{
+            queryClient.invalidateQueries({queryKey : ["favorites"]})
+  }
+    })
+}

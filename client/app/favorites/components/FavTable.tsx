@@ -5,15 +5,36 @@ import { ProductCrum } from "@/app/products/components/ProductCrum"
 import { Button } from "@/components/ui/button"
 import { useFavoritesStore } from "@/store/favStore"
 import Link from "next/link"
-import { useFav } from "@/hooks/useFav"
-import { useEffect, useState } from "react"
+import { useFav, useRemoveAllFavorites, useRemoveFavorite } from "@/hooks/useFav"
 import { useAuthStore } from "@/store/authStore"
+
 
 export default function FavTable() {
     const fav_items = useFavoritesStore((state) => state.favorites)
     const removeItem = useFavoritesStore((state) => state.removeItem)
-    
+    const isAuthenticated = useAuthStore((state)=>state.isAuthenticated)
+    const remove_mutation = useRemoveFavorite();
+    const removeall_mutuate = useRemoveAllFavorites()
+    const {isLoading,error} = useFav({requireAuth:true})
 
+    type param ={
+        id : string;
+    }
+    const handleRemoveItem = (value : param)=>{
+        if (isAuthenticated){
+             remove_mutation.mutate({product_id:Number(value)})
+        } else{
+            removeItem(value.id);
+        }
+    }
+    const handleRemoveAllItem = ()=>{
+        if (isAuthenticated){
+         removeall_mutuate.mutate();
+        }else{
+            useFavoritesStore.getState().clearAllItem()
+        }
+    }
+   
     return (
         <div className="bg-gray-50 min-h-screen pb-12">
             <ProductCrum />
@@ -49,7 +70,7 @@ export default function FavTable() {
                                         <Button 
                                             variant="ghost" 
                                             size="icon" 
-                                            onClick={() => removeItem(item.id)}
+                                            onClick={() => handleRemoveItem(item.id)}
                                             className="hover:bg-red-50 hover:text-red-500 rounded-full"
                                         >
                                             <X className="w-4 h-4" />
@@ -112,7 +133,7 @@ export default function FavTable() {
                     <div className="mt-8 flex justify-end">
                         <Button 
                             variant="outline" 
-                            onClick={() => useFavoritesStore.getState().clearAllItem()}
+                            onClick={() => handleRemoveAllItem()}
                             className="text-red-500 border-red-300 hover:bg-red-50"
                         >
                             Clear All Favorites
