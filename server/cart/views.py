@@ -41,11 +41,6 @@ class RemoveCartItemView(APIView):
         except CartItem.DoesNotExist:
             return Response({"detail": "Cart item does not exist."}, status=status.HTTP_404_NOT_FOUND)
         
-
-
-
-
-
 class GetCartView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -62,20 +57,29 @@ class GetCartView(APIView):
 
 
 
-class UpdateCartItemView(generics.UpdateAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = UpdateCartItemSerializer
-    queryset = CartItem.objects.all()
+class UpdateCartItemView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        if self.request and request.user.is_authenticated:
-            return CartItem.objects.filter(cart_user = self.request.user)
-        else:
-            session_id = self.request.session.session_key
-            if not session_id:
-                self.request.session.create()
-                session_id = self.request.session.session_key
-            return CartItem.objects.filter(cart_session_id = session_id)
+    def patch(self, request, id):
+        try:
+            cart = Cart.objects.get(user=request.user)
+        except Cart.DoesNotExist:
+            return Response({'detail': 'Cart is missing'}, status=status.HTTP_404_NOT_FOUND)
+
+        size = request.data.get("size")
+        if not size:
+            return Response({'detail': 'Size is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            cart_item = CartItem.objects.get(pk=id, cart=cart, size=size)
+        except CartItem.DoesNotExist:
+            return Response({'detail': 'Cart item not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = UpdateCartItemSerializer(cart_item, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+   
         
 class ClearCartItemView(APIView):
     permission_classes = [AllowAny]

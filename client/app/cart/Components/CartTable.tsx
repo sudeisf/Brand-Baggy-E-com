@@ -5,7 +5,7 @@ import {useCartStore} from "@/store/cartStore"
 import {  Trash2 } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { useCart, useRemoveCart } from "@/hooks/useCart"
+import { useCart, useRemoveCartItem ,useUpdateCartItemQuantity } from "@/hooks/useCart"
 import { useAuthStore } from "@/store/authStore"
 
 interface CartItem {
@@ -18,11 +18,13 @@ interface CartItem {
 }
 
 export default function CartTable() {
+
     const items = useCartStore(state=>state.items);
     const updateItemQuantity = useCartStore((state) => state.updateItmeQuantity);
     const removeItem = useCartStore((state) => state.removeItem);
     const isAuthenticated = useAuthStore((state)=> state.isAuthenticated)
-    const mutation = useRemoveCart()
+    const mutation = useRemoveCartItem()
+    const update = useUpdateCartItemQuantity()
     type removePayload = {
         cart_id: number,
     }
@@ -40,6 +42,7 @@ export default function CartTable() {
             });
         }
     };
+   
 
     return (
         <div className=" *:font-roboto w-[70%] ">
@@ -75,7 +78,7 @@ export default function CartTable() {
                     </div>
                     </div>
                     <div className="col-span-2 text-center items-center font-roboto">
-                        <QuantityButton quantity={item.quantity} onQuantityChange={(newQty) => {
+                        <QuantityButton id={item.id} quantity={item.quantity} size={item.size} onQuantityChange={(newQty) => {
                             updateItemQuantity(item.id, newQty , item.size)
                         }} />
                     </div>

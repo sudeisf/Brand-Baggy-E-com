@@ -88,7 +88,7 @@ interface Removepayload {
       cart_id: number;
     }
 
-export const useRemoveCart = () =>{
+export const useRemoveCartItem = () =>{
       const token  = useAuthStore((state)=> state.accessToken)
       const queryClient = useQueryClient()
       return useMutation(
@@ -109,15 +109,21 @@ export const useRemoveCart = () =>{
             },
       )
 }
-const useRemoveAllCart = () =>{
-      const addItem  = useCartStore((state)=> state.addCartItem)
+
+
+interface UpdatePayload{
+      id: number;
+      quantity: number;
+      size: string;
+}
+export const useUpdateCartItemQuantity = () =>{
       const token  = useAuthStore((state)=> state.accessToken)
       const queryClient = useQueryClient()
       return useMutation(
             {
-                  mutationKey : ["removeAllCartItem"],
-                  mutationFn: async (payload) => {
-                        const response = await api.post("/cart",
+                  mutationKey : ["updateCartItem"],
+                  mutationFn: async (payload:UpdatePayload) => {
+                        const response = await api.patch(`/cart/${payload.id}/update/`,
                               payload,
                               {headers : {
                                           "Authorization" : `Bearer ${token} `
@@ -127,7 +133,6 @@ const useRemoveAllCart = () =>{
                         return response.data
                   },
                   onSuccess: (data) => {
-                        addItem(data);
                         queryClient.invalidateQueries({ queryKey: ['cart'] });
                   }
             }

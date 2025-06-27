@@ -86,16 +86,21 @@ class RemoveCartItemSerializer(serializers.Serializer):
         return {'message' : 'item removed'}
     
 class UpdateCartItemSerializer(serializers.ModelSerializer):
-      quantity = serializers.IntegerField()
+    quantity = serializers.IntegerField()
+    class Meta:
+        model = CartItem
+        fields  = ['id' , 'quantity' , 'size']
 
-      class Meta:
-          model = CartItem
-          fileds  = ['id' , 'quantity']
-      
-      def update(self, instance, validated_data):
-          instance.qauntity = validated_data['qauntity']
-          instance.save()
-          return instance
+    def validate(self, data):
+        errors = {}
+        if 'quantity' not in data or data['quantity'] is None:
+            errors['quantity'] = "Quantity is required."
+        elif data['quantity'] < 1:
+            errors['quantity'] = "Quantity must be at least 1."
+        if errors:
+            raise serializers.ValidationError(errors)
+        return data
+
 
     
 
