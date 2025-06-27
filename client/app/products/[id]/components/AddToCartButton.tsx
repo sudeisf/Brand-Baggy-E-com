@@ -78,16 +78,19 @@ export default function AddToCartButton({
         }
       };
     return(
-        <div className="flex mt-4 gap-4 w-full items-center">
+        <div className="flex mt-4 gap-2 sm:gap-4 w-full items-center">
             <Button
                 disabled={!isSizeSelected}
                 onClick={handleAddToCart}
-                className="bg-[#331d67] py-7 hover:bg-[#331d67]/80 text-lg font-medium text-white rounded-full w-[88%]"
+                className="bg-[#331d67] py-4 sm:py-7 hover:bg-[#331d67]/80 text-base sm:text-lg font-medium text-white rounded-full w-[70%] sm:w-[88%]"
             >
                 Add to Cart
             </Button>
-            <div className="flex justify-center items-center gap-2 border-2 border-gray-300 rounded-full w-12 h-12" onClick={handleToggleFavorite}>
-                <Heart className={`w-5 h-5 ${isFavorite(cartItem.id) ? "fill-red-500 stroke-red-500" : "text-gray-500"}`} />
+            <div 
+                className="flex justify-center items-center gap-2 border-2 border-gray-300 rounded-full w-10 h-10 sm:w-12 sm:h-12"
+                onClick={handleToggleFavorite}
+            >
+                <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isFavorite(cartItem.id) ? "fill-red-500 stroke-red-500" : "text-gray-500"}`} />
             </div>
         </div>
     )

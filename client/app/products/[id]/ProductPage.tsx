@@ -103,13 +103,20 @@ export default function ProductPage({ initialProduct }: ProductPageProps) {
         <div 
             className="flex flex-col mx-auto min-h-screen ">
             <div
-              className="flex flex-row p-2 mb-2 gap-4 max-w-[1250px] h-[750px] mx-auto rounded-lg">
+              className="
+                flex flex-col 
+                md:flex-row 
+                p-2 mb-2 gap-4 
+                max-w-full md:max-w-[1250px] 
+                h-auto md:h-[750px] 
+                mx-auto rounded-lg
+              ">
                 <ProductGalary
                     mainImage={product?.main_image ?? ""}
                     images={product?.images ?? []}
                     name={product?.name ?? ""}
                 />
-                <div className="w-full px-3 flex flex-col">
+                <div className="w-full px-0 md:px-3 flex flex-col mt-4 md:mt-0">
                     <ProductHeader
                         catagory="Men Fashion"
                         name={product?.name ?? ""}

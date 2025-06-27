@@ -11,9 +11,9 @@ interface ShippingInfoProps {
 
 export default function ShippingInfo({discount,packageType,deliveryTime,estimatedArrival}:ShippingInfoProps){
     return (
-        <div className="mt-4 border-2 rounded-lg p-2 px-4 space-y-2 border-gray-200 ">
+        <div className="mt-4 border-2 rounded-lg p-2 px-2 sm:px-4 space-y-2 border-gray-200">
         <h1 className="text-md text-[#331d67] font-medium font-roboto mt-2">Shipping</h1>
-        <div className="grid grid-cols-2 grid-rows-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 grid-rows-4 sm:grid-rows-2 gap-2">
 
             <div className="flex gap-2 h-fit items-center">
                 <div className="rounded-full bg-[#331d67]/10  h-12 w-12 flex justify-center items-center">
