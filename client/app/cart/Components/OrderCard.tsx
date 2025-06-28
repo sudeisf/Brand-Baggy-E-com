@@ -1,17 +1,19 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { useCartStore } from "@/store/cartStore"
 import { ShieldCheck } from "lucide-react"
 import Link from "next/link"
 
 export default function OrderSummary() {
+    const subtotal = useCartStore(state => state.totalPrice);
     return (
         <div className="border-2 space-y-4  border-gray-200 rounded-xl p-6 h-fit">
             <h1 className="text-2xl font-medium font-roboto text-[#331d67]">Order Summary</h1>
             <div className="space-y-2">
                 <div className="flex justify-between">
                     <p>Subtotal</p>
-                    <p className="font-roboto font-medium tracking-wider">100 <span className="text-sm font-roboto">ETB</span></p>
+                    <p className="font-roboto font-medium tracking-wider">{subtotal().toFixed(2)} <span className="text-sm font-roboto">ETB</span></p>
                 </div>
                 <div className="flex justify-between">
                     <p>Discount</p>
@@ -19,7 +21,7 @@ export default function OrderSummary() {
                 </div>
                 <div className="flex justify-between">
                     <p>Delivery Fee</p>
-                    <p className="font-roboto font-medium tracking-wider">100 <span className="text-sm font-roboto">ETB</span> </p>
+                    <p className="font-roboto font-medium tracking-wider">{100}<span className="text-sm font-roboto">ETB</span> </p>
                 </div>
             </div>
             <div className="flex justify-between border-t-2 border-gray-200 pt-2">

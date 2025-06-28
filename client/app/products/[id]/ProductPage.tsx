@@ -90,6 +90,7 @@ export default function ProductPage({ initialProduct }: ProductPageProps) {
       {intialData : initialProduct});
 
     const product = fetchedProduct ?? initialProduct;
+   
     const availableSizes = product?.variants
             .filter(variant => variant.stock > 0)
             .map(variant => variant.size.code);
@@ -141,7 +142,16 @@ export default function ProductPage({ initialProduct }: ProductPageProps) {
                             size: selectedSize,
                             quantity: 1,
                             price: product?.price ?? "",
-                            in_stock : product?.in_stock?? false
+                            in_stock: product?.in_stock ?? false,
+                            discount: {
+                                discount_value: product?.discount?.value,
+                                discount_type: product?.discount?.type,
+                                discount_start_date: product?.discount?.start_date,
+                                discount_end_date: product?.discount?.end_date,
+                                discount_is_valid : product.discount.is_valid,
+                                discount_is_active : product.discount.is_active
+                            }
+
                         }}
                      />
 
@@ -150,7 +160,9 @@ export default function ProductPage({ initialProduct }: ProductPageProps) {
                     />
 
                     <ShippingInfo 
-                        discount={`Desc ${Number(product?.discount.value)}%`} 
+                        discount={`Desc ${
+                            product?.discount.is_active && product?.discount.is_valid ?  product?.discount.value : "0.00"
+                        } ${product.discount.type === "percentage" ? "%" : ""}`} 
                         packageType="Regular package" 
                         deliveryTime="3-5 Working days" 
                         estimatedArrival={estimatedArrival}

@@ -47,6 +47,9 @@ export interface Size {
       type: string;
       value: string;
       is_active: boolean;
+      is_valid : boolean;
+      start_date: string;
+      end_date: string;
     }
     
     export interface ProductDetail {

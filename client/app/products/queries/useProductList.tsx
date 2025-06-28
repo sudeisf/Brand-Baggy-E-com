@@ -42,9 +42,6 @@ export const useProductsList = () => {
 
 
 
-
-
-
 const fetchProductDetail = async (id: number) : Promise<ProductDetail | null> => {
   try {
     const response = await api.get<ProductDetail>(`/product/${id}/detail/`);

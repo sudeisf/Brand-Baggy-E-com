@@ -11,6 +11,7 @@ import { useAddFavoriteItemMutation } from "@/hooks/useFav";
 import { number } from "zod";
 
 
+
 interface CartItem {
     id : string;
     main_image : string;
@@ -19,6 +20,14 @@ interface CartItem {
     quantity : number;
     price : string;
     in_stock : boolean;
+    discount : {
+        discount_value : string;
+        discount_type :string;
+        discount_start_date :string;
+        discount_end_date :string;
+        discount_is_valid :boolean;
+        discount_is_active :boolean;
+    }
 }
 
 interface AddToCartButtonProps{
@@ -45,16 +54,19 @@ export default function AddToCartButton({
     const payload =  {
         product_id : Number(cartItem.id),
         quantity: Number(cartItem.quantity),
-        size : cartItem.size
+        size : cartItem.size,
+        discount_value : Number(cartItem.discount.discount_value),
+        discount_type :cartItem.discount.discount_type,
+        discount_start_date :cartItem.discount.discount_start_date,
+        discount_end_date :cartItem.discount.discount_end_date,
+        discount_is_valid :cartItem.discount.discount_is_valid,
+        discount_is_active :cartItem.discount.discount_is_active,
     }
 
     const handleAddToCart = () => {
         mutation.mutate(
             payload,{
-                onSuccess:()=>{
-                    addToCart({ ...cartItem, price: Number(cartItem.price) })
-                    if (onAddToCartSuccess) onAddToCartSuccess();
-                },onError : (error) =>{
+                onError : (error) =>{
                     console.error("Failed to add to cart:",error);
                 }
             }

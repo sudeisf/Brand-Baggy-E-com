@@ -58,16 +58,22 @@ interface AddPayLoad {
       product_id: number;
       size: string;
       quantity: number;
+      discount_value : number;
+      discount_type :string;
+      discount_start_date :string;
+      discount_end_date :string;
+      discount_is_valid :boolean;
+      discount_is_active :boolean;
     }
 
 export const useAddCartMutation = ()=>{
-      const addItem  = useCartStore((state)=> state.addCartItem)
       const token  = useAuthStore((state)=> state.accessToken)
       const queryClient = useQueryClient()
       return useMutation(
             {
                   mutationKey : ["addCart"],
                   mutationFn: async (payload : AddPayLoad) => {
+                        console.log(payload)
                         const response = await api.post("/cart/add/",
                               payload,
                               {headers : {

@@ -74,17 +74,88 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     variants = ProductVariantSerializer(many=True, read_only=True)
     main_image = serializers.SerializerMethodField()
     seller = UserSerializer(read_only=True)
+    discount = serializers.SerializerMethodField(read_only= True)
+    debug_discount = serializers.SerializerMethodField(read_only=True)
     # average_rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = [
             'id', 'name', 'description', 'main_image', 'brand', 'category',
-            'images', 'reviews', 'variants' , 'seller'
+            'images', 'reviews', 'variants' , 'seller' ,'price', "discount" ,"in_stock", "debug_discount"
         ]
 
     def get_main_image(self, obj):
         return obj.main_image.url if obj.main_image else None
+
+    def get_discount(self, obj):
+        product_discounts = obj.discount.all()
+        print(f"Found {product_discounts.count()} product discounts for product {obj.id}")
+        
+        for pd in product_discounts:
+            discount = pd.discount
+            print(f"Checking discount: {discount}")
+            if discount:
+                print(f"Discount details: type={discount.discount_type}, value={discount.value}, is_active={discount.is_active}")
+                print(f"Start date: {discount.start_date}, End date: {discount.end_date}")
+                print(f"Current time: {timezone.now()}")
+                print(f"Is valid: {discount.is_valid()}")
+                
+                # TEMPORARY: Ignore date validation for testing
+                if discount.is_active:  # Only check if discount is active, ignore date range
+                    return {
+                        "type": discount.discount_type,
+                        "value": str(discount.value),
+                        "is_active": True
+                    }
+                # PRODUCTION: Use this instead for proper date validation:
+                # if discount.is_valid():
+                #     return {
+                #         "type": discount.discount_type,
+                #         "value": str(discount.value),
+                #         "is_active": True
+                #     }
+        
+        print("No active discounts found")
+        return {
+            "is_active": False
+        }
+    
+    def get_discount_debug(self, obj):
+        """Alternative method that returns discount info regardless of validity for debugging"""
+        product_discounts = obj.discount.all()
+        if product_discounts.exists():
+            latest_discount = product_discounts.first()
+            discount = latest_discount.discount
+            if discount:
+                return {
+                    "type": discount.discount_type,
+                    "value": str(discount.value),
+                    "is_active": discount.is_active,
+                    "start_date": discount.start_date.isoformat(),
+                    "end_date": discount.end_date.isoformat(),
+                    "current_time": timezone.now().isoformat(),
+                    "is_valid": discount.is_valid()
+                }
+        return {
+            "is_active": False,
+            "message": "No discounts found"
+        }
+    
+    def get_debug_discount(self, obj):
+        """Debug method to see all discount information"""
+        return self.get_discount_debug(obj)
+    
+    def get_images(self, obj):
+        images = obj.images.all()
+        return [self._build_cloudinary_url(image.image) for image in images]
+    
+    def _build_cloudinary_url(self, image_field):
+        if image_field:
+            public_id = str(image_field)
+            return CloudinaryImage(public_id).build_url(secure=True)
+        return None
+
 
 class ProductDiscountSerializer(serializers.ModelSerializer):
     class Meta:
@@ -476,7 +547,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         model = Product
         fields = [
             'id', 'name', 'description', 'main_image', 'brand', 'category',
-            'images', 'reviews', 'variants' , 'seller' ,'price', "discount" ,"in_stock"
+            'images', 'reviews', 'variants' , 'seller' ,'price', "discount" ,"in_stock",
         ]
 
     def get_main_image(self, obj):
@@ -486,17 +557,24 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     
     def get_discount(self, obj):
         product_discounts = obj.discount.all()
-        for pd in product_discounts:
-            discount = pd.discount
-            if discount and discount.is_valid():
+        if product_discounts.exists():
+            latest_discount = product_discounts.first()
+            discount = latest_discount.discount
+            if discount:
                 return {
                     "type": discount.discount_type,
                     "value": str(discount.value),
-                    "is_active": True
+                    "is_active": discount.is_active,
+                    "start_date": discount.start_date.isoformat(),
+                    "end_date": discount.end_date.isoformat(),
+                    "current_time": timezone.now().isoformat(),
+                    "is_valid": discount.is_valid()
                 }
         return {
-            "is_active": False
+            "is_active": False,
+            "message": "No discounts found"
         }
+
     
     def get_images(self, obj):
         images = obj.images.all()
