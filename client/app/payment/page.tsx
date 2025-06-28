@@ -11,9 +11,13 @@ import { CardMethod } from "./components/CardMethod";
 import FinalSummery from "./components/FinalSummery";
 import CashOnDelivery from "./components/CodMethod";
 import { Button } from "@/components/ui/button";
+import { PaypalReactButton } from "./components/PaypalReactButton";
+import { useSearchParams } from 'next/navigation';
 
 export default function PaymentPage() {
     const [paymentMethod, setPaymentMethod] = useState<string>("paypal");
+    const searchParams = useSearchParams();
+    const orderId = searchParams.get('order_id');
 
     const handlePaymentMethodChange = (value: string) => {
         setPaymentMethod(value);
@@ -76,13 +80,19 @@ export default function PaymentPage() {
       </div>
 
       <div>
-        {(paymentMethod === "paypal" || paymentMethod === "stripe") && (
+        {paymentMethod === "paypal" && orderId && (
+            <PaypalReactButton orderId={parseInt(orderId)} />
+        )}
+
+        {paymentMethod === "stripe" && (
             <CardMethod />
         )}
+
+
         {paymentMethod === "cash" && (
             <CashOnDelivery />
         )}
-      </div>
+</div>
       <div className="flex justify-start items-center border-t border-gray-200 pt-4">
         <Button className="bg-[#331d67]/40 text-white h-10 rounded-md hover:bg-[#331d67]">
             <Link href="/shipping" className="flex items-center  gap-2">

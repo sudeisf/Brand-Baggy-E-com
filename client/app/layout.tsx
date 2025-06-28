@@ -32,7 +32,7 @@ export default function RootLayout({
 );
   return (
     <html lang="en" className="h-full">
-            <body className="h-full antialiased bg-white">
+            <body className="h-full antialiased bg-white" suppressHydrationWarning={true}>
                 <div className="relative flex min-h-screen flex-col w-full m-0 p-0">
                     <QueryClientProvider client={queryClient}>
                         <HydrationBoundary>

@@ -1,7 +1,6 @@
 from django.db import models
 from orders.models import Order
 
-# Create your models here.
 class Payment(models.Model):
     class Method(models.TextChoices):
         PAYPAL = 'paypal'
@@ -11,6 +10,9 @@ class Payment(models.Model):
     class Status(models.TextChoices):
         PENDING = 'pending'
         COMPLETED = 'completed'
+        FAILED = 'failed'
+        REFUNDED = 'refunded'
+        EXPIRED = 'expired'
 
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='payment')
     method = models.CharField(max_length=50, choices=Method.choices)

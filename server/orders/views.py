@@ -5,64 +5,64 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import createOrderSerializer
 from rest_framework.permissions import IsAuthenticated , IsAuthenticatedOrReadOnly
-from cart.models import Cart , CartItems
+from cart.models import Cart , CartItem
 from django.db import transaction
-from orders.serializers import OrderSerializer
+from orders.serializers import OrderSerializer , ShippingInfoSerializer
+from decimal import Decimal
 
 
-class CreateOrderView(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+class CreateOrderAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    def post(self , request):
-        serializer = createOrderSerializer(request.data)
-        serializer.is_valid(raise_exception=True)
-        data = serializer._validated_data
+    def post(self, request):
+        user = request.user
 
-        cart_id = data['cart_id']
+        shipping_serializer = ShippingInfoSerializer(data=request.data.get('shipping_info'))
+        if not shipping_serializer.is_valid():
+            return Response(shipping_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        shipping_info = shipping_serializer.save(user=user)
+
         try:
-            cart  = Cart.objects.get(id=cart_id)
+            cart = Cart.objects.get(user=user)
+            cart_items = cart.items.all()
         except Cart.DoesNotExist:
-            return Response({'detail' : "cart not found"})
-        
-        if not cart.items.exist():
-            return Response({'detail' : "cart is empty"})
-        
-        total_price = sum([item.product.price * item.quantity for item in cart.items.all()])
+            return Response({'detail': 'Cart not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        with transaction.atomic():
-            order = Order.objects.create(
-                user=request.user if request.user.is_authenticated else None,
-                guest_email=data.get('guest_email'),
-                cart=cart,
-                total_price=total_price,
-                status=Order.OrderStatus.PENDING,
-                payment_status=Order.PaymentStatus.PENDING,  
-                payment_method='not_selected',  
-                transaction_id='',
-                transaction_number=0, 
-                shipping_address=data['shipping_address'],
-                shipping_city=data['shipping_city'],
-                shipping_state=data['shipping_state'],
-                shipping_zip_code=data['shipping_zip_code'],
-                shipping_country=data['shipping_country'],
-                shipping_phone=data['shipping_phone'],
-                shipping_email=data.get('shipping_email'),
+        if not cart_items:
+            return Response({'detail': 'Cart is empty.'}, status=status.HTTP_400_BAD_REQUEST)
+
+       
+        total = Decimal('0.00')
+        for item in cart_items:
+            total += item.product.price * item.quantity
+
+        
+        order = Order.objects.create(
+            user=user,
+            cart=cart,
+            total_price=total,
+            shipping_info=shipping_info,
+            status=Order.OrderStatus.PENDING
+        )
+
+       
+        for item in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                price=item.product.price,
+                quantity=item.quantity,
+                subtotal=item.product.price * item.quantity
             )
 
-            for cart_item in cart.item.all():
-                OrderItem.objects.create(
-                    order=order,
-                    product=cart_item.product,
-                    variants=cart_item.variants,
-                    price=cart_item.product.price,
-                    subtotal=cart_item.product.price * cart_item.quantity,
-                    quantity=cart_item.quantity,
-                )
+ 
+        cart.items.all().delete()
 
-            cart.items.all().delete()
-        return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
-        
-    
-
-
+        serializer = OrderSerializer(order)
+        return Response({
+            'id': order.id,
+            'order': serializer.data
+        }, status=status.HTTP_201_CREATED)
+     
 

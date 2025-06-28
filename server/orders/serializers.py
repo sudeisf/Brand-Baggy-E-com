@@ -1,19 +1,31 @@
 from rest_framework import serializers
-from .models import Order , OrderItem
+from .models import Order , OrderItem ,ShippingInfo
 
 
 
-
-class OrderItemsSerializer(serializers.ModelSerializer):
+class ShippingInfoSerializer(serializers.ModelSerializer):
     class Meta:
-        model  = OrderItem
-        field = '__all__'
+        model = ShippingInfo
+        exclude = ['id', 'created_at']
+
+
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'product', 'product_name', 'variants', 'price', 'subtotal', 'quantity']
+
 
 
 class OrderSerializer(serializers.ModelSerializer):
+    shipping_info = ShippingInfoSerializer()
+    items = OrderItemSerializer(many=True, read_only=True)
+
     class Meta:
         model = Order
-        field = '__all__'
+        fields = ['id', 'user', 'cart', 'total_price', 'status', 'order_date', 'shipping_info', 'items']
+        read_only_fields = ['status', 'order_date', 'items']
 
 
 class createOrderSerializer(serializers.Serializer):
