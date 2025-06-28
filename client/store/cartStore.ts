@@ -109,12 +109,12 @@ export const useCartStore = create<CartStore>()(persist(
                               if (item.discount && get().isDiscountValid(item.discount)) {
                                     const discountValue = parseFloat(item.discount.value) || 0;
                                     if (item.discount.type === 'percentage') {
-                                          return acc + (itemTotal - (itemTotal * discountValue / 100));
+                                          return acc + (itemTotal * discountValue / 100);
                                     } else {
-                                          return acc + Math.max(0, itemTotal - discountValue);
+                                          return acc + Math.min(discountValue, itemTotal);
                                     }
                               }
-                              return acc + itemTotal;
+                              return acc;
                         }, 0);
                   },
                   isDiscountValid: (discount: Discount) => {
