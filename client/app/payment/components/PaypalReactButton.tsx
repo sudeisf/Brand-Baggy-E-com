@@ -7,6 +7,7 @@ import {
   usePayPalScriptReducer,
 } from "@paypal/react-paypal-js";
 import { useCallback, useEffect, useState } from "react";
+import axios from "axios";
 
 type Props = {
   orderId: number;
@@ -17,8 +18,8 @@ const initialOptions: ReactPayPalScriptOptions = {
   currency: "USD",
   components: "buttons",
   intent: "capture",
+  disableFunding: "venmo",
 };
-
 
 function PaypalButtonLogic({ orderId }: Props) {
   const [{ isPending, isInitial, isRejected }] = usePayPalScriptReducer();
@@ -37,20 +38,10 @@ function PaypalButtonLogic({ orderId }: Props) {
 
   const createOrder = useCallback(async () => {
     try {
-      const res = await fetch("/api/paypal/create-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ order_id: orderId }),
+      const res = await axios.post("/payment/paypal/create-order/", {
+        order_id: orderId
       });
-
-      if (!res.ok) {
-        throw new Error('Failed to create PayPal order');
-      }
-
-      const data = await res.json();
-      return data.paypal_order_id;
+      return res.data.paypal_order_id;
     } catch (error) {
       console.error("Error creating PayPal order:", error);
       throw error;
@@ -58,9 +49,22 @@ function PaypalButtonLogic({ orderId }: Props) {
   }, [orderId]);
 
   const onApprove = useCallback(async (data: any) => {
-    console.log("✅ Payment Approved", data);
-    window.location.href = "/payment/success";
-  }, []);
+    try {
+      const res = await axios.post(`/payment/paypal/capture-order/`, {
+        paypal_payment_id: data.orderID,
+        order_id: orderId,
+      });
+      
+      if (res.status === 200) {
+        window.location.href = "/payment/success";
+      } else {
+        alert("Error capturing payment");
+      }
+    } catch (error) {
+      console.error("Error capturing payment:", error);
+      alert("Error capturing payment");
+    }
+  }, [orderId]);
 
   const onError = useCallback((err: any) => {
     console.error("❌ PayPal Error", err);
@@ -80,7 +84,6 @@ function PaypalButtonLogic({ orderId }: Props) {
   );
 }
 
-// ✅ The outer component stays clean
 export function PaypalReactButton({ orderId }: Props) {
   return (
     <PayPalScriptProvider options={initialOptions}>

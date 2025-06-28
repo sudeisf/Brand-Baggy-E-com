@@ -96,9 +96,6 @@ class PayPalPaymentAPIView(APIView):
                 paypal_payment = paypalrestsdk.Payment({
                     "intent": "sale",
                     "payer": {"payment_method": "paypal"},
-                    "redirect_urls": {
-                        "return_url": "https://741f-102-208-97-146.ngrok-free.app/payment/success/",
-                        "cancel_url": "https://741f-102-208-97-146.ngrok-free.app/payment/cancel/" },
                     "transactions": [{
                         "item_list": {
                             "items": [{
@@ -126,14 +123,40 @@ class PayPalPaymentAPIView(APIView):
                         transaction_id=paypal_payment.id,
                         provider_response=paypal_payment.to_dict()
                     )
-                    approval_url = next(link.href for link in paypal_payment.links if link.rel == 'approval_url')
-                    return Response({'approval_url': approval_url}, status=200)
-
+                    return Response({
+                        'paypal_order_id': paypal_payment.id  
+                    }, status=200)
                 return Response({'error': 'PayPal payment failed'}, status=400)
 
             except Order.DoesNotExist:
                 return Response({'error': 'Order not found'}, status=404)
         return Response(serializer.errors, status=400)
+    
+
+class PayPalCaptureAPIView(APIView):
+    def post(self, request):
+        paypal_payment_id = request.data.get("paypal_payment_id")
+        order_id = request.data.get("order_id")
+
+        try:
+            payment = paypalrestsdk.Payment.find(paypal_payment_id)
+            if payment.execute({"payer_id": request.data.get("payer_id")}):  # Usually handled internally by SDK
+                db_payment = Payment.objects.get(transaction_id=paypal_payment_id)
+                db_payment.status = Payment.Status.COMPLETED
+                db_payment.provider_status = payment.to_dict()
+                db_payment.save()
+
+                order = db_payment.order
+                order.status = Order.OrderStatus.PAID
+                order.save()
+
+                return Response({"message": "Payment completed"}, status=200)
+            else:
+                return Response({"error": "Execution failed"}, status=400)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
     
 @csrf_exempt
 @api_view(['POST'])
