@@ -1,6 +1,8 @@
 import api from "@/lib/axios"
 import { useAuthStore } from "@/store/authStore"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import {OrderResponse} from "@/types/orders"
+import { OrderDetailResponse } from "@/types/order-detail";
 
 interface ShippingInfo {
       full_name : string;
@@ -39,3 +41,37 @@ export const useAddOrderMutation = () => {
             }
       )
 }
+
+export const getUserOrders = () => {
+      const token = useAuthStore((state) => state.accessToken);
+      return useQuery({
+            queryKey: ["getUserOrders"],
+            queryFn: async () => {
+                  const response = await api.get<OrderResponse>("/orders/order/my-orders/", {
+                        headers: {
+                              Authorization: `Bearer ${token}`,
+                        },
+                  });
+                  return response.data;
+            },
+      });
+}
+export const useUserOrderDetail = (orderId: number) => {
+      const token = useAuthStore((s) => s.accessToken);
+    
+      return useQuery({
+        queryKey: ["getUserOrdersDetail", orderId],
+        queryFn: async () => {
+          const response = await api.get<OrderDetailResponse>(
+            `/orders/order/detail/?order_id=${orderId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          return response.data;
+        },
+        enabled: !!orderId, // only fetch if orderId is truthy
+      });
+    };

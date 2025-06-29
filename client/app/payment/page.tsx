@@ -27,7 +27,6 @@ export default function PaymentPage() {
         </p>
       </div>
 
-      {/* Payment Selection Buttons */}
       <div className="flex justify-center gap-4 mb-8">
         <Button
           variant="outline"
@@ -62,8 +61,6 @@ export default function PaymentPage() {
           <span className="text-[#331d67] font-medium">Cash on Delivery</span>
         </Button>
       </div>
-
-      {/* Conditional Render Payment Flow */}
       <div className="flex flex-col items-center">
         {paymentMethod === "paypal" && orderId ? (
           <PaypalReactButton orderId={parseInt(orderId)} />
@@ -75,7 +72,6 @@ export default function PaymentPage() {
         {paymentMethod === "cash" && <CashOnDelivery />}
       </div>
 
-      {/* Navigation */}
       <div className="flex justify-start items-center border-t border-gray-200 pt-4 mt-10">
         <Button className="bg-[#331d67]/40 text-white h-10 rounded-md hover:bg-[#331d67]">
           <Link href="/shipping" className="flex items-center gap-2">

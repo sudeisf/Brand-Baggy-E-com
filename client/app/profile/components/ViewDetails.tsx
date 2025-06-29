@@ -10,48 +10,28 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import { useUserOrderDetail } from "@/hooks/use-order"
 
-const orderDetails = {
-    id: 1234567890,
-    orderDate: "2021-01-01",
-    orderStatus: "Pending",
-    orderNote: "I want it to be delivered at my house front door, not at the back door",
-    orderItems: [
-        {
-            id: 1234567890,
-            name: "Product 1",
-            price: 100,
-            quantity: 1,
-            image: "/assets/products/product1.jpg",
-            color: "cream",
-            sku: "1234567890",
-        },
-        {
-            id: 1234567890,
-            name: "Product 2",
-            price: 100,
-            quantity: 2,
-            image: "/assets/products/product2.jpg",
-            color: "cyan",
-            sku: "1234567890",
-        },
-        {
-            id: 1234567890,
-            name: "Product 3",
-            price: 100,
-            quantity: 3,
-            image: "/assets/products/product3.jpg",
-            color: "gray",
-            sku: "1234567890",
-        },
-    ],
-}
 
-export default function ViewDetails({ status }: { status: string }) {
-    const subtotal = orderDetails.orderItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
-    const shipping = subtotal * 0.15
-    const tax = subtotal * 0.15
-    const total = subtotal + shipping + tax
+
+export default function ViewDetails({ id  }: { id: number }) {
+
+    const { data, isLoading } = useUserOrderDetail(id);
+
+
+
+    if (isLoading || !data) {
+        return (
+          <Button className="bg-[#331d67] text-white text-sm rounded-sm px-4 py-2" disabled>
+            Loading...
+          </Button>
+        );
+      }
+
+    const subtotal = data.items.reduce((acc, item) => acc + Number(item.price) * item.quantity, 0);
+    const shipping = subtotal * 0.15;
+    const tax = subtotal * 0.15;
+    const total = subtotal + shipping + tax;
 
     return (
         <Dialog>
@@ -65,39 +45,39 @@ export default function ViewDetails({ status }: { status: string }) {
                     <DialogTitle>
                         <div className="flex flex-col gap-2">
                             <p className="text-md font-semibold capitalize">
-                                Order <span className="text-[#331d67] text-md font-bold">#{orderDetails.id}</span>
+                                Order <span className="text-[#331d67] text-md font-bold">#{data.id}</span>
                             </p>
                             <div className="flex items-center justify-between gap-2 py-4">
-                                <p className="text-sm font-semibold text-gray-500">{orderDetails.orderDate}</p>
+                                <p className="text-sm font-semibold text-gray-500">{data.order_date}</p>
                                 <p className="text-sm font-semibold text-green-500 bg-green-500/10 rounded-sm px-4 py-1">
-                                    {orderDetails.orderStatus}
+                                    {data.status}
                                 </p>
                             </div>
                         </div>
                     </DialogTitle>
                 </DialogHeader>
                 <div className="flex flex-col gap-4">
-                    {orderDetails.orderItems.map((item, index) => (
+                    {data.items.map((item, index) => (
                         <div key={index} className="flex gap-4 items-center justify-between">
                             <div className="flex gap-4 items-center">
                                 <Image
-                                    src={item.image}
-                                    alt={item.name}
+                                    src={item.main_image}
+                                    alt={item.product_name}
                                     width={50}
                                     height={50}
                                     className="rounded"
                                 />
                                 <div className="flex flex-col gap-1">
-                                    <p className="text-md font-semibold capitalize">{item.name}</p>
-                                    <p className="text-sm font-semibold text-gray-500 capitalize">{item.color}</p>
-                                    <p className="text-sm font-semibold text-gray-500">SKU: {item.sku}</p>
+                                    <p className="text-md font-semibold capitalize">{item.product_name}</p>
+                                    <p className="text-sm font-semibold text-gray-500 capitalize">{item.size}</p>
+    
                                 </div>
                             </div>
                             <div className="flex gap-2 items-center">
-                                <p className="text-sm font-semibold text-gray-500">${item.price.toFixed(2)}</p> x
+                                <p className="text-sm font-semibold text-gray-500">${item.price}</p> x
                                 <p className="text-sm font-semibold text-gray-500">{item.quantity}</p>
                             </div>
-                            <p className="text-sm font-semibold text-gray-500">${(item.price * item.quantity).toFixed(2)}</p>
+                            <p className="text-sm font-semibold text-gray-500">${(Number(item.price) * item.quantity).toFixed(2)}</p>
                         </div>
                     ))}
                 </div>
@@ -105,7 +85,7 @@ export default function ViewDetails({ status }: { status: string }) {
                     <div className="flex flex-col gap-2  border-gray-500/10 pr-4 w-full sm:w-[300px]">
                         <p className="text-sm font-semibold text-gray-500">Order Note</p>
                         <p className="text-sm font-semibold text-gray-500 bg-gray-500/10 rounded-sm px-4 py-1 whitespace-pre-wrap">
-                            {orderDetails.orderNote}
+                            order will be sent with 3-5 business days.
                         </p>
                     </div>
                     <div className="flex flex-col gap-2 w-full sm:w-auto">

@@ -82,7 +82,7 @@ function PaypalButtonLogic({ orderId }: Props) {
   }, [orderId, accessToken]);
 
   const onError = useCallback((err: any) => {
-    console.error("❌ PayPal Error", err);
+    console.error("PayPal Error", err);
     alert("Something went wrong during the payment.");
   }, []);
 

@@ -7,7 +7,7 @@ from .serializers import createOrderSerializer
 from rest_framework.permissions import IsAuthenticated , IsAuthenticatedOrReadOnly
 from cart.models import Cart , CartItem
 from django.db import transaction
-from orders.serializers import OrderSerializer , ShippingInfoSerializer
+from orders.serializers import OrderSerializer , ShippingInfoSerializer,OrderDetailSerializer
 from decimal import Decimal
 
 
@@ -56,13 +56,43 @@ class CreateOrderAPIView(APIView):
                 subtotal=item.product.price * item.quantity
             )
 
- 
         cart.items.all().delete()
-
         serializer = OrderSerializer(order)
         return Response({
             'id': order.id,
             'order': serializer.data
         }, status=status.HTTP_201_CREATED)
+    
+
+
+class UserOrderListAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        orders = Order.objects.filter(user=request.user).order_by('-created_at')
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
      
+class GetOrderItemAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        pk = request.query_params.get("order_id")
+        print("User:", request.user)
+        print("Order ID:", pk)
+
+        if not pk:
+            return Response({"detail": "Order ID missing."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            order = Order.objects.get(id=pk, user=request.user)  # ✅ Corrected
+        except Order.DoesNotExist:
+            return Response({"detail": "Order not found for this user."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = OrderDetailSerializer(order)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+
 
