@@ -2,20 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-
   try {
-    const djangoRes = await axios.post(`${process.env.BACKEND_URL}/api/paypal/create-order/`, body, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
+    const body = await req.json();
+    const authHeader = req.headers.get("authorization") || "";
+    const djangoRes = await axios.post(
+      `${process.env.BACKEND_URL}/payment/paypal/create-order/`,
+      body,
+      { headers: { "Content-Type": "application/json",
+        Authorization: authHeader,
+       } }
+    );
     return NextResponse.json(djangoRes.data);
   } catch (error: any) {
+    console.error("PayPal create-order error:", error);
     return NextResponse.json(
-      { error: error.response?.data || "Failed to create PayPal order" },
-      { status: error.response?.status || 500 }
+      { error: error.response?.data?.message || "Payment failed" },
+      { status: 500 }
     );
   }
 }

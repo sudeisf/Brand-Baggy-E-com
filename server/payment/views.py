@@ -1,4 +1,5 @@
 import paypalrestsdk.exceptions
+import requests
 from rest_framework import status 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,6 +12,7 @@ from django.conf import settings
 import paypalrestsdk
 from django.http import HttpResponse
 import json
+from rest_framework.permissions import IsAuthenticated
 
 from rest_framework.decorators import api_view 
 
@@ -82,7 +84,13 @@ class StripePaymentIntentAPIView(APIView):
                 return Response({"error" : "order not found"} ,status=404)
         return Response(serializer.errors, status=400)
     
+
+
+
+
+
 class PayPalPaymentAPIView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         serializer = PaymentRequestSerializer(data=request.data)
         if serializer.is_valid():
@@ -92,67 +100,112 @@ class PayPalPaymentAPIView(APIView):
 
                 if hasattr(order, 'payment'):
                     return Response({'error': 'Payment already exists'}, status=400)
+                
+                auth_response = requests.post(
+                    f"{settings.PAYPAL_API_BASE}/v1/oauth2/token",
+                    auth=(settings.PAYPAL_CLIENT_ID, settings.PAYPAL_CLIENT_SECRET),
+                    data={"grant_type": "client_credentials"},
+                )
+                access_token = auth_response.json().get("access_token")
 
-                paypal_payment = paypalrestsdk.Payment({
-                    "intent": "sale",
-                    "payer": {"payment_method": "paypal"},
-                    "transactions": [{
-                        "item_list": {
-                            "items": [{
-                                "name": f"Order #{order.id}",
-                                "sku": "item",
-                                "price": str(order.total_price),
-                                "currency": "USD",
-                                "quantity": 1
-                            }]
-                        },
+                headers = {
+                        "Content-Type": "application/json",
+                        "Authorization": f"Bearer {access_token}",
+                    }
+                
+                body = {
+                    "intent": "CAPTURE",
+                    "purchase_units": [{
                         "amount": {
-                            "total": str(order.total_price),
-                            "currency": "USD"
-                        },
-                        "description": "Payment for ecommerce order"
+                            "currency_code": "USD",
+                            "value": str(order.total_price)
+                        }
                     }]
-                })
+                }
 
-                if paypal_payment.create():
-                    Payment.objects.create(
+                create_order_response = requests.post(
+                    f"{settings.PAYPAL_API_BASE}/v2/checkout/orders",
+                    json=body,
+                    headers=headers
+                )
+
+                if create_order_response.status_code != 201:
+                    return Response({'error': 'PayPal order creation failed'}, status=400)
+
+                paypal_data = create_order_response.json()
+
+                
+                Payment.objects.create(
                         order=order,
                         method=Payment.Method.PAYPAL,
                         status=Payment.Status.PENDING,
                         amount=order.total_price,
-                        transaction_id=paypal_payment.id,
-                        provider_response=paypal_payment.to_dict()
+                        transaction_id=paypal_data["id"],
+                        provider_response=paypal_data
                     )
-                    return Response({
-                        'paypal_order_id': paypal_payment.id  
+                return Response({
+                        'paypal_order_id': paypal_data["id"]
                     }, status=200)
-                return Response({'error': 'PayPal payment failed'}, status=400)
-
+               
             except Order.DoesNotExist:
                 return Response({'error': 'Order not found'}, status=404)
         return Response(serializer.errors, status=400)
     
 
 class PayPalCaptureAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         paypal_payment_id = request.data.get("paypal_payment_id")
-        order_id = request.data.get("order_id")
+        if not paypal_payment_id:
+            return Response({"error": "Missing PayPal payment ID"}, status=400)
 
         try:
-            payment = paypalrestsdk.Payment.find(paypal_payment_id)
-            if payment.execute({"payer_id": request.data.get("payer_id")}):  # Usually handled internally by SDK
-                db_payment = Payment.objects.get(transaction_id=paypal_payment_id)
-                db_payment.status = Payment.Status.COMPLETED
-                db_payment.provider_status = payment.to_dict()
-                db_payment.save()
+            # Get access token
+            auth_response = requests.post(
+                f"{settings.PAYPAL_API_BASE}/v1/oauth2/token",
+                auth=(settings.PAYPAL_CLIENT_ID, settings.PAYPAL_CLIENT_SECRET),
+                data={"grant_type": "client_credentials"},
+            )
+            access_token = auth_response.json().get("access_token")
+            if not access_token:
+                return Response({"error": "Failed to authenticate with PayPal"}, status=400)
 
-                order = db_payment.order
-                order.status = Order.OrderStatus.PAID
-                order.save()
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {access_token}",
+            }
 
-                return Response({"message": "Payment completed"}, status=200)
-            else:
-                return Response({"error": "Execution failed"}, status=400)
+            capture_response = requests.post(
+                f"{settings.PAYPAL_API_BASE}/v2/checkout/orders/{paypal_payment_id}/capture",
+                headers=headers,
+            )
+
+            if capture_response.status_code in [200, 201]:
+                capture_data = capture_response.json()
+
+                try:
+                    db_payment = Payment.objects.get(transaction_id=paypal_payment_id)
+                    db_payment.status = Payment.Status.COMPLETED
+                    db_payment.provider_status = capture_data
+                    db_payment.save()
+
+                    order = db_payment.order
+                    order.status = Order.OrderStatus.PAID
+                    order.save()
+
+                    return Response({
+                        "message": "Payment captured successfully",
+                        "data": capture_data
+                    }, status=200)
+                except Payment.DoesNotExist:
+                    return Response({"error": "Payment not found"}, status=404)
+
+            # If capture failed
+            return Response({
+                "error": "Capture failed",
+                "details": capture_response.json()
+            }, status=400)
 
         except Exception as e:
             return Response({"error": str(e)}, status=500)
@@ -178,120 +231,4 @@ def stripe_webhook_view(request):
         print(" Payment received!")
 
     return HttpResponse(status=200)
-
-
-class PayPalWebhookAPIView(APIView):
-    def post(request):
-        webhook_event = request.data 
-
-        transmission_id = request.headers.get('Paypal-Transmission-Id')
-        timestamp = request.headers.get('Paypal-Transmission-Time')
-        webhook_id = settings.PAYPAL_WEBHOOK_ID
-        cert_url = request.headers.get('Paypal-Cert-Url')
-        auth_algo = request.headers.get('Paypal-Auth-Algo')
-        transmission_sig = request.headers.get('Paypal-Transmission-Sig')
-
-        webhook_event_body = request.body.decode('utf-8')
-        verify = paypalrestsdk.WebhookEvent.verify(
-            transmission_id=transmission_id,
-            timestamp=timestamp,
-            webhook_id=webhook_id,
-            event_body=webhook_event_body,
-            cert_url=cert_url,
-            auth_algo=auth_algo,
-            transmission_sig=transmission_sig
-        )
-
-        if not verify:
-            return Response({'error': 'Webhook verification failed'}, status=400)
-        
-        event_type = webhook_event.get('event_type')
-        resource = webhook_event.get('resource')
-
-        if event_type == 'PAYMENT.SALE.COMPLETED':
-            transaction_id =  resource.get('parent_payment')
-            try:
-                payment = Payment.objects.get(transaction_id=transaction_id)
-                if payment.status != Payment.Status.COMPLETED:
-                    payment.status = Payment.Status.COMPLETED
-                    payment.provider_response = resource
-                    payment.save()
-                    
-                    # Update order status
-                    order = payment.order
-                    order.status = Order.status.PAID
-                
-                return Response({'status': 'Success'}, status=200)
-            
-            except Payment.DoesNotExist:
-                return Response({'error': 'Payment not found'}, status=404)
-
-        elif event_type == 'PAYMENT.SALE.REFUNDED':
-            # Handle refund
-            transaction_id = resource.get('parent_payment')
-            try:
-                payment = Payment.objects.get(transaction_id=transaction_id)
-                payment.status = Payment.Status.REFUNDED
-                payment.provider_response = resource
-                payment.save()
-                
-                # Update order status
-                order = payment.order
-                order.status = Order.Status.REFUNDED
-                order.save()
-                
-                return Response({'status': 'Success'}, status=200)
-            
-            except Payment.DoesNotExist:
-                return Response({'error': 'Payment not found'}, status=404)
-
-        return Response({'status': 'Ignored event'}, status=200)
-
-
-class PayPalSuccessAPIView(APIView):
-    def get(self , request):
-        serializer = PayPalSuccessSerializer(data=request.GET)
-        if not serializer.is_valid():
-            return Response({'error': serializer.errors}, status=400)
-        # Get validated data
-        payment_id = serializer.validated_data['payment_id']
-        payer_id = serializer.validated_data['payer_id']
-
-        try: 
-            payment = paypalrestsdk.Payment.find(payment_id)
-            if payment.execute({"payer_id": payer_id}):
-                try:
-                    db_payment = Payment.objects.get(transaction_id = payment_id)
-                    if db_payment.status != Payment.Status.COMPLETED:
-                        db_payment.status = Payment.Status.COMPLETED
-                        db_payment.provider_status = payment.to_dict()
-                        db_payment.save()
-
-                        order = db_payment.order
-                        order.status = Order.OrderStatus.PAID
-                        order.save()
-
-                        return Response({'status': 'Payment completed', 'order_id': order.id}, status=200)
-                    else:
-                        return Response({
-                            "status " : "Payment already have been completed."                        
-                            } , status=200)
-                except Payment.DoesNotExist:
-                    return Response({
-                            "status " : "Payment does not exist in the data base."                        
-                            } , status=400)
-            else:
-                return Response({'error': 'Payment execution failed'}, status=400)
-        except paypalrestsdk.exceptions.ResourceNotFound:
-             return Response({'Resource is not found'})
-        except Exception as e:
-            return Response({
-                'error' : f" the system found {e}"
-            })
-
-class PayPalCancelAPIView(APIView):
-    def get(self, request):
-        order_id  = request.GET.get('order_id')
-        return Response({'status': 'Payment cancelled', 'order_id': order_id or None}, status=200)
-
 

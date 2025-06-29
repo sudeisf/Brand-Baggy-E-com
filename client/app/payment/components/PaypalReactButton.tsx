@@ -6,8 +6,9 @@ import {
   ReactPayPalScriptOptions,
   usePayPalScriptReducer,
 } from "@paypal/react-paypal-js";
-import { useCallback, useEffect, useState } from "react";
+import { useActionState, useCallback, useEffect, useState } from "react";
 import axios from "axios";
+import { useAuthStore } from "@/store/authStore";
 
 type Props = {
   orderId: number;
@@ -24,7 +25,7 @@ const initialOptions: ReactPayPalScriptOptions = {
 function PaypalButtonLogic({ orderId }: Props) {
   const [{ isPending, isInitial, isRejected }] = usePayPalScriptReducer();
   const [isPayPalReady, setIsPayPalReady] = useState(false);
-
+  const accessToken = useAuthStore((s)=>s.accessToken);
   useEffect(() => {
     const checkPayPal = () => {
       if (typeof window !== 'undefined' && window.paypal && window.paypal.Buttons) {
@@ -38,24 +39,38 @@ function PaypalButtonLogic({ orderId }: Props) {
 
   const createOrder = useCallback(async () => {
     try {
-      const res = await axios.post("/payment/paypal/create-order/", {
-        order_id: orderId
+      const res = await fetch("/api/paypal/create-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ order_id: orderId }),
       });
-      return res.data.paypal_order_id;
+      if (!res.ok) throw new Error("Failed to create PayPal order");
+      const data = await res.json();
+      return data.paypal_order_id;
     } catch (error) {
       console.error("Error creating PayPal order:", error);
       throw error;
     }
-  }, [orderId]);
+  }, [orderId, accessToken]);
 
   const onApprove = useCallback(async (data: any) => {
     try {
-      const res = await axios.post(`/payment/paypal/capture-order/`, {
-        paypal_payment_id: data.orderID,
-        order_id: orderId,
+      const res = await fetch("/api/paypal/capture-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          paypal_payment_id: data.orderID,
+          order_id: orderId,
+        }),
       });
-      
-      if (res.status === 200) {
+
+      if (res.ok) {
         window.location.href = "/payment/success";
       } else {
         alert("Error capturing payment");
@@ -64,7 +79,7 @@ function PaypalButtonLogic({ orderId }: Props) {
       console.error("Error capturing payment:", error);
       alert("Error capturing payment");
     }
-  }, [orderId]);
+  }, [orderId, accessToken]);
 
   const onError = useCallback((err: any) => {
     console.error("❌ PayPal Error", err);

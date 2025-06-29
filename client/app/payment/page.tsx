@@ -1,111 +1,91 @@
 "use client";
 
-import { ProductCrum } from "@/app/products/components/ProductCrum"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
-import { ArrowLeft, Coins } from "lucide-react"
+import { ProductCrum } from "@/app/products/components/ProductCrum";
+import { ArrowLeft, Coins } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { CardMethod } from "./components/CardMethod";
 import FinalSummery from "./components/FinalSummery";
 import CashOnDelivery from "./components/CodMethod";
 import { Button } from "@/components/ui/button";
 import { PaypalReactButton } from "./components/PaypalReactButton";
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams } from "next/navigation";
 
 export default function PaymentPage() {
-    const [paymentMethod, setPaymentMethod] = useState<string>("paypal");
-    const searchParams = useSearchParams();
-    const orderId = searchParams.get('order_id');
-
-    const handlePaymentMethodChange = (value: string) => {
-        setPaymentMethod(value);
-    }
-    
+  const [paymentMethod, setPaymentMethod] = useState<string>("paypal");
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get("order_id");
 
   return (
     <div className="container mx-auto px-4 py-5 mb-10 min-h-screen">
       <ProductCrum />
 
-       <div className="flex flex-col w-[1250px] mx-auto mb-4 ">
-            <h1 className="text-4xl font-bold text-[#331d67] p-2 mt-2">Payment Method</h1>
-            <p className="text-gray-500 text-md p-2 mt-2">Please select the payment method you want to use</p>
-       </div>
-
-      <div className="flex gap-4 justify-center px-4">
-      <div>
-        <div className="w-[700px] mx-auto">
-           <RadioGroup value={paymentMethod} onValueChange={handlePaymentMethodChange} className="flex gap-4 rounded-xl ">
-            <div
-                onClick={() => handlePaymentMethodChange("paypal")}
-                className={`w-1/3 border-2 rounded-xl p-4 cursor-pointer transition-colors ${
-                    paymentMethod === "paypal" 
-                    ? " bg-gray-100" 
-                    : "border-gray-200 hover:border-gray-300"
-                }`}>
-                <div className="flex items-center gap-2">
-                    <RadioGroupItem value="paypal" id="paypal" />
-                    <h1 className="font-medium text-[#331d67]">PayPal</h1>
-                </div>
-                <img src="/assets/paypal.svg" alt="paypal" className="w-20 h-20" />
-            </div>
-            <div 
-                onClick={() => handlePaymentMethodChange("stripe")}
-                className={`w-1/3 border-2 rounded-xl p-4 cursor-pointer transition-colors ${
-                    paymentMethod === "stripe" 
-                    ? " bg-gray-100" 
-                    : "border-gray-200 hover:border-gray-300"
-                }`}>
-                <div className="flex items-center gap-2">
-                    <RadioGroupItem value="stripe" id="stripe" />
-                    <h1 className="font-medium text-[#331d67]">Stripe</h1>
-                </div>
-                <img src="/assets/stripe.svg" alt="stripe" className="w-20 h-20" />
-            </div>
-            <div 
-                onClick={() => handlePaymentMethodChange("cash")}
-                className={`w-1/3 border-2 rounded-xl p-4 cursor-pointer transition-colors ${
-                    paymentMethod === "cash" 
-                    ? " bg-gray-100" 
-                    : "border-gray-200 hover:border-gray-300"
-                }`}>
-                <div className="flex items-center gap-2">
-                    <RadioGroupItem value="cash" id="cash" />
-                    <h1 className="font-medium text-[#331d67]">Cash On Delivery</h1>
-                </div>
-                <Coins className="w-16 h-16 text-[#331d67] mt-2" />
-            </div>
-        </RadioGroup>
+      <div className="flex flex-col w-full max-w-[1250px] mx-auto mb-6">
+        <h1 className="text-4xl font-bold text-[#331d67] p-2 mt-2">Payment Method</h1>
+        <p className="text-gray-500 text-md p-2 mt-2">
+          Please select the payment method you want to use
+        </p>
       </div>
 
-      <div>
-        {paymentMethod === "paypal" && orderId && (
-            <PaypalReactButton orderId={parseInt(orderId)} />
-        )}
+      {/* Payment Selection Buttons */}
+      <div className="flex justify-center gap-4 mb-8">
+        <Button
+          variant="outline"
+          onClick={() => setPaymentMethod("paypal")}
+          className={`w-60 p-6 flex flex-col items-center gap-2 rounded-xl border-2 ${
+            paymentMethod === "paypal" ? "border-[#331d67] bg-gray-100" : ""
+          }`}
+        >
+          <img src="/assets/paypal.svg" alt="paypal" className="w-16 h-16" />
+          <span className="text-[#331d67] font-medium">PayPal</span>
+        </Button>
 
-        {paymentMethod === "stripe" && (
-            <CardMethod />
-        )}
+        <Button
+          variant="outline"
+          onClick={() => setPaymentMethod("stripe")}
+          className={`w-60 p-6 flex flex-col items-center gap-2 rounded-xl border-2 ${
+            paymentMethod === "stripe" ? "border-[#331d67] bg-gray-100" : ""
+          }`}
+        >
+          <img src="/assets/stripe.svg" alt="stripe" className="w-16 h-16" />
+          <span className="text-[#331d67] font-medium">Stripe</span>
+        </Button>
 
+        <Button
+          variant="outline"
+          onClick={() => setPaymentMethod("cash")}
+          className={`w-60 p-6 flex flex-col items-center gap-2 rounded-xl border-2 ${
+            paymentMethod === "cash" ? "border-[#331d67] bg-gray-100" : ""
+          }`}
+        >
+          <Coins className="w-10 h-10 text-[#331d67]" />
+          <span className="text-[#331d67] font-medium">Cash on Delivery</span>
+        </Button>
+      </div>
 
-        {paymentMethod === "cash" && (
-            <CashOnDelivery />
-        )}
-</div>
-      <div className="flex justify-start items-center border-t border-gray-200 pt-4">
+      {/* Conditional Render Payment Flow */}
+      <div className="flex flex-col items-center">
+        {paymentMethod === "paypal" && orderId ? (
+          <PaypalReactButton orderId={parseInt(orderId)} />
+        ) : paymentMethod === "paypal" ? (
+          <p className="text-red-500">Missing order information</p>
+        ) : null}
+
+        {paymentMethod === "stripe" && <CardMethod />}
+        {paymentMethod === "cash" && <CashOnDelivery />}
+      </div>
+
+      {/* Navigation */}
+      <div className="flex justify-start items-center border-t border-gray-200 pt-4 mt-10">
         <Button className="bg-[#331d67]/40 text-white h-10 rounded-md hover:bg-[#331d67]">
-            <Link href="/shipping" className="flex items-center  gap-2">
-                <ArrowLeft className="w-4 h-4" />
-                Edit Shipping Address
-            </Link>
-        </Button>   
-     </div>
+          <Link href="/shipping" className="flex items-center gap-2">
+            <ArrowLeft className="w-4 h-4" />
+            Edit Shipping Address
+          </Link>
+        </Button>
       </div>
-      <FinalSummery paymentMethod={paymentMethod} />
-     </div>
-     
-    </div>
 
-  ) 
+      <FinalSummery paymentMethod={paymentMethod} />
+    </div>
+  );
 }
