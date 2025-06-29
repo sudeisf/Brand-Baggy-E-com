@@ -45,12 +45,12 @@ export default function Summery({ onPlaceOrder }: Props) {
                 </div>
                 <div className="flex justify-between">
                     <p className="font-medium text-gray-500">Delivery Fee</p>
-                    <p className="font-medium tracking-wider">{100}<span className="text-sm">ETB</span></p>
+                    <p className="font-medium tracking-wider">Free</p>
                 </div>
             </div>
             <div className="flex justify-between border-t-2 border-gray-200 pt-2">
                 <p className="font-medium text-gray-500">Total</p>
-                <p className="lg:text-2xl font-medium tracking-wider">${items.reduce((acc, item) => acc + item.price * item.quantity, 0) + 100}<span className="">ETB</span></p>
+                <p className="lg:text-2xl font-medium tracking-wider">${items.reduce((acc, item) => acc + item.price * item.quantity, 0)}<span className="">ETB</span></p>
             </div>
             
             <div className="flex justify-center items-center">

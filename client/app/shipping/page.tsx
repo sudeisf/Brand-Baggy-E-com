@@ -37,10 +37,8 @@ export default function ShippingPage() {
       orderData,
       {
         onSuccess: (data) => {
-          console.log("Order created successfully:", data);
-          console.log("Order ID:", data.id);
+       
           const paymentUrl = `/payment?order_id=${data.id}`;
-          console.log("Navigating to:", paymentUrl);
           toast.success("Order created successfully.");
           router.push(paymentUrl);
         },

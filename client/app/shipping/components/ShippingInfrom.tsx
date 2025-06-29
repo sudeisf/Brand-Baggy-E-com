@@ -39,13 +39,9 @@ export default function ShippingInformation({ onChange }: Props) {
             country: "",
         }
     });
-
-    // Watch form values and call onChange when they change
     const watchedValues = form.watch();
-    
     useEffect(() => {
         const subscription = form.watch((value) => {
-            // Only call onChange if all required fields have values
             if (value.full_name && value.email && value.phone && value.address && 
                 value.city && value.state && value.zip_code && value.country) {
                 onChange(value as z.infer<typeof formSchema>);
@@ -55,7 +51,7 @@ export default function ShippingInformation({ onChange }: Props) {
     }, [form, onChange]);
 
     return (
-        <div className="w-full border-b-2 border-gray-200 p-4">
+        <div className="w-full  border-gray-200 p-4">
             <h1 className="text-lg font-medium text-[#331d67] p-2">Shipping Information</h1>
             <Form {...form}>
                 <form className="space-y-4">
