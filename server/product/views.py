@@ -193,6 +193,25 @@ class CategorySubListView(APIView):
         serializer = CatagorySerializer(queryset, many=True)
         return Response(serializer.data)
 
+@method_decorator(cache_page(60*15), name='dispatch')
+class CategoryFilterView(APIView):
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        # Get all parent categories with their immediate children
+        parent_categories = Category.objects.filter(parent=None)
+        
+        result = []
+        for parent in parent_categories:
+            parent_data = CatagorySerializer(parent).data
+            parent_data['children'] = CatagorySerializer(
+                Category.objects.filter(parent=parent),
+                many=True
+            ).data
+            result.append(parent_data)
+        
+        return Response(result)
+
 class ProductStockUpdateView(APIView):
     permission_classes = [IsAuthenticated, IsSeller]
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useProductsList } from "../queries/useProductList";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCartStore } from "@/store/cartStore";
+import { useProductFilterStore } from "@/store/productStore";
 
 type Product = {
   id: number;
@@ -12,23 +13,38 @@ type Product = {
   price: number;
   description: string;
   main_image: string;
+  category: string; 
 };
+
 type Props = {
   products: Product[];
 };
 
 export function ProductList({ products }: Props) {
   const queryClient = useQueryClient();
-  queryClient.setQueryData(['productsList'], products); 
+  const { selectedCategories } = useProductFilterStore();
+  
+
+  const filteredProducts = products.filter(product => {
+
+    if (selectedCategories.length > 0 && !selectedCategories.includes(product.category)) {
+      return false;
+    }
+    return true;
+  });
+
+  queryClient.setQueryData(['productsList'], filteredProducts); 
   const { data, isLoading, error } = useProductsList();
-  const addCartItemFn = useCartStore((state)=> state.addCartItem)
+
+  
+  const displayProducts = (data || filteredProducts);
   return (
     <div>
       <div className="relative w-full">
         {isLoading && <p>Loading...</p>}
         {error && <p className="text-red-500">Error loading products</p>}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 w-full ml-0">
-          {(data || products).map((product) => (
+          {displayProducts.map((product) => (
             <div
               key={product.id}
               className="bg-inherit rounded-md transition-shadow duration-300 w-64 md:w-96 h-[22rem] md:h-[24rem] flex flex-col flex-shrink-0 snap-start justify-between group border items-start border-gray-200"
