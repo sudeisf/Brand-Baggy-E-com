@@ -305,67 +305,108 @@ class StripeCaptureAPIView(APIView):
             return Response({"error": str(e)}, status=500)
 
 
-
+from .tasks import send_payment_receipt_email
 
 class StripePayAndCaptureAPIView(APIView):
+
+    def record_failed_payment(self, order, status_code, error):
+        """Avoid duplicate failed payments for orders with OneToOneField."""
+        if Payment.objects.filter(order=order).exists():
+            print(f"[DEBUG] Skipping failed payment record: payment already exists for order {order.id}")
+            return
+
+        print(f"[DEBUG] Recording failed payment for order {order.id} | reason: {error}")
+        Payment.objects.create(
+            order=order,
+            method=Payment.Method.STRIPE,
+            status=Payment.Status.FAILED,
+            amount=order.total_price,
+            provider_status=status_code,
+            provider_response={'error': str(error)},
+        )
+
     def post(self, request):
         serializer = PaymentRequestSerializer(data=request.data)
-        if serializer.is_valid():
-            order_id = serializer.validated_data['order_id']
-            try:
-                order = Order.objects.get(id=order_id)
+        if not serializer.is_valid():
+            print("[DEBUG] Invalid serializer:", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-                if hasattr(order, "payment"):
-                    return Response({'error': 'Payment already exists'}, status=400)
+        order_id = serializer.validated_data['order_id']
+        print(f"[DEBUG] Processing payment for order ID: {order_id}")
 
-                # Create and immediately confirm the payment
-                payment_intent = stripe.PaymentIntent.create(
-                    amount=int(order.total_price * 100),
-                    currency='usd',
-                    payment_method=request.data.get("payment_method_id"),
-                    confirm=True,  
-                    automatic_payment_methods={
-                            'enabled': True,
-                            'allow_redirects': 'never', 
-                            },
-                    metadata={'order_id': str(order.id)}
-                )
+        try:
+            order = Order.objects.get(id=order_id)
+            print(f"[DEBUG] Found order: {order.id}, total price: {order.total_price}")
 
-                if payment_intent.status != "succeeded":
-                    return Response({
-                        "error": "Payment not successful",
-                        "status": payment_intent.status
-                    }, status=400)
+            if hasattr(order, "payment"):
+                print(f"[DEBUG] Order {order.id} already has a payment.")
+                return Response({'error': 'Payment already exists for this order'}, status=status.HTTP_400_BAD_REQUEST)
 
-                # Record the successful payment in the database
-                payment = Payment.objects.create(
-                    order=order,
-                    method=Payment.Method.STRIPE,
-                    status=Payment.Status.COMPLETED,
-                    amount=order.total_price,
-                    transaction_id=payment_intent.id,
-                    provider_response=payment_intent,
-                )
+            # ✅ Create Stripe PaymentIntent
+            payment_intent = stripe.PaymentIntent.create(
+                amount=int(order.total_price * 100),
+                currency='usd',
+                payment_method=request.data.get("payment_method_id"),
+                confirm=True,
+                automatic_payment_methods={
+                    'enabled': True,
+                    'allow_redirects': 'never',
+                },
+                metadata={'order_id': str(order.id)}
+            )
 
-                # Mark the order as paid
+            payment_status = payment_intent.status
+            is_success = payment_status == 'succeeded'
+            print(f"[DEBUG] Stripe status: {payment_status} | success: {is_success}")
+
+            # ✅ Create Payment record
+            payment = Payment.objects.create(
+                order=order,
+                method=Payment.Method.STRIPE,
+                status=Payment.Status.COMPLETED if is_success else Payment.Status.FAILED,
+                amount=order.total_price,
+                transaction_id=payment_intent.id,
+                provider_status=payment_status,
+                provider_response=payment_intent,
+            )
+
+            if is_success:
                 order.status = Order.OrderStatus.PAID
                 order.save()
+                print(f"[DEBUG] Order {order.id} marked as PAID.")
+
+                # ✅ Send email via Celery
+                print(f"[DEBUG] Queuing payment receipt email for order {order.id}, payment {payment.id}")
+                send_payment_receipt_email.delay(order.id, payment.id)
 
                 return Response({
                     'message': 'Payment successful and order completed',
                     'payment_intent': payment_intent.id
-                }, status=200)
+                }, status=status.HTTP_200_OK)
 
-            except Order.DoesNotExist:
-                return Response({'error': 'Order not found'}, status=404)
+            else:
+                print(f"[DEBUG] Payment failed for order {order.id}, status: {payment_status}")
+                return Response({
+                    "error": "Payment not successful",
+                    "status": payment_status
+                }, status=status.HTTP_400_BAD_REQUEST)
 
-            except stripe.error.CardError as e:
-                return Response({'error': str(e)}, status=400)
+        except Order.DoesNotExist:
+            print(f"[DEBUG] Order with id {order_id} does not exist.")
+            return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
 
-            except stripe.error.StripeError as e:
-                return Response({'error': 'Stripe error: ' + str(e)}, status=500)
+        except stripe.error.CardError as e:
+            print(f"[DEBUG] Stripe CardError: {e}")
+            self.record_failed_payment(order, getattr(e, 'code', 'card_error'), e)
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-            except Exception as e:
-                return Response({'error': 'Unexpected error: ' + str(e)}, status=500)
+        except stripe.error.StripeError as e:
+            print(f"[DEBUG] Stripe error: {e}")
+            self.record_failed_payment(order, getattr(e, 'code', 'stripe_error'), e)
+            return Response({'error': f'Stripe error: {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response(serializer.errors, status=400)
+        except Exception as e:
+            print(f"[DEBUG] Unexpected error: {e}")
+            if 'order' in locals():
+                self.record_failed_payment(order, 'unexpected_error', e)
+            return Response({'error': f'Unexpected error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

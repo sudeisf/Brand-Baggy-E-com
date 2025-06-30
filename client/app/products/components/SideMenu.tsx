@@ -26,7 +26,7 @@ export function SideMenu() {
     queryFn: () => 
       api.get('/product/category-filter/')
         .then(res => res.data),
-    staleTime: 1000 * 60 * 15, // 15 minutes cache
+    staleTime: 1000 * 60 * 15, 
   });
 
   const toggleSection = (id: number) => {

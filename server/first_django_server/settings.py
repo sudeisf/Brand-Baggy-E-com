@@ -65,9 +65,12 @@ INSTALLED_APPS = [
     "silk"
 ]
 
-# CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
-# CELERY_ACCEPT_CONTENT = ['json']
-# CELERY_TASK_SERIALIZER = 'json'
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -127,6 +130,8 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')  # Same as EMAIL_HOST_USER
+CONTACT_EMAIL = 'support@yourdomain.com'
 
 
 import cloudinary
@@ -190,8 +195,8 @@ ROOT_URLCONF = 'first_django_server.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
+        'DIRS': [],  # Can be empty for app templates
+        'APP_DIRS': True,  # Must be True
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
