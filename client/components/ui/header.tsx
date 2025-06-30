@@ -19,6 +19,7 @@ import CartBadge from "./CartBadge";
 import FavBadge from "./FavBadge";
 import { useCart } from "@/hooks/useCart";
 import { useFav } from "@/hooks/useFav";
+import SearchBar from "./SearchBar";
 
 export default function Header(){
     const router = useRouter();
@@ -53,7 +54,7 @@ export default function Header(){
             </div>
 
             <div className="flex items-center">
-                <h1 className="text-[#331d67] tracking-tighter text-md sm:text-2xl">Baggy-Brand</h1>
+                <h1 className="text-[#331d67] tracking-tighter text-md sm:text-xl font-roboto">Baggy-Brand</h1>
             </div>
 
         
@@ -80,14 +81,7 @@ export default function Header(){
 
             
             <div className="flex items-center gap-2 sm:gap-4">
-                <div className="hidden sm:flex w-[10rem] md:w-[20rem] lg:w-[30rem] bg-white items-center justify-start gap-2 rounded-sm px-3 py-1.5 border-1">
-                    <Search className="text-black w-4 h-4 md:w-5 md:h-5" />
-                    <input 
-                        type="text" 
-                        placeholder="Search..." 
-                        className="rounded-md outline-none bg-white w-full text-sm md:text-base" 
-                    />
-                </div>
+                <SearchBar/>
 
            
 

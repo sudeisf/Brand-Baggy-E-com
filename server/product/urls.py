@@ -15,7 +15,8 @@ from .views import (
     ProductStockUpdateView
     ,MergeFavProductView,
     GetFavProductView,
-    RemoveAllFavItems
+    RemoveAllFavItems,
+    SearchProductAPIView
     )
 
 
@@ -40,5 +41,6 @@ urlpatterns =[
     path("favorite-product/merged",MergeFavProductView.as_view(),name="merge-fav-product"),
     path("favorite-products/",GetFavProductView.as_view(),name="get-fav-product"),
     path("favorite-products/removeAll/",RemoveAllFavItems.as_view(),name="remove-all-fav"),
+    path('search-product/', SearchProductAPIView.as_view(), name='product-search'),
 
 ]   

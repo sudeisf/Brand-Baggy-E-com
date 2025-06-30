@@ -9,8 +9,10 @@ from .serializers import (ProductSerialier ,
                           SellerProductDetailSerializer,
                           UpdateProductSerializer ,
                           SellerProductListSerializer,
-                          FavoriteProductSerializer
+                          FavoriteProductSerializer,
+                          SerachProductSerializer
                           )
+from rest_framework.pagination import PageNumberPagination
 
 from .models import Product , FavoriteProduct , ProductReview
 from rest_framework.permissions import IsAuthenticated , AllowAny 
@@ -254,7 +256,18 @@ class GetFavProductView(APIView):
         serializer = FavoriteProductSerializer(fav_products, many=True)
         return Response(serializer.data)
         
-        
-        
+from rest_framework.filters import SearchFilter
+
+class SearchProductAPIView(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = SerachProductSerializer
+    pagination_class = PageNumberPagination
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    search_fields = ['name', 'description', 'category__name','brand']
+    filterset_fields = {
+        'price': ['gte', 'lte'],
+        'category': ['exact'],
+        'in_stock': ['exact']
+    }
 
         
