@@ -36,7 +36,7 @@ export const useAddOrderMutation = () => {
                         return response.data
                   },
                   onSuccess: (data) => {
-                        queryClient.invalidateQueries({ queryKey: ['cart'] });
+                       
                   }
             }
       )

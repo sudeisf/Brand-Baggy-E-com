@@ -10,12 +10,14 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useOrderStore } from "@/store/orderStore";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ShippingPage() {
   const router = useRouter();
   const mutuate = useAddOrderMutation();
   const [shippingData, setShippingData] = useState<any>(null);
   const { setCurrentOrder } = useOrderStore();
+  const queryClient = useQueryClient()
   
   const handleShippingChange = (data: any) => {
     setShippingData(data);
@@ -40,7 +42,10 @@ export default function ShippingPage() {
        
           const paymentUrl = `/payment?order_id=${data.id}`;
           toast.success("Order created successfully.");
-          router.push(paymentUrl);
+          setTimeout(() => {
+            router.push(paymentUrl);
+          }, 2000);
+          queryClient.invalidateQueries({ queryKey: ['cart'] });
         },
         onError: (error: any) => {
           console.error("Order creation failed:", error);

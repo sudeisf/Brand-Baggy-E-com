@@ -232,3 +232,140 @@ def stripe_webhook_view(request):
 
     return HttpResponse(status=200)
 
+class StripeCreateOrderAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = PaymentRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            order_id = serializer.validated_data['order_id']
+            try:
+                order = Order.objects.get(id=order_id)
+
+                if hasattr(order, "payment"):
+                    return Response({'error': 'Payment already exists'}, status=400)
+
+                intent = stripe.PaymentIntent.create(
+                    amount=int(order.total_price * 100),
+                    currency='usd',
+                    capture_method='manual',  # key part: authorize only
+                    metadata={'order_id': str(order.id)}
+                )
+
+                Payment.objects.create(
+                    order=order,
+                    method=Payment.Method.STRIPE,
+                    status=Payment.Status.PENDING,
+                    amount=order.total_price,
+                    transaction_id=intent.id,
+                    provider_response=intent,
+                )
+
+                return Response({
+                    'client_secret': intent.client_secret,
+                    'payment_intent_id': intent.id
+                }, status=200)
+
+            except Order.DoesNotExist:
+                return Response({'error': 'Order not found'}, status=404)
+        return Response(serializer.errors, status=400)
+    
+    
+class StripeCaptureAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        payment_intent_id = request.data.get("payment_intent_id")
+        if not payment_intent_id:
+            return Response({"error": "Missing Stripe payment intent ID"}, status=400)
+
+        try:
+            payment_intent = stripe.PaymentIntent.capture(payment_intent_id)
+
+            try:
+                db_payment = Payment.objects.get(transaction_id=payment_intent_id)
+                db_payment.status = Payment.Status.COMPLETED
+                db_payment.provider_status = payment_intent
+                db_payment.save()
+
+                order = db_payment.order
+                order.status = Order.OrderStatus.PAID
+                order.save()
+
+                return Response({
+                    "message": "Payment captured successfully",
+                    "data": payment_intent
+                }, status=200)
+            except Payment.DoesNotExist:
+                return Response({"error": "Payment not found"}, status=404)
+
+        except stripe.error.InvalidRequestError as e:
+            return Response({"error": str(e)}, status=400)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+
+
+
+class StripePayAndCaptureAPIView(APIView):
+    def post(self, request):
+        serializer = PaymentRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            order_id = serializer.validated_data['order_id']
+            try:
+                order = Order.objects.get(id=order_id)
+
+                if hasattr(order, "payment"):
+                    return Response({'error': 'Payment already exists'}, status=400)
+
+                # Create and immediately confirm the payment
+                payment_intent = stripe.PaymentIntent.create(
+                    amount=int(order.total_price * 100),
+                    currency='usd',
+                    payment_method=request.data.get("payment_method_id"),
+                    confirm=True,  
+                    automatic_payment_methods={
+                            'enabled': True,
+                            'allow_redirects': 'never', 
+                            },
+                    metadata={'order_id': str(order.id)}
+                )
+
+                if payment_intent.status != "succeeded":
+                    return Response({
+                        "error": "Payment not successful",
+                        "status": payment_intent.status
+                    }, status=400)
+
+                # Record the successful payment in the database
+                payment = Payment.objects.create(
+                    order=order,
+                    method=Payment.Method.STRIPE,
+                    status=Payment.Status.COMPLETED,
+                    amount=order.total_price,
+                    transaction_id=payment_intent.id,
+                    provider_response=payment_intent,
+                )
+
+                # Mark the order as paid
+                order.status = Order.OrderStatus.PAID
+                order.save()
+
+                return Response({
+                    'message': 'Payment successful and order completed',
+                    'payment_intent': payment_intent.id
+                }, status=200)
+
+            except Order.DoesNotExist:
+                return Response({'error': 'Order not found'}, status=404)
+
+            except stripe.error.CardError as e:
+                return Response({'error': str(e)}, status=400)
+
+            except stripe.error.StripeError as e:
+                return Response({'error': 'Stripe error: ' + str(e)}, status=500)
+
+            except Exception as e:
+                return Response({'error': 'Unexpected error: ' + str(e)}, status=500)
+
+        return Response(serializer.errors, status=400)

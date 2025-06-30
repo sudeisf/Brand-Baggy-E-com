@@ -6,8 +6,7 @@ import {
   ReactPayPalScriptOptions,
   usePayPalScriptReducer,
 } from "@paypal/react-paypal-js";
-import { useActionState, useCallback, useEffect, useState } from "react";
-import axios from "axios";
+import { useCallback, useEffect, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 
 type Props = {
@@ -71,7 +70,7 @@ function PaypalButtonLogic({ orderId }: Props) {
       });
 
       if (res.ok) {
-        window.location.href = "/payment/success";
+        window.location.href = "/profile/orders";
       } else {
         alert("Error capturing payment");
       }

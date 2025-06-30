@@ -10,6 +10,8 @@ import CashOnDelivery from "./components/CodMethod";
 import { Button } from "@/components/ui/button";
 import { PaypalReactButton } from "./components/PaypalReactButton";
 import { useSearchParams } from "next/navigation";
+import StripeCheckout from "./components/StripeCheckout"
+import { string } from "zod";
 
 export default function PaymentPage() {
   const [paymentMethod, setPaymentMethod] = useState<string>("paypal");
@@ -26,34 +28,35 @@ export default function PaymentPage() {
           Please select the payment method you want to use
         </p>
       </div>
-
+      <div className="flex max-w-[1240px] mx-auto space-x-5">
+      <div className="flex-col justify-between h-full">
       <div className="flex justify-center gap-4 mb-8">
         <Button
           variant="outline"
           onClick={() => setPaymentMethod("paypal")}
-          className={`w-60 p-6 flex flex-col items-center gap-2 rounded-xl border-2 ${
+          className={`w-60 p-6 flex flex-col h-20 items-center gap-2 rounded-xl border-2 ${
             paymentMethod === "paypal" ? "border-[#331d67] bg-gray-100" : ""
           }`}
         >
           <img src="/assets/paypal.svg" alt="paypal" className="w-16 h-16" />
-          <span className="text-[#331d67] font-medium">PayPal</span>
+          {/* <span className="text-[#331d67] font-medium">PayPal</span> */}
         </Button>
 
         <Button
           variant="outline"
           onClick={() => setPaymentMethod("stripe")}
-          className={`w-60 p-6 flex flex-col items-center gap-2 rounded-xl border-2 ${
+          className={`w-60 p-6 flex flex-col h-20 items-center gap-2 rounded-xl border-2 ${
             paymentMethod === "stripe" ? "border-[#331d67] bg-gray-100" : ""
           }`}
         >
           <img src="/assets/stripe.svg" alt="stripe" className="w-16 h-16" />
-          <span className="text-[#331d67] font-medium">Stripe</span>
+          {/* <span className="text-[#331d67] font-medium">Stripe</span> */}
         </Button>
 
         <Button
           variant="outline"
           onClick={() => setPaymentMethod("cash")}
-          className={`w-60 p-6 flex flex-col items-center gap-2 rounded-xl border-2 ${
+          className={`w-60 p-6 flex flex-col h-20 items-center gap-2 rounded-xl border-2 ${
             paymentMethod === "cash" ? "border-[#331d67] bg-gray-100" : ""
           }`}
         >
@@ -68,7 +71,12 @@ export default function PaymentPage() {
           <p className="text-red-500">Missing order information</p>
         ) : null}
 
-        {paymentMethod === "stripe" && <CardMethod />}
+        {paymentMethod === "stripe" && orderId && (
+          <div className="w-full max-w-md p-6 bg-white rounded shadow mx-auto">
+            <StripeCheckout orderId={parseInt(orderId)} />
+          </div>
+        )}
+        
         {paymentMethod === "cash" && <CashOnDelivery />}
       </div>
 
@@ -80,8 +88,12 @@ export default function PaymentPage() {
           </Link>
         </Button>
       </div>
-
-      <FinalSummery paymentMethod={paymentMethod} />
+      </div>
+          <div>  
+           <FinalSummery paymentMethod={paymentMethod} />
+          </div>
+      </div>
+      
     </div>
   );
 }

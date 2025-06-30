@@ -15,7 +15,7 @@ export default function FinalSummary({ paymentMethod = "cash", onConfirm }: Fina
     const total = subtotal + vat + cashFee;
 
     return (
-        <div className="border-2 space-y-4 border-gray-200 rounded-xl p-6 h-fit">
+        <div className="border-1 space-y-4 border-gray-200 rounded-xl p-6 h-fit">
             <h1 className="text-2xl font-medium font-roboto text-[#331d67]">Order Summary</h1>
             
             {/* Payment Method Indicator */}
@@ -70,14 +70,16 @@ export default function FinalSummary({ paymentMethod = "cash", onConfirm }: Fina
                 </p>
             </div>
 
-            <div className="flex justify-center items-center">
+            {   paymentMethod === "cash" ?
+                (<div className="flex justify-center items-center">
                 <Button 
                     onClick={onConfirm}
                     className="w-full py-6 rounded-md font-semibold tracking-wider bg-[#331d67] text-white hover:bg-[#331d67]/80"
                 >
-                    {paymentMethod === "cash" ? "Confirm Cash Order" : "Proceed to Payment"}
+                            Confirm Cash Order
                 </Button>
-            </div>
+            </div>) : null
+            }
         </div>
     )
 }

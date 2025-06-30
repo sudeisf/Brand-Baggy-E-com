@@ -66,7 +66,7 @@ export default function SideBarMenu() {
     const tabs = [
         { path: defaultPath, icon: User, label: "Details" },
         { path: "/profile/orders", icon: ShoppingBag, label: "Orders" },
-        { path: "/profile/payment", icon: CreditCard, label: "Payment" },
+        // { path: "/profile/payment", icon: CreditCard, label: "Payment" },
         { path: "/profile/settings", icon: Settings, label: "Settings" },
         { path: "#", icon: LogOut, label: "Logout" }
     ]
