@@ -16,7 +16,7 @@ class NotificationListAPIView(APIView):
 class MarkAsReadAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, pk):
+    def patch(self, request, pk):
         try:
             notification = Notification.objects.get(id=pk, recipient=request.user)
             notification.is_read = True
@@ -24,3 +24,9 @@ class MarkAsReadAPIView(APIView):
             return Response({"detail": "Notification marked as read."})
         except Notification.DoesNotExist:
             return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+
+class MarkAllAsRead(APIView):
+    permission_classes = [IsAuthenticated]
+    def patch(self, request):
+        updated = Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
+        return Response({"detail": f"{updated} notifications marked as read."})

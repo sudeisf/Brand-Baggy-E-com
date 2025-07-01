@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import logging
 
 load_dotenv()
 
@@ -64,7 +65,8 @@ INSTALLED_APPS = [
     'payment',
     "silk",
     "channels",
-    "notifications"
+    "notifications",
+     "daphne",
 ]
 
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
@@ -72,7 +74,45 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
 
-ASGI_APPLICATION = "first_django_project.asgi.application"
+ASGI_APPLICATION = "first_django_server.asgi.application"
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{levelname}] {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '[{levelname}] {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        # Add this for your notifications app
+        'notifications': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
 
 CHANNEL_LAYERS = {
     "default": {

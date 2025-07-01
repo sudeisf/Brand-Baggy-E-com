@@ -62,10 +62,10 @@ class CreateOrderAPIView(APIView):
 
         notified_sellers = set()
         for item in cart_items:
-            seller_user = item.product.seller.user
+            seller_user = item.product.seller
             if seller_user.id not in notified_sellers:
                 message = f"New order #{order.id} placed for ${total} by {user.get_full_name() or user.username}"
-                send_notifications(seller_user, message, notification_type="ORDER", related_order=order)
+                send_notifications(seller_user, message, notification_type="ORDER")
                 notified_sellers.add(seller_user.id)
 
         cart.items.all().delete()
