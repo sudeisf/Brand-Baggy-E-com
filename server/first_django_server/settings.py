@@ -62,13 +62,26 @@ INSTALLED_APPS = [
     'cart',
     'orders',
     'payment',
-    "silk"
+    "silk",
+    "channels",
+    "notifications"
 ]
 
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+
+ASGI_APPLICATION = "first_django_project.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 
 
@@ -121,7 +134,7 @@ SITE_ID = 1
 ACCOUNT_LOGIN_METHODS = {'username'}
 ACCOUNT_SIGNUP_FIELDS = ['username*', 'email', 'password1*', 'password2*']
 
-LOGIN_REDIRECT_URL = 'http://localhost:5173/home'  # your React app
+
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

@@ -9,6 +9,8 @@ from cart.models import Cart , CartItem
 from django.db import transaction
 from orders.serializers import OrderSerializer , ShippingInfoSerializer,OrderDetailSerializer
 from decimal import Decimal
+from notifications.utils import send_notifications
+
 
 
 class CreateOrderAPIView(APIView):
@@ -55,9 +57,19 @@ class CreateOrderAPIView(APIView):
                 quantity=item.quantity,
                 subtotal=item.product.price * item.quantity
             )
+        
+        serializer = OrderSerializer(order)
+
+        notified_sellers = set()
+        for item in cart_items:
+            seller_user = item.product.seller.user
+            if seller_user.id not in notified_sellers:
+                message = f"New order #{order.id} placed for ${total} by {user.get_full_name() or user.username}"
+                send_notifications(seller_user, message, notification_type="ORDER", related_order=order)
+                notified_sellers.add(seller_user.id)
 
         cart.items.all().delete()
-        serializer = OrderSerializer(order)
+
         return Response({
             'id': order.id,
             'order': serializer.data
