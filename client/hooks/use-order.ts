@@ -56,7 +56,7 @@ export const getUserOrders = () => {
             },
       });
 }
-export const useUserOrderDetail = (orderId: number) => {
+export const useUserOrderDetail = (orderId: number, options ={}) => {
       const token = useAuthStore((s) => s.accessToken);
     
       return useQuery({
@@ -72,6 +72,6 @@ export const useUserOrderDetail = (orderId: number) => {
           );
           return response.data;
         },
-        enabled: !!orderId, // only fetch if orderId is truthy
+        enabled: !!orderId, 
       });
     };
