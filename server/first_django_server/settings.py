@@ -37,6 +37,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # Application definition
 
 INSTALLED_APPS = [
+     "daphne",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -66,7 +67,6 @@ INSTALLED_APPS = [
     "silk",
     "channels",
     "notifications",
-     "daphne",
 ]
 
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'

@@ -22,14 +22,13 @@ class SellerNotificationConsumer(AsyncJsonWebsocketConsumer):
                   user = await self.get_user(access_token["user_id"])
                   logger.info(f"User fetched: {user}")
 
-                  if not user or not hasattr(user, "seller"):
+                  if user.user_role != "seller":
                         logger.warning("REJECTING - Not a seller")
                         await self.close()
                         return
 
                   self.scope["user"] = user
-                  self.seller_id = user.seller.id
-                  self.group_name = f"seller_{self.seller_id}"
+                  self.group_name = f"seller_{user.id}"
 
                   await self.channel_layer.group_add(self.group_name, self.channel_name)
                   await self.accept()
@@ -49,9 +48,11 @@ class SellerNotificationConsumer(AsyncJsonWebsocketConsumer):
                   return None
       
       async def disconnect(self, close_code):
-            await self.channel_layer.group_discard("seller_notifications",self.channel_name)   
+            if hasattr(self, 'group_name'):
+                  await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
       async def notify(self, event):
+            logger.info(f"Sending notification: {event['notification']}")
             await self.send_json({
                   "type": "notification",
                   "data": event["notification"]

@@ -16,15 +16,18 @@ export const useNotificationWs = (token : string | null ) =>{
       )
       useEffect(() => {
             if (lastMessage) {
-              const data = JSON.parse(lastMessage.data)
-              addNotification({
-                id: data.id,
-                title : data.title,
-                message: data.message,
-                timestamp: data.timestamp,
-                read: false,
-                type : data.type
-              })
+              const wsData = JSON.parse(lastMessage.data);
+              if (wsData.type === "notification") {
+                const data = wsData.data;
+                addNotification({
+                  id: data.id,
+                  title: data.title || "",
+                  message: data.message,
+                  timestamp: data.created_at,
+                  is_read: data.is_read,
+                  type: data.type
+                });
+              }
             }
           }, [lastMessage])
 } 

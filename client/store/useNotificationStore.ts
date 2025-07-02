@@ -6,7 +6,7 @@ export type Notification = {
   title : string
   message: string
   timestamp: string
-  read: boolean
+  is_read: boolean
   type : string
 }
 
@@ -17,9 +17,9 @@ type State = {
   setAll: (list: Notification[]) => void
 }
 
-export const useNotificationStore = create<State>()(
+export const useNotificationStore = create<State & { unreadCount: () => number }>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       notifications: [],
       addNotification: (notif) =>
         set((state) => ({
@@ -28,18 +28,14 @@ export const useNotificationStore = create<State>()(
       markAsRead: (id) =>
         set((state) => ({
           notifications: state.notifications.map((n) =>
-            n.id === id ? { ...n, read: true } : n
+            n.id === id ? { ...n, is_read: true } : n
           ),
         })),
       setAll: (list) =>
-        set((state) => {
-          const existingIds = new Set(state.notifications.map((n) => n.id))
-          const merged = [
-            ...list.filter((n) => !existingIds.has(n.id)),
-            ...state.notifications,
-          ]
-          return { notifications: merged }
-        }),
+        set(() => ({
+          notifications: list
+        })),
+      unreadCount: () => get().notifications.filter(n => !n.is_read).length,
     }),
     {
       name: 'notification-store',

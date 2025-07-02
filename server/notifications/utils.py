@@ -11,7 +11,7 @@ def send_notifications(recipient_user,message,notification_type="SYSTEM"):
       )
 
       channel_layer = get_channel_layer()
-      group_name = f"user_{recipient_user.id}_notifications"
+      group_name = f"seller_{recipient_user.id}"
       async_to_sync(channel_layer.group_send)(
             group_name,
             {

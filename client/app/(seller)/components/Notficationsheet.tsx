@@ -25,17 +25,17 @@ export function Notification() {
   useNotificationWs(token)
   useLoadNotifications()
   const notifications = useNotificationStore(s=>s.notifications)
+  const unreadCount = useNotificationStore(s => s.unreadCount())
   const markAsRead = useMarkNotification()
   const markAsAllRead = useMarkAllNotification()
 
-
-
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case "order":
-      case "payment":
+      case "ORDER":
         return <Package className="w-5 h-5 text-gray-500" />
-      case "system":
+      case "PRODUCT":
+        return <Package className="w-5 h-5 text-gray-500" />
+      case "SYSTEM":
       case "feedback":
       default:
         return <AlertCircle className="w-5 h-5 text-gray-500" />
@@ -44,8 +44,13 @@ export function Notification() {
 
   return (
     <Sheet>
-      <SheetTrigger className="flex items-center  border-gray-300  px-2 rounded-lg py-2 gap-2">
+      <SheetTrigger className="flex items-center  border-gray-300  px-2 rounded-lg py-2 gap-2 relative">
         <Bell className="w-5 h-5 text-[#331d67]" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[18px] text-center font-bold">
+            {unreadCount}
+          </span>
+        )}
       </SheetTrigger>
       <SheetContent className="">
         <SheetHeader>
@@ -57,37 +62,39 @@ export function Notification() {
             onClick={()=> markAsAllRead.mutate()
             }
             className="mt-2 text-[#331d67] hover:text-[#331d67]/80 font-roboto"
-            disabled={notifications.every((n) => n.read)}
+            disabled={notifications.every((n) => n.is_read)}
           >
             Mark All as Read
           </Button>
         </SheetHeader>
-        <div className="mt-4 space-y-4">
-          {notifications.map((notification) => (
-            <div
-              key={notification.id}
-              className={`flex items-start space-x-3 border-b pb-4 px-4 ${
-                notification.read ? "opacity-50" : ""
-              }`}
-            >
-              <div>{getNotificationIcon(notification.type)}</div>
-              <div className="flex-1">
-                <h3 className="text-sm font-medium font-roboto text-gray-900 mb-2">{notification.title}</h3>
-                <p className="text-sm text-gray-500 font-roboto">{notification.message}</p>
-                <p className="text-xs text-gray-400 font-robobto">{notification.timestamp}</p>
-                {!notification.read && (
-                  <Button
-                    variant="link"
-                    size="sm"
-                    onClick={() => markAsRead.mutate(notification.id)}
-                    className="mt-1 p-0 text-[#331d67] hover:text-[#331d67]/80 font-roboto"
-                  >
-                    Mark as Read
-                  </Button>
-                )}
+        <div className="mt-4 space-y-4 max-h-[800px] overflow-y-auto pr-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {notifications.map((notification) => {
+            return (
+              <div
+                key={notification.id}
+                className={`flex items-start space-x-3 border-b pb-4 px-4 ${
+                  notification.is_read === true ? "opacity-50" : ""
+                }`}
+              >
+                <div>{getNotificationIcon(notification.type)}</div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium font-roboto capitalize text-gray-900 mb-2">{notification.type === "ORDER" ? "new order" :notification.type }</h3>
+                  <p className="text-sm text-gray-500 font-roboto">{notification.message}</p>
+                  <p className="text-xs text-gray-400 font-robobto">{notification.timestamp}</p>
+                  {notification.is_read === false && (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      onClick={() => markAsRead.mutate(notification.id)}
+                      className="mt-1 p-0 text-[#331d67] hover:text-[#331d67]/80 font-roboto"
+                    >
+                      Mark as Read
+                    </Button>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
        
       </SheetContent>
