@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Order , OrderItem ,ShippingInfo
-
+from payment.models import Payment
 
 
 class ShippingInfoSerializer(serializers.ModelSerializer):
@@ -97,10 +97,18 @@ class OrderTableSerializer(serializers.ModelSerializer):
             return "no payment"
 
     def get_items(self, obj):
-        return obj.items.count()  # 'items' is the related_name for OrderItem to Order
+        return obj.items.count()  
 
 
+class PaymentAndOrderStatusSerializer(serializers.Serializer):
+    order_id = serializers.IntegerField()
+    payment_status = serializers.ChoiceField(choices=Payment.Status.choices, required=False)
+    order_status = serializers.ChoiceField(choices=Order.OrderStatus.choices, required=False)
 
+    def validate(self, data):
+        if not data.get("payment_status") and not data.get("order_status"):
+            raise serializers.ValidationError("At least one status must be provided.")
+        return data
 
 
 

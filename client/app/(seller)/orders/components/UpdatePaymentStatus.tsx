@@ -7,7 +7,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useUpdateOrderStatus } from "@/hooks/use-order"
 import { useState } from "react"
+import { toast } from "sonner"
 
 const paymentStatus: string[] = [
   "paid",
@@ -34,7 +36,22 @@ interface Props {
 
 export default function UpdatePaymentStatus({ order_id, status }: Props) {
   const [selected, setSelected] = useState(status.toLowerCase())
-
+  const mutuation = useUpdateOrderStatus();
+  const handleChange = (value : string)=>{
+    mutuation.mutate(
+      {
+        order_id : Number(order_id),
+         payment_status : value
+      }, {
+        onSuccess : (data)=>{
+              toast.success(data.message)
+        }
+        ,onError: (error)=>{
+              toast.error(error.message)
+        },
+  }
+    )
+  }
   return (
     <div
       className={`rounded-md text-center ${
@@ -45,7 +62,7 @@ export default function UpdatePaymentStatus({ order_id, status }: Props) {
         value={selected}
         onValueChange={(value: string) => {
           setSelected(value)
-          console.log(`Order ${order_id} status changed to:`, value)
+          handleChange(value)
         }}
       >
         <SelectTrigger className="w-[120px] px-2 py-4 rounded-sm text-xs font-medium capitalize flex items-center gap-2 font-roboto border-none">

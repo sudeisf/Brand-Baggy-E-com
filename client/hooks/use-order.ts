@@ -103,3 +103,33 @@ export const useAdminOrderTable = () => {
       });
 }
 
+
+interface SendProps {
+      order_id: number;
+      payment_status?: string
+      order_status?: string
+  }
+
+  
+
+export const useUpdateOrderStatus =() =>{
+      const token = useAuthStore((s) => s.accessToken);
+      const queryClient = useQueryClient()
+      return useMutation({
+            mutationKey: ["updateOrderState"],
+            mutationFn: async (payload : SendProps) => {
+                  const response = await api.patch("/orders/order/update-status/",
+                        payload
+                        , {
+                        headers: {
+                              Authorization: `Bearer ${token}`,
+                        },
+                  });
+                  return response.data;
+            },
+            onSuccess : ()=>{
+                  queryClient.invalidateQueries({queryKey :["adminOrderTable"]})
+            }
+            
+      });
+}

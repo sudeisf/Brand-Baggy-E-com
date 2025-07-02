@@ -9,7 +9,7 @@ from .serializers import createOrderSerializer
 from rest_framework.permissions import IsAuthenticated , IsAuthenticatedOrReadOnly
 from cart.models import Cart , CartItem
 from django.db import transaction
-from orders.serializers import OrderSerializer , ShippingInfoSerializer,OrderDetailSerializer,OrderTableSerializer
+from orders.serializers import OrderSerializer ,PaymentAndOrderStatusSerializer, ShippingInfoSerializer,OrderDetailSerializer,OrderTableSerializer
 from decimal import Decimal
 from notifications.utils import send_notifications
 
@@ -120,25 +120,64 @@ class AdminOrderTableAPIView(APIView):
         return Response(serializer.data)
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 class PaymentAndOrderStatusUpdate(APIView):
     permission_classes = [IsAuthenticated]
-    def patch(self,request):
-        data = request.data
-        payment_status = data.get("payment_status")
-        order_status = data.get("order_status")
-        order_id = data.get("order_id")
-        print(payment_status,order_status,order_id)
+
+    def patch(self, request):
+        # Validate request data
+        serializer = PaymentAndOrderStatusSerializer(data=request.data)
+        if not serializer.is_valid():
+            logger.error(f"Validation error: {serializer.errors}")
+            return Response({"detail": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        order_id = serializer.validated_data.get("order_id")
+        payment_status = serializer.validated_data.get("payment_status")
+        order_status = serializer.validated_data.get("order_status")
+
         try:
+            # Fetch the order
             order = Order.objects.get(id=order_id)
-            if payment_status:
-                order.payment.status = payment_status
-                order.payment.save()
-            if order_status:
-                order.status = order_status
-                order.save()
-            return Response({"message": "Order status and payment status updated successfully"}, status=status.HTTP_200_OK)
+            updates = {}
+
+            with transaction.atomic():
+                # Update payment status
+                if payment_status:
+                    payment = getattr(order, "payment", None)
+                    if payment is None:
+                        logger.error(f"No payment record found for order ID {order_id}")
+                        return Response(
+                            {"detail": "Payment record not found for this order"},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    payment.status = payment_status
+                    payment.save()
+                    updates["payment_status"] = payment.status
+
+                # Update order status
+                if order_status:
+                    order.status = order_status
+                    order.save()
+                    updates["order_status"] = order.status
+
+            logger.info(f"Successfully updated order ID {order_id}: {updates}")
+            return Response(
+                {"message": "Update successful", "updates": updates},
+                status=status.HTTP_200_OK
+            )
+
         except Order.DoesNotExist:
-            return Response({"detail": "Order not found"}, status=status.HTTP_404_NOT_FOUND)    
-
-
-
+            logger.error(f"Order with ID {order_id} not found")
+            return Response(
+                {"detail": f"Order with ID {order_id} not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            logger.exception(f"Unexpected error updating order ID {order_id}: {str(e)}")
+            return Response(
+                {"detail": f"Unexpected error: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
