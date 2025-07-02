@@ -1,4 +1,6 @@
 from django.shortcuts import render
+
+from payment.models import Payment
 from  . models import Order , OrderItem
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -7,7 +9,7 @@ from .serializers import createOrderSerializer
 from rest_framework.permissions import IsAuthenticated , IsAuthenticatedOrReadOnly
 from cart.models import Cart , CartItem
 from django.db import transaction
-from orders.serializers import OrderSerializer , ShippingInfoSerializer,OrderDetailSerializer
+from orders.serializers import OrderSerializer , ShippingInfoSerializer,OrderDetailSerializer,OrderTableSerializer
 from decimal import Decimal
 from notifications.utils import send_notifications
 
@@ -70,6 +72,12 @@ class CreateOrderAPIView(APIView):
 
         cart.items.all().delete()
 
+        Payment.objects.create(
+            order=order,
+            amount=total,
+            status=Payment.Status.PENDING
+        )
+
         return Response({
             'id': order.id,
             'order': serializer.data
@@ -103,6 +111,14 @@ class GetOrderItemAPIView(APIView):
 
         serializer = OrderDetailSerializer(order)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class AdminOrderTableAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        orders = Order.objects.select_related('user', 'cart').prefetch_related('cart__items').all()
+        serializer = OrderTableSerializer(orders, many=True)
+        return Response(serializer.data)
+
 
 
 

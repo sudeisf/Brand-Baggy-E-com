@@ -42,10 +42,10 @@ export default function ShippingPage() {
        
           const paymentUrl = `/payment?order_id=${data.id}`;
           toast.success("Order created successfully.");
+          router.push(paymentUrl);
           setTimeout(() => {
-            router.push(paymentUrl);
-          }, 2000);
-          queryClient.invalidateQueries({ queryKey: ['cart'] });
+            queryClient.invalidateQueries({ queryKey: ['cart'] });
+          }, 3000);
         },
         onError: (error: any) => {
           console.error("Order creation failed:", error);

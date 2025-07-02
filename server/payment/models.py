@@ -16,7 +16,7 @@ class Payment(models.Model):
 
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='payment')
     method = models.CharField(max_length=50, choices=Method.choices)
-    status = models.CharField(max_length=50, choices=Status.choices, default=Status.PENDING)
+    status = models.CharField(max_length=50, choices=Status.choices, null=True, blank=True)
     transaction_id = models.CharField(max_length=255, null=True, blank=True)
     provider_status = models.TextField(blank=True , null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)

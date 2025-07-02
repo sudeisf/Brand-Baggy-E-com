@@ -76,3 +76,32 @@ class UpdateOrderItemStatusSerializer(serializers.Serializer):
 
 class AdminOrderListViewSerializer(serializers.Serializer):
     pass
+
+
+class OrderTableSerializer(serializers.ModelSerializer):
+    order_id = serializers.IntegerField(source='id')
+    date = serializers.DateTimeField(source='order_date', format="%Y-%m-%d %H:%M")
+    customer = serializers.CharField(source='user.username', default='Guest')
+    total = serializers.DecimalField(source='total_price', max_digits=10, decimal_places=2)
+    payment_status = serializers.SerializerMethodField()
+    items = serializers.SerializerMethodField()
+    order_status = serializers.CharField(source='status')
+
+    class Meta:
+        model = Order
+        fields = ['order_id', 'date', 'customer', 'total', 'payment_status', 'items', 'order_status']
+
+    def get_payment_status(self, obj):
+        try:
+            return obj.payment.status  
+        except:
+            return "no payment"
+
+    def get_items(self, obj):
+        return obj.cart.items.count()  
+
+
+
+
+
+
