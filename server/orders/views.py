@@ -120,7 +120,25 @@ class AdminOrderTableAPIView(APIView):
         return Response(serializer.data)
 
 
-
+class PaymentAndOrderStatusUpdate(APIView):
+    permission_classes = [IsAuthenticated]
+    def patch(self,request):
+        data = request.data
+        payment_status = data.get("payment_status")
+        order_status = data.get("order_status")
+        order_id = data.get("order_id")
+        print(payment_status,order_status,order_id)
+        try:
+            order = Order.objects.get(id=order_id)
+            if payment_status:
+                order.payment.status = payment_status
+                order.payment.save()
+            if order_status:
+                order.status = order_status
+                order.save()
+            return Response({"message": "Order status and payment status updated successfully"}, status=status.HTTP_200_OK)
+        except Order.DoesNotExist:
+            return Response({"detail": "Order not found"}, status=status.HTTP_404_NOT_FOUND)    
 
 
 

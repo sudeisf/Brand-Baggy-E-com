@@ -75,3 +75,31 @@ export const useUserOrderDetail = (orderId: number, options ={}) => {
         enabled: !!orderId, 
       });
     };
+
+
+export interface OrderTableResponse {
+      order_id: number;
+      date: string;
+      customer: string;
+      total: string;
+      payment_status: string;
+      items: number;
+      status: string;
+}
+
+
+export const useAdminOrderTable = () => {
+      const token = useAuthStore((s) => s.accessToken);
+      return useQuery({
+            queryKey: ["adminOrderTable"],
+            queryFn: async () => {
+                  const response = await api.get<OrderTableResponse>("/orders/order/admin-table/", {
+                        headers: {
+                              Authorization: `Bearer ${token}`,
+                        },
+                  });
+                  return response.data;
+            },
+      });
+}
+

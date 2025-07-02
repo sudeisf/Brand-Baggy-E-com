@@ -85,11 +85,10 @@ class OrderTableSerializer(serializers.ModelSerializer):
     total = serializers.DecimalField(source='total_price', max_digits=10, decimal_places=2)
     payment_status = serializers.SerializerMethodField()
     items = serializers.SerializerMethodField()
-    order_status = serializers.CharField(source='status')
 
     class Meta:
         model = Order
-        fields = ['order_id', 'date', 'customer', 'total', 'payment_status', 'items', 'order_status']
+        fields = ['order_id', 'date', 'customer', 'total', 'payment_status', 'items', 'status']
 
     def get_payment_status(self, obj):
         try:
@@ -98,7 +97,7 @@ class OrderTableSerializer(serializers.ModelSerializer):
             return "no payment"
 
     def get_items(self, obj):
-        return obj.cart.items.count()  
+        return obj.items.count()  # 'items' is the related_name for OrderItem to Order
 
 
 
