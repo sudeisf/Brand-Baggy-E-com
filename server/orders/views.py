@@ -9,7 +9,7 @@ from .serializers import createOrderSerializer
 from rest_framework.permissions import IsAuthenticated , IsAuthenticatedOrReadOnly
 from cart.models import Cart , CartItem
 from django.db import transaction
-from orders.serializers import OrderSerializer ,PaymentAndOrderStatusSerializer, ShippingInfoSerializer,OrderDetailSerializer,OrderTableSerializer
+from orders.serializers import OrderSerializer ,PaymentAndOrderStatusSerializer, ShippingInfoSerializer,OrderDetailSerializer,OrderTableSerializer,SellerOrderDetailsSerializer
 from decimal import Decimal
 from notifications.utils import send_notifications
 
@@ -98,14 +98,12 @@ class GetOrderItemAPIView(APIView):
 
     def get(self, request):
         pk = request.query_params.get("order_id")
-        print("User:", request.user)
-        print("Order ID:", pk)
 
         if not pk:
             return Response({"detail": "Order ID missing."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            order = Order.objects.get(id=pk, user=request.user)  # ✅ Corrected
+            order = Order.objects.get(id=pk, user=request.user)  
         except Order.DoesNotExist:
             return Response({"detail": "Order not found for this user."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -202,3 +200,14 @@ class SellerOrdersDashboard(APIView):
 
         except Order.DoesNotExist:
             return Response({"error" : "Order does not exist for this seller"}, status=status.HTTP_200_OK)
+        
+class SellerOrderDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self,request,order_id):
+        user = request.user
+        try:
+            order = Order.objects.get(items__product__seller = request.user , id = order_id)
+            serializer = SellerOrderDetailsSerializer(order)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Order.DoesNotExist:
+            return Response({"error" : "order doesn't exist"})

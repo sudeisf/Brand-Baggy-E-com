@@ -161,3 +161,53 @@ export const useSellerDashboardAnalyticas = () =>{
             staleTime : 5 * 60 * 1000
       });
 }
+
+export interface OrderItem {
+  id: number;
+  product_name: string;
+  product_id: string;
+  price: string;
+  subtotal: string;
+  quantity: number;
+  main_image: string | null;
+  description: string;
+}
+
+export interface UserData {
+  id: number;
+  full_name: string;
+  email: string;
+  phone: string;
+}
+
+export interface SellerOrderDetailsResponse {
+  id: number;
+  user_data: UserData;
+  status: string;
+  order_date: string; 
+  payment_method: string | null;
+  total_price : string
+  items: OrderItem[];
+}
+
+export const useSellerOrderDetails = (order_id: number) => {
+      const token = useAuthStore((s) => s.accessToken);
+    
+      return useQuery({
+        queryKey: ["updateOrderState", order_id],
+        queryFn: async ({ queryKey }) => {
+          const [, id] = queryKey;
+    
+          const response = await api.get<SellerOrderDetailsResponse>(
+            `orders/seller/order/${id}/detail/`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+    
+          return response.data;
+        },
+      });
+    };

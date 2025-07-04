@@ -110,5 +110,32 @@ class PaymentAndOrderStatusSerializer(serializers.Serializer):
             raise serializers.ValidationError("At least one status must be provided.")
         return data
 
+class SellerOrderDetailsSerializer(serializers.ModelSerializer):
+    user_data = serializers.SerializerMethodField(read_only=True)
+    items = serializers.SerializerMethodField()
+    payment_method = serializers.CharField(source='payment.method', read_only=True)
+    class Meta:
+        model = Order
+        fields = [
+            "id",
+            "user_data",
+            "status",
+            "order_date",
+            "payment_method",
+            "items",
+            "total_price"
+        ]
+    
+    def get_user_data(self,obj):
+        if obj.user:
+            return {
+                "id" : obj.user.id,
+                "full_name" : f'{obj.user.first_name} {obj.user.lastname_name}',
+                "email" : obj.user.email,
+                "phone" : obj.user.phone_number
+            }
+    def get_items(self, obj):
+        items = obj.items.all()
+        return OrderItemSerializer(items, many=True).data  
 
 

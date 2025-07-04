@@ -134,7 +134,7 @@ export const columns: ColumnDef<OrderTableResponse>[] = [
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-              {/* <OrderDetails order={row.original} /> */}
+              <OrderDetails order_id={row.original.order_id} />
     
                 <DropdownMenuItem onClick={() => navigator.clipboard.writeText(row.original.order_id.toString())}>
                   Copy Order ID
