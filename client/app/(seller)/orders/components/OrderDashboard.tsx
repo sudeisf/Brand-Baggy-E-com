@@ -1,5 +1,6 @@
 "use client"
 
+import { useSellerDashboardAnalyticas } from "@/hooks/use-order"
 import { Clock, DollarSign, RefreshCw, ShoppingBag, Truck } from "lucide-react"
 
 
@@ -7,6 +8,8 @@ import { Clock, DollarSign, RefreshCw, ShoppingBag, Truck } from "lucide-react"
 
 
 export default function OrderDashboard(){
+    const {data:analytics} = useSellerDashboardAnalyticas()
+
     return (
         <div className="flex items-center justify-around mt-8 px-2">
         <div className="border-1 flex gap-4 items-center w-[14rem] shadow-xs  p-4 rounded-md">
@@ -16,7 +19,7 @@ export default function OrderDashboard(){
             <h1 className="text-gray-500 font-roboto font-medium flex items-center gap-2">
                  Total orders
             </h1>
-            <p className="text-xl font-medium text-[#331d67]">1230</p>
+            <p className="text-xl font-medium text-[#331d67]">{analytics?.total_orders}</p>
             </div>
         </div>
         <div className="border-1 flex gap-4 items-center w-[14rem] shadow-xs p-4 rounded-md">
@@ -25,7 +28,7 @@ export default function OrderDashboard(){
             <h1 className="text-gray-500 font-roboto font-medium flex items-center gap-2">
                Avg. Order Value
             </h1>
-            <p className="text-xl font-medium text-[#331d67]">$123.56</p>
+            <p className="text-xl font-medium text-[#331d67]">${analytics?.avarge_orders}</p>
             </div>
         </div>
         <div className="border-1 flex gap-3 items-center w-[14rem] shadow-xs  p-4 rounded-md">
@@ -34,7 +37,7 @@ export default function OrderDashboard(){
             <h1 className="text-gray-500 font-roboto font-medium flex items-center gap-2">
                  Pending Fulfillment
             </h1>
-            <p className="text-xl font-medium text-[#331d67]">15</p>
+            <p className="text-xl font-medium text-[#331d67]">{analytics?.pending_orders}</p>
             </div>
             
         </div>
@@ -44,7 +47,7 @@ export default function OrderDashboard(){
         <h1 className="text-gray-500 font-roboto font-medium flex items-center gap-2">
                  Return Rate
             </h1>
-            <p className="text-xl font-medium text-[#331d67]">3.2%</p>
+            <p className="text-xl font-medium text-[#331d67]">{analytics?.return_rate.toFixed(2)}%</p>
         </div>
             
         </div>
@@ -54,7 +57,7 @@ export default function OrderDashboard(){
             <h1 className="text-gray-500 font-roboto font-medium flex items-center gap-2">
                     Delivered Orders
                 </h1>
-                <p className="text-xl font-medium text-[#331d67]">1200</p>
+                <p className="text-xl font-medium text-[#331d67]">{analytics?.deliverd_orders}</p>
         </div>
             
         </div>

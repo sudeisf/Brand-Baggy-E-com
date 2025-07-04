@@ -30,6 +30,7 @@ class Order(models.Model):
         SHIPPED = 'shipped'
         DELIVERED = 'delivered'
         CANCELLED = 'cancelled'
+        RETURNED = "returned"
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='orders', null=True, blank=True)
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='orders')

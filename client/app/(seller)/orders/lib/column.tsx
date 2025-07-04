@@ -9,6 +9,7 @@ import { MoreHorizontal } from "lucide-react"
 import { useState } from "react"
 import UpdatePaymentStatus from "../components/UpdatePaymentStatus"
 import UpdateOrderStatus from "../components/updateOrderStatuse"
+import OrderDetails from "../components/orderDetails"
 
 
 
@@ -41,7 +42,7 @@ export const columns: ColumnDef<OrderTableResponse>[] = [
         enableHiding: false,
       },
       {
-        accessorKey: "id",
+        accessorKey: "order_id",
         header: "Order ID",
         cell: ({ row }) => (
           <div className="font-medium text-left">
@@ -49,7 +50,7 @@ export const columns: ColumnDef<OrderTableResponse>[] = [
           </div>
         ),
         filterFn: (row, id, value) => {
-          return String(row.getValue(id)).toLowerCase().includes(String(value).toLowerCase())
+          return String(row.getValue(id)) === String(value);
         }
       },
       {

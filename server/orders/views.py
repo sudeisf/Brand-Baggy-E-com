@@ -128,7 +128,6 @@ class PaymentAndOrderStatusUpdate(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request):
-        # Validate request data
         serializer = PaymentAndOrderStatusSerializer(data=request.data)
         if not serializer.is_valid():
             logger.error(f"Validation error: {serializer.errors}")
@@ -139,12 +138,10 @@ class PaymentAndOrderStatusUpdate(APIView):
         order_status = serializer.validated_data.get("order_status")
 
         try:
-            # Fetch the order
             order = Order.objects.get(id=order_id)
             updates = {}
 
             with transaction.atomic():
-                # Update payment status
                 if payment_status:
                     payment = getattr(order, "payment", None)
                     if payment is None:
@@ -181,3 +178,27 @@ class PaymentAndOrderStatusUpdate(APIView):
                 {"detail": f"Unexpected error: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+from django.db.models import Avg   
+class SellerOrdersDashboard(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        user  = request.user
+        try:
+            number_of_orders = Order.objects.filter(items__product__seller = request.user).distinct().count()
+            order_value = Order.objects.filter(items__product__seller = request.user).aggregate(avg = Avg("total_price"))["avg"] or 0
+            pending_orders = Order.objects.filter(items__product__seller = request.user , status=Order.OrderStatus.PENDING).count()
+            Deliverd_orders = Order.objects.filter(items__product__seller = request.user , status=Order.OrderStatus.DELIVERED).count()
+            returned_orders = Order.objects.filter(items__product__seller = request.user, status=Order.OrderStatus.RETURNED).count()
+            return_rate = (returned_orders / number_of_orders * 100) if number_of_orders > 0 else 0
+
+            return Response({
+                "total_orders" : number_of_orders,
+                "avarge_orders" : order_value,
+                'pending_orders': pending_orders,
+                "return_rate": return_rate,
+                "deliverd_orders" : Deliverd_orders
+            })
+
+        except Order.DoesNotExist:
+            return Response({"error" : "Order does not exist for this seller"}, status=status.HTTP_200_OK)

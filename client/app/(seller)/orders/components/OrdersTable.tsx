@@ -58,7 +58,7 @@ export default function OrdersTable() {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const {data: orders} = useAdminOrderTable();
+  const {data: orders, refetch} = useAdminOrderTable();
   const table = useReactTable<OrderTableResponse>({
     data: orders || [],
     columns,
@@ -84,7 +84,7 @@ export default function OrdersTable() {
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
-    table.getColumn("id")?.setFilterValue(value);
+    table.getColumn("order_id")?.setFilterValue(value);
   };
 
     return (
@@ -97,18 +97,22 @@ export default function OrdersTable() {
                         type="text"
                         placeholder="Search products..."
                         value={searchValue}
-                        onChange={(e) => handleSearch(e.target.value)}
+                        onChange={(e) => handleSearch(String(e.target.value))}
                         className="rounded-md outline-none bg-white w-full text-sm md:text-base text-[#331d67]"
                     />
                     </div>
                     <div className="flex gap-2">
                     
                   <DropdownMenu>
-                  <DropdownMenuTrigger className="ml-auto font-roboto border flex items-center px-4 py-2 gap-2 rounded-sm text-gray-600 text-sm font-medium shadow-none z-10">
+                  <DropdownMenuTrigger 
+                  onClick={() => {
+                    table.getColumn("order_id")?.toggleSorting();
+                  }} 
+                  className="ml-auto font-roboto border flex items-center px-4 py-2 gap-2 rounded-sm text-gray-600 text-sm font-medium shadow-none z-10">
                   <ArrowDownUp className="w-4 h-4" />
 
                     <span className="text-gray-400 text-sm">Sort:</span>
-                    {table.getColumn("orderStatus")?.getIsSorted() === "asc" ? "Asc" : "Desc"}
+                    {table.getColumn("order_id")?.getIsSorted() === "asc" ? "Asc" : "Desc"}
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent className="bg-white border p-2 rounded-md z-10 w-40">
@@ -155,7 +159,7 @@ export default function OrdersTable() {
                         })}
                     </DropdownMenuContent>
                     </DropdownMenu>
-                    <Button variant={"outline"} className="bg-white">
+                    <Button onClick={()=>refetch()} variant={"outline"} className="bg-white">
                       <RefreshCcw className="w- h-4 text-black " />
                     </Button>
             </div>

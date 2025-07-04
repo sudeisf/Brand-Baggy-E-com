@@ -129,7 +129,35 @@ export const useUpdateOrderStatus =() =>{
             },
             onSuccess : ()=>{
                   queryClient.invalidateQueries({queryKey :["adminOrderTable"]})
+                  queryClient.invalidateQueries({queryKey :["orderAnalytics"]})
             }
             
+      });
+}
+
+
+
+interface AanalyticsResponse {
+      total_orders: number,
+      avarge_orders: number,
+      pending_orders: number,
+      return_rate :number,
+      deliverd_orders: number
+}
+
+
+export const useSellerDashboardAnalyticas = () =>{
+      const token = useAuthStore((s) => s.accessToken);
+      return useQuery({
+            queryKey: ["orderAnalytics"],
+            queryFn: async () => {
+                  const response = await api.get<AanalyticsResponse>("/orders/order-dashboard/", {
+                        headers: {
+                              Authorization: `Bearer ${token}`,
+                        },
+                  });
+                  return response.data;
+            },
+            staleTime : 5 * 60 * 1000
       });
 }
