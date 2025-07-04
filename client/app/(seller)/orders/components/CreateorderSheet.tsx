@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+"use client"
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Sheet,
   SheetClose,
@@ -11,75 +12,55 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
-import { Plus, Search, X } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scrollarea";
+} from "@/components/ui/sheet"
+import { Plus, Search, X } from "lucide-react"
+import { ScrollArea } from "@/components/ui/scrollarea"
+import SelectProducts from "./selectProducts"
+import { useProductStore } from "@/store/selectedProducts"
 
 type OrderItem = {
-  id: string;
-  name: string;
-  sku: string;
-  price: number;
-  quantity: number;
-};
+  id: number
+  name: string
+  size: string
+  quantity: number
+}
 
 export function CreateOrder() {
-  const [items, setItems] = useState<OrderItem[]>([
-    {
-      id: "1",
-      name: "Premium Headphones",
-      sku: "PRD-001",
-      price: 49.99,
-      quantity: 1,
-    },
-    {
-      id: "2",
-      name: "Premium Headphones",
-      sku: "PRD-001",
-      price: 49.99,
-      quantity: 1,
-    },
-    {
-      id: "2",
-      name: "Premium Headphones",
-      sku: "PRD-001",
-      price: 49.99,
-      quantity: 1,
-    },{
-      id: "2",
-      name: "Premium Headphones",
-      sku: "PRD-001",
-      price: 49.99,
-      quantity: 1,
-    }
-  ]);
+  const { selectedProducts, removeProduct, updateQuantity } = useProductStore()
 
-  const handleQuantityChange = (id: string, newQuantity: number) => {
-    if (newQuantity < 1) return;
-    setItems(items.map(item => 
-      item.id === id ? { ...item, quantity: newQuantity } : item
-    ));
-  };
+  const handleQuantityChange = (id: number, size: string, newQuantity: number) => {
+    if (newQuantity < 1) return
+    updateQuantity(id, size, newQuantity)
+  }
 
-  const handleRemoveItem = (id: string) => {
-    setItems(items.filter(item => item.id !== id));
-  };
+  const handleRemoveItem = (id: number, size: string) => {
+    removeProduct(id, size)
+  }
 
-  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = 5.99;
-  const total = subtotal + shipping;
+  const pricePerItem = 49.99
+  const subtotal = selectedProducts.reduce(
+    (sum, item) => sum + pricePerItem * item.quantity,
+    0
+  )
+  const shipping = 5.99
+  const total = subtotal + shipping
 
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline" className="flex gap-2 rounded-sm shadow-2xs bg-[#331d67] text-white font-roboto hover:bg-[#331d67]/90 hover:text-white">
+        <Button
+          variant="outline"
+          className="flex gap-2 rounded-sm shadow-2xs bg-[#331d67] text-white font-roboto hover:bg-[#331d67]/90 hover:text-white"
+        >
           <Plus className="h-4 w-4" />
           Create order
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" width="w-full sm:w-[600px]">
-        <SheetHeader className="">
-          <SheetTitle className="text-gray-700 font-roboto font-medium">New Order</SheetTitle>
+      <SheetContent side="right" style={{ width: "600px", maxWidth: "100vw" }}>
+        <SheetHeader>
+          <SheetTitle className="text-gray-700 font-roboto font-medium">
+            New Order
+          </SheetTitle>
           <SheetDescription className="font-roboto">
             Add customer details and order items
           </SheetDescription>
@@ -87,7 +68,9 @@ export function CreateOrder() {
 
         <div className="space-y-8 overflow-y-auto h-[calc(100vh-180px)] px-4">
           <section className="space-y-4">
-            <h2 className="font-medium text-gray-900 font-roboto text-md">Customer Information</h2>
+            <h2 className="font-medium text-gray-900 font-roboto text-md">
+              Customer Information
+            </h2>
             <div className="grid grid-cols-2 gap-4 font-roboto text-gray-700">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -108,49 +91,56 @@ export function CreateOrder() {
           <section className="space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="font-medium text-gray-900">Order Items</h2>
-              <Button variant="ghost" size="sm" className="text-[#331d67]">
-                <Plus className="h-4 w-4 mr-2" /> Add Item
-              </Button>
+              <SelectProducts />
             </div>
-            
-            <ScrollArea className="border rounded-sm h-40 ">
-              {items.map((item , index) => (
-                <div key={index} className="p-4 flex items-center justify-between border-b">
+
+            <ScrollArea className="border rounded-sm h-40">
+              {selectedProducts.map((item, index) => (
+                <div
+                  key={`${item.id}-${item.size}`}
+                  className="p-4 flex items-center justify-between border-b"
+                >
                   <div className="flex items-center space-x-4">
                     <div className="bg-gray-100 rounded-md w-10 h-10 flex items-center justify-center">
                       <Search className="h-4 w-4 text-gray-400" />
                     </div>
                     <div>
-                      <p className="font-medium">{item.name}</p>
-                      <p className="text-sm text-gray-500">SKU: {item.sku}</p>
+                      <p className="font-medium">{`${item.name} ${item.size}`}</p>
+                      <p className="text-sm text-gray-500">SKU: PRD-{item.id}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center border rounded-md">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="h-8 w-8 p-0"
-                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                        onClick={() =>
+                          handleQuantityChange(item.id, item.size, item.quantity - 1)
+                        }
                       >
                         -
                       </Button>
                       <span className="px-2">{item.quantity}</span>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="h-8 w-8 p-0"
-                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                        onClick={() =>
+                          handleQuantityChange(item.id, item.size, item.quantity + 1)
+                        }
                       >
                         +
                       </Button>
                     </div>
-                    <p className="w-20 text-right">${(item.price * item.quantity).toFixed(2)}</p>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <p className="w-20 text-right">
+                      ${(pricePerItem * item.quantity).toFixed(2)}
+                    </p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="h-8 w-8 p-0 text-gray-400"
-                      onClick={() => handleRemoveItem(item.id)}
+                      onClick={() => handleRemoveItem(item.id, item.size)}
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -190,5 +180,5 @@ export function CreateOrder() {
         </SheetFooter>
       </SheetContent>
     </Sheet>
-  );
+  )
 }

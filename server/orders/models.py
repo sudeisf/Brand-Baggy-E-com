@@ -41,6 +41,10 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    guest_full_name = models.CharField(max_length=100, blank=True, null=True)
+    guest_email = models.EmailField(blank=True, null=True)
+    guest_phone = models.CharField(max_length=20, blank=True, null=True)
+
     class Meta:
         ordering = ['-created_at']
     
