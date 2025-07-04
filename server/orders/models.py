@@ -33,7 +33,14 @@ class Order(models.Model):
         RETURNED = "returned"
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='orders', null=True, blank=True)
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='orders')
+   
+    cart = models.ForeignKey(
+        Cart,
+        on_delete=models.CASCADE,
+        related_name='orders',
+        null=True,
+        blank=True  
+    )
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=200, choices=OrderStatus.choices, default=OrderStatus.PENDING)
     order_date = models.DateTimeField(auto_now_add=True)

@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
 from payment.models import Payment
-from  . models import Order , OrderItem
+from  . models import Order , OrderItem, ShippingInfo
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -12,6 +12,7 @@ from django.db import transaction
 from orders.serializers import OrderSerializer ,PaymentAndOrderStatusSerializer, ShippingInfoSerializer,OrderDetailSerializer,OrderTableSerializer,SellerOrderDetailsSerializer
 from decimal import Decimal
 from notifications.utils import send_notifications
+from product.models import Product, ProductVariants
 
 
 
@@ -203,11 +204,72 @@ class SellerOrdersDashboard(APIView):
         
 class SellerOrderDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    def get(self,request,order_id):
+
+    def get(self, request, order_id):
         user = request.user
-        try:
-            order = Order.objects.get(items__product__seller = request.user , id = order_id)
-            serializer = SellerOrderDetailsSerializer(order)
-            return Response(serializer.data,status=status.HTTP_200_OK)
-        except Order.DoesNotExist:
-            return Response({"error" : "order doesn't exist"})
+        order = (
+            Order.objects
+            .filter(id=order_id, items__product__seller=user)
+            .distinct()
+            .first()
+        )
+
+        if not order:
+            return Response({"error": "Order doesn't exist for this seller."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = SellerOrderDetailsSerializer(order, context={"seller": user})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
+
+class GuestOrderCreateAPIView(APIView):
+    permission_classes = [IsAuthenticated]  
+
+    def post(self, request):
+        data = request.data
+
+        shipping_data = data["shipping_info"]
+        shipping = ShippingInfo.objects.create(
+            full_name=shipping_data["full_name"],
+            address=shipping_data["address"],
+            city=shipping_data["city"],
+            state=shipping_data["state"],
+            zip_code=shipping_data["zip_code"],
+            country=shipping_data["country"],
+            phone=shipping_data["phone"],
+            email=shipping_data["email"],
+        )
+
+        guest_data = data["guest_user"]
+        order = Order.objects.create(
+            guest_full_name=guest_data["full_name"],
+            guest_email=guest_data["email"],
+            guest_phone=guest_data["phone"],
+            total_price=data["total_price"],
+            shipping_info=shipping
+        )
+
+        
+        for item in data["items"]:
+            product = Product.objects.get(id=item["product_id"])
+            variant = None
+            if item.get("variant_id"):
+                variant = ProductVariants.objects.get(id=item["variant_id"])
+
+            OrderItem.objects.create(
+                order=order,
+                product=product,
+                variants=variant,
+                price=item["price"],
+                quantity=item["quantity"],
+                subtotal=item["price"] * item["quantity"]
+            )
+
+        
+        Payment.objects.create(
+            order=order,
+            method=data["payment_method"],
+            status=Payment.Status.PENDING,
+            amount=data["total_price"]
+        )
+
+        return Response({"order_id": order.id}, status=status.HTTP_201_CREATED)

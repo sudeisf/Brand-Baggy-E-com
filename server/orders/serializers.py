@@ -81,7 +81,7 @@ class AdminOrderListViewSerializer(serializers.Serializer):
 class OrderTableSerializer(serializers.ModelSerializer):
     order_id = serializers.IntegerField(source='id')
     date = serializers.DateTimeField(source='order_date', format="%Y-%m-%d %H:%M")
-    customer = serializers.CharField(source='user.username', default='Guest')
+    customer = serializers.SerializerMethodField()
     total = serializers.DecimalField(source='total_price', max_digits=10, decimal_places=2)
     payment_status = serializers.SerializerMethodField()
     items = serializers.SerializerMethodField()
@@ -90,14 +90,23 @@ class OrderTableSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['order_id', 'date', 'customer', 'total', 'payment_status', 'items', 'status']
 
+    def get_customer(self, obj):
+        if obj.user:
+            return obj.user.username
+        elif obj.guest_full_name:
+            return f"{obj.guest_full_name} ({obj.guest_email or 'No Email'})"
+        else:
+            return "Guest"
+
     def get_payment_status(self, obj):
         try:
-            return obj.payment.status  
+            return obj.payment.status
         except:
             return "no payment"
 
     def get_items(self, obj):
-        return obj.items.count()  
+        return obj.items.count()
+ 
 
 
 class PaymentAndOrderStatusSerializer(serializers.Serializer):
@@ -114,6 +123,7 @@ class SellerOrderDetailsSerializer(serializers.ModelSerializer):
     user_data = serializers.SerializerMethodField(read_only=True)
     items = serializers.SerializerMethodField()
     payment_method = serializers.CharField(source='payment.method', read_only=True)
+
     class Meta:
         model = Order
         fields = [
@@ -125,17 +135,26 @@ class SellerOrderDetailsSerializer(serializers.ModelSerializer):
             "items",
             "total_price"
         ]
-    
-    def get_user_data(self,obj):
+
+    def get_user_data(self, obj):
         if obj.user:
+            # Registered user info
             return {
-                "id" : obj.user.id,
-                "full_name" : f'{obj.user.first_name} {obj.user.lastname_name}',
-                "email" : obj.user.email,
-                "phone" : obj.user.phone_number
+                "id": obj.user.id,
+                "full_name": f'{obj.user.first_name} {obj.user.lastname_name}',
+                "email": obj.user.email,
+                "phone": obj.user.phone_number
             }
+        else:
+            return {
+                "id": None,
+                "full_name": obj.guest_full_name,
+                "email": obj.guest_email,
+                "phone": obj.guest_phone
+            }
+
     def get_items(self, obj):
         items = obj.items.all()
-        return OrderItemSerializer(items, many=True).data  
+        return OrderItemSerializer(items, many=True).data
 
 
