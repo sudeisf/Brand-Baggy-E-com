@@ -82,16 +82,17 @@ export const columns: ColumnDef<Product>[] = [
     accessorKey: "category.parent.name",
     header: "Category",
     cell: ({ row }) => {
+      const parentName = row.original.category?.parent?.name;
       return (
         <div className="flex items-center gap-2 px-2 font-roboto">
-          {row.original.category.parent.name}
+          {parentName || "N/A"}
         </div>
       );
     },
     filterFn: (row, id, value) => {
-      console.log(value.toLowerCase())
       if (!value) return true;
-      return row.original.category.parent.name.toLowerCase().includes(value.toLowerCase());
+      const parentName = row.original.category?.parent?.name;
+      return parentName ? parentName.toLowerCase().includes(value.toLowerCase()) : false;
     },
   },
   {

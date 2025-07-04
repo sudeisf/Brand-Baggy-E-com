@@ -42,7 +42,6 @@ import { endOfDay, startOfDay } from "date-fns";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { columns } from "./lib/productTable";
-import { useProductStore } from "@/store/prouctStore";
 import { useProducts } from "@/app/(seller)/products-dashboard/lib/queries/useProducts";
 import { HydrationBoundary, useQueryClient } from "@tanstack/react-query";
 interface Category {
@@ -71,13 +70,11 @@ type props = {
 }
 
 export default function ProductListPage({initialProducts}:props) {
-  const products = useProductStore((state)=> state.products);
   const {data : queryProducts, isFetching , error: queryError } = useProducts()
   const queryClient = useQueryClient();
-  
-  useEffect(() => {
-    useProductStore.setState({ products: initialProducts })
-  }, [initialProducts])
+
+  // Use queryProducts if available, otherwise initialProducts
+  const products = queryProducts ?? initialProducts;
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);

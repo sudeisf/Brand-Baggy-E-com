@@ -14,45 +14,48 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus } from "lucide-react"
 import { useProductStore } from "@/store/selectedProducts"
-
-// Mock product data with sizes
-const products = [
-  { id: 1, name: "Nike", sizes: ["S", "M", "L", "XL"] },
-  { id: 2, name: "Adidas", sizes: ["S", "M", "L"] },
-  { id: 3, name: "Puma", sizes: ["M", "L", "XL"] },
-  { id: 4, name: "Reebok", sizes: ["S/M", "L/XL"] },
-]
-
-// Generate product-size combinations
-const productOptions = products.flatMap((product) =>
-  product.sizes.map((size) => ({
-    id: product.id,
-    name: `${product.name} ${size}`,
-    size,
-  }))
-)
+import { useListProducts } from "@/hooks/use-product"
 
 export default function SelectProducts() {
   const { selectedProducts, addProduct, removeProduct, updateQuantity } = useProductStore()
+  const { data, isLoading, error } = useListProducts()
+  const products = Array.isArray(data) ? data : []
+
+  const productOptions = products.flatMap((product: { id: number; name: string; size: string[] }) =>
+    product.size.map((size: string) => ({
+      id: product.id,
+      name: `${product.name} ${size}`,
+      size,
+    }))
+  ) || []
 
   const handleSelect = (value: string) => {
     const [productId, size] = value.split("-")
     const id = parseInt(productId)
-    const product = products.find((p) => p.id === id)
+    const product = products?.find((p) => p.id === id)
     if (product) {
       addProduct({ id, name: product.name, size, quantity: 1 })
     }
   }
 
   const handleConfirm = () => {
-    // Replace this with your logic (e.g., API call, etc.)
     console.log("Selected products:", selectedProducts)
+  }
+
+  if (isLoading) {
+    return <div>Loading products...</div>
+  }
+
+  if (error) {
+    return <div>Error loading products: {error.message}</div>
   }
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Add Items <Plus /></Button>
+        <Button variant="outline">
+          Add Items <Plus />
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
@@ -109,7 +112,8 @@ export default function SelectProducts() {
             ))}
           </div>
           <div className="mt-2 text-sm text-muted-foreground">
-            Selected: {selectedProducts.length > 0
+            Selected:{" "}
+            {selectedProducts.length > 0
               ? selectedProducts
                   .map((item) => `${item.name} ${item.size} (Qty: ${item.quantity})`)
                   .join(", ")
@@ -118,11 +122,7 @@ export default function SelectProducts() {
         </div>
         <DialogFooter className="sm:justify-start">
           <DialogClose asChild>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={handleConfirm}
-            >
+            <Button type="button" variant="secondary" onClick={handleConfirm}>
               Confirm
             </Button>
           </DialogClose>

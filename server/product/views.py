@@ -10,7 +10,8 @@ from .serializers import (ProductSerialier ,
                           UpdateProductSerializer ,
                           SellerProductListSerializer,
                           FavoriteProductSerializer,
-                          SerachProductSerializer
+                          SerachProductSerializer,
+                          ProductChooseForSellerSerializer
                           )
 from rest_framework.pagination import PageNumberPagination
 
@@ -290,3 +291,15 @@ class SearchProductAPIView(generics.ListAPIView):
     }
 
         
+class SellerProductList(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self,request):
+        user = request.user
+        try:
+            products = Product.objects.filter(seller=user).prefetch_related('variants__size')
+            serializer = ProductChooseForSellerSerializer(products, many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Product.DoesNotExist:
+            return Response({
+                "error" : "product doest not exist for this seller"
+            },status=status.HTTP_404_NOT_FOUND)

@@ -867,8 +867,21 @@ class SerachProductSerializer(serializers.ModelSerializer):
             return CloudinaryImage(public_id).build_url(secure=True)
 
     
-    
+class ProductChooseForSellerSerializer(serializers.ModelSerializer):
+    size = serializers.SerializerMethodField()
 
+    class Meta:
+        model = Product
+        fields = [
+            "id",
+            "name",
+            "size",
+        ]
+
+    def get_size(self, obj):
+        # Fetch all sizes associated with the product's variants
+        variants = obj.variants.all()
+        return [variant.size.name for variant in variants]
 
 
 
