@@ -1,17 +1,17 @@
-// app/(seller)/customer/page.tsx
 "use client";
+
 import {
-  ColumnDef,
   ColumnFiltersState,
-  flexRender,
+  SortingState,
+  VisibilityState,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  SortingState,
   useReactTable,
-  VisibilityState,
+  flexRender,
 } from "@tanstack/react-table";
+
 import {
   Table,
   TableBody,
@@ -20,49 +20,47 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 import {
   AlignCenter,
-  ChevronDown,
-  Search,
+  ArrowDown,
   ArrowDownUp,
   ArrowUp,
-  ArrowDown,
+  Search,
 } from "lucide-react";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { AddCustomerSheet } from "./components/addCustomerSheet";
-import { columns, data, Customer } from "./lib/customerTable"; // Fixed import path
+import { columns } from "./lib/customerTable";
+import { useFeatchCustomerLsit } from "@/hooks/use-customer";
 
 export default function Customers() {
-  const statusStyles: Record<string, string> = {
-    Active: "bg-green-500/5 text-green-500 rounded-md",
-    Inactive: "bg-red-500/5 text-red-500",
-  };
-
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const [searchValue, setSearchValue] = useState("");
+
+  const { data: customerData } = useFeatchCustomerLsit();
 
   const table = useReactTable({
-    data,
+    data: customerData?.results ?? [],
     columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     state: {
@@ -73,8 +71,6 @@ export default function Customers() {
     },
   });
 
-  const [searchValue, setSearchValue] = useState("");
-
   const handleSearch = (value: string) => {
     setSearchValue(value);
     table.getColumn("name")?.setFilterValue(value);
@@ -82,80 +78,67 @@ export default function Customers() {
 
   return (
     <div className="w-[1250px] bg-white rounded-md mb-4 mx-auto">
-      <div className="p-4 rounded-t-md border-b-0 mb-4">
+      <div className="p-4 rounded-t-md border-b mb-4">
         <div className="flex justify-between items-center">
-          <div className="space-y-2">
-            <h1 className="text-2xl font-semibold font-roboto text-[#331d67]/90">
-              Customers
-            </h1>
-            <p className="text-gray-500 font-medium font-roboto">
-              Organize all of your customers
-            </p>
+          <div>
+            <h1 className="text-2xl font-semibold text-[#331d67]/90">Customers</h1>
+            <p className="text-gray-500 font-medium">Organize all of your customers</p>
           </div>
           <AddCustomerSheet />
         </div>
+
         <div className="flex justify-between py-4">
-          <div className="hidden sm:flex w-[10rem] md:w-[20rem] bg-white items-center justify-start gap-2 rounded-sm px-3 py-1.5 border-1">
-            <Search className="text-[#331d67] w-4 h-4 md:w-5 md:h-5" />
+          {/* Search Box */}
+          <div className="hidden sm:flex w-[10rem] md:w-[20rem] border rounded-sm px-3 py-1.5 items-center gap-2">
+            <Search className="text-[#331d67] w-4 h-4" />
             <input
               type="text"
               placeholder="Search customer..."
               value={searchValue}
               onChange={(e) => handleSearch(e.target.value)}
-              className="rounded-md outline-none bg-white w-full text-sm md:text-base text-[#331d67]"
+              className="w-full text-sm bg-white text-[#331d67] outline-none"
             />
           </div>
 
+          {/* Sort + Filter Columns */}
           <div className="flex gap-2">
             <DropdownMenu>
-              <DropdownMenuTrigger className="ml-auto font-roboto border flex items-center px-4 py-2 gap-2 rounded-sm text-gray-600 text-sm font-medium shadow-none z-10">
+              <DropdownMenuTrigger className="flex items-center gap-2 text-gray-600 text-sm border px-4 py-2 rounded-sm">
                 <ArrowDownUp className="w-4 h-4" />
-                <span className="text-gray-400 text-sm">Sort:</span>
-                {table.getColumn("name")?.getIsSorted() === "asc"
-                  ? "Asc"
-                  : "Desc"}
+                <span>Sort:</span>
+                {table.getColumn("name")?.getIsSorted() === "asc" ? "Asc" : "Desc"}
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-white border p-2 rounded-md z-10 w-40">
+              <DropdownMenuContent className="bg-white border rounded-md w-40 p-1">
                 <DropdownMenuItem
                   onClick={() => table.getColumn("name")?.toggleSorting(false)}
-                  className="cursor-pointer hover:bg-gray-100 rounded-sm px-2 text-sm text-gray-700 py-1.5"
                 >
-                  <ArrowUp className="mr-2 h-4 w-4" />
-                  Ascending
+                  <ArrowUp className="mr-2 h-4 w-4" /> Ascending
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => table.getColumn("name")?.toggleSorting(true)}
-                  className="cursor-pointer hover:bg-gray-100 rounded-sm px-2 text-sm text-gray-700 py-1.5"
                 >
-                  <ArrowDown className="mr-2 h-4 w-4" />
-                  Descending
+                  <ArrowDown className="mr-2 h-4 w-4" /> Descending
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="ml-auto font-roboto rounded-sm text-gray-600 shadow-none"
-                >
-                  <AlignCenter />
-                  Filter
+                <Button variant="outline" className="rounded-sm text-gray-600">
+                  <AlignCenter className="w-4 h-4 mr-1" /> Filter
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="center">
+              <DropdownMenuContent align="end">
                 {table
                   .getAllColumns()
-                  .filter((column) => column.getCanHide())
-                  .map((column) => (
+                  .filter((col) => col.getCanHide())
+                  .map((col) => (
                     <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
+                      key={col.id}
+                      checked={col.getIsVisible()}
+                      onCheckedChange={(val) => col.toggleVisibility(!!val)}
                     >
-                      {column.id}
+                      {col.id}
                     </DropdownMenuCheckboxItem>
                   ))}
               </DropdownMenuContent>
@@ -163,35 +146,26 @@ export default function Customers() {
           </div>
         </div>
       </div>
+
+      {/* Table */}
       <div className="px-4">
-        <Table className="rounded-lg border-separate border-spacing-0 overflow-hidden">
+        <Table className="border-separate border-spacing-0">
           <TableHeader>
-            {table.getHeaderGroups().map((headerGroup, index) => (
-              <TableRow key={index}>
-                {headerGroup.headers.map((header, index) => (
-                  <TableHead
-                    key={index}
-                    className="text-gray-600 text-left font-medium bg-gray-50 py-2"
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id} className="bg-gray-50 py-2 text-left text-gray-600 font-medium">
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
             ))}
           </TableHeader>
+
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row, index) => (
-                <TableRow
-                  key={index}
-                  className="text-gray-600 font-medium text-left py-1 px-4"
-                  data-state={row.getIsSelected() && "selected"}
-                >
+            {table.getRowModel().rows.length > 0 ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -201,7 +175,7 @@ export default function Customers() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell colSpan={columns.length} className="text-center py-6 text-gray-400">
                   No results.
                 </TableCell>
               </TableRow>
@@ -209,8 +183,10 @@ export default function Customers() {
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4 px-5">
-        <div className="flex-1 text-sm text-muted-foreground">
+
+      {/* Pagination Controls */}
+      <div className="flex items-center justify-between px-5 py-4 text-sm text-muted-foreground">
+        <div>
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>

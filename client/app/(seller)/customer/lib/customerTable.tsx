@@ -10,19 +10,22 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import Link from "next/link";
 import { Ellipsis } from "lucide-react";
-import EditCustomer from "../[id]/component/EditCustomer";
-import { customerData } from "../[id]/data";
+import EditCustomer from "../[email]/component/EditCustomer";
+import { customerData } from "../[email]/data";
 
-export type Customer = {
-  id: string;
+
+export interface CustomerListItem {
   name: string;
   email: string;
-  orderCount: number;
-  location: string;
-  totalSpent: number;
-};
-
-export const columns: ColumnDef<Customer>[] = [
+  is_registered: boolean;
+  order_count: number;
+  total_spent: string; 
+  last_order_date: string; 
+  country: string;
+  city: string;
+  main_image: string | null;
+}
+export const columns: ColumnDef<CustomerListItem>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -54,7 +57,7 @@ export const columns: ColumnDef<Customer>[] = [
       <div className="flex items-center gap-2 px-2 font-roboto">
         <Avatar className="w-10 h-10">
           <AvatarImage
-            src="https://github.com/shadcn.png"
+            src={row.original.main_image ?? ""}
             alt={row.original.name}
             className="rounded-md"
           />
@@ -82,7 +85,7 @@ export const columns: ColumnDef<Customer>[] = [
     header: "Location",
     cell: ({ row }) => (
       <div className="flex text-left gap-2 font-roboto">
-        {row.original.location}
+        {row.original.city} ,{row.original.country}
       </div>
     ),
   },
@@ -91,7 +94,7 @@ export const columns: ColumnDef<Customer>[] = [
     header: "Orders",
     cell: ({ row }) => (
       <div className="flex text-left gap-2 font-roboto">
-        {row.original.orderCount}
+        {row.original.order_count}
       </div>
     ),
   },
@@ -100,7 +103,7 @@ export const columns: ColumnDef<Customer>[] = [
     header: "Spent",
     cell: ({ row }) => (
       <div className="flex text-left gap-2 font-roboto">
-        ${row.original.totalSpent}
+        ${row.original.total_spent}
       </div>
     ),
   },
@@ -122,7 +125,7 @@ export const columns: ColumnDef<Customer>[] = [
           <PopoverContent className="w-48 p-2" align="end">
             <div className="flex flex-col gap-1">
               <Link
-                href={`/customer/${row.original.id}`}
+                href={`/customer/${encodeURIComponent(row.original.email)}`}
                 className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 rounded-sm"
               >
                 View Details
@@ -142,85 +145,3 @@ export const columns: ColumnDef<Customer>[] = [
   },
 ];
 
-export const data: Customer[] = [
-  {
-    id: "CUST-1001",
-    name: "John Smith",
-    email: "john.smith@example.com",
-    orderCount: 5,
-    location: "New York, USA",
-    totalSpent: 1245.99,
-  },
-  {
-    id: "CUST-1002",
-    name: "Emily Johnson",
-    email: "emily.j@example.com",
-    orderCount: 2,
-    location: "London, UK",
-    totalSpent: 329.5,
-  },
-  {
-    id: "CUST-1003",
-    name: "Michael Brown",
-    email: "michael.b@example.com",
-    orderCount: 8,
-    location: "Toronto, Canada",
-    totalSpent: 2100.0,
-  },
-  {
-    id: "CUST-1004",
-    name: "Sarah Williams",
-    email: "sarah.w@example.com",
-    orderCount: 1,
-    location: "Sydney, Australia",
-    totalSpent: 149.99,
-  },
-  {
-    id: "CUST-1005",
-    name: "David Lee",
-    email: "david.lee@example.com",
-    orderCount: 12,
-    location: "San Francisco, USA",
-    totalSpent: 3540.75,
-  },
-  {
-    id: "CUST-1006",
-    name: "Jessica Martinez",
-    email: "jessica.m@example.com",
-    orderCount: 3,
-    location: "Madrid, Spain",
-    totalSpent: 487.3,
-  },
-  {
-    id: "CUST-1007",
-    name: "Robert Wilson",
-    email: "robert.w@example.com",
-    orderCount: 7,
-    location: "Berlin, Germany",
-    totalSpent: 1299.0,
-  },
-  {
-    id: "CUST-1008",
-    name: "Lisa Anderson",
-    email: "lisa.a@example.com",
-    orderCount: 4,
-    location: "Paris, France",
-    totalSpent: 876.45,
-  },
-  {
-    id: "CUST-1009",
-    name: "James Taylor",
-    email: "james.t@example.com",
-    orderCount: 6,
-    location: "Tokyo, Japan",
-    totalSpent: 1542.8,
-  },
-  {
-    id: "CUST-1010",
-    name: "Maria Garcia",
-    email: "maria.g@example.com",
-    orderCount: 9,
-    location: "Mexico City, Mexico",
-    totalSpent: 2345.6,
-  },
-];
