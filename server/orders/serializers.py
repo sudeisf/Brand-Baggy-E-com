@@ -158,3 +158,24 @@ class SellerOrderDetailsSerializer(serializers.ModelSerializer):
         return OrderItemSerializer(items, many=True).data
 
 
+class UnifiedCustomerSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    email = serializers.CharField(source='annotated_email')
+    is_registered = serializers.BooleanField()
+    order_count = serializers.IntegerField()
+    total_spent = serializers.DecimalField(max_digits=10, decimal_places=2)
+    last_order_date = serializers.DateTimeField(allow_null=True)
+    country = serializers.CharField(allow_null=True)
+    city = serializers.CharField(allow_null=True)
+    main_image = serializers.SerializerMethodField()
+
+    def get_main_image(self, obj):
+        # For registered users, obj['main_image'] is a Cloudinary public_id or None
+        if obj.get('main_image'):
+            try:
+                from cloudinary import CloudinaryImage
+                public_id = str(obj['main_image'])
+                return CloudinaryImage(public_id).build_url(secure=True)
+            except Exception:
+                return None
+        return None

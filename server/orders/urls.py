@@ -7,7 +7,9 @@ from .views import (
     PaymentAndOrderStatusUpdate,
     SellerOrdersDashboard,
     SellerOrderDetailAPIView,
-    GuestOrderCreateAPIView
+    GuestOrderCreateAPIView,
+    CustomerListAPIView,
+    CustomerDetailAPIView
     )
 
 urlpatterns = [
@@ -18,5 +20,8 @@ urlpatterns = [
     path("order/update-status/", PaymentAndOrderStatusUpdate.as_view(), name="update-status"),
     path("order-dashboard/",SellerOrdersDashboard.as_view(),name="order-dashboard"),
     path("seller/order/<int:order_id>/detail/",SellerOrderDetailAPIView.as_view(),name="order-detail-seller"),
-    path("seller/create-order/",GuestOrderCreateAPIView.as_view(),name="custom-seller-order")
+    path("seller/create-order/",GuestOrderCreateAPIView.as_view(),name="custom-seller-order"),
+    path('order/customers/', CustomerListAPIView.as_view(), name='customer-list'),
+    path("api/seller/customers/<str:email>/", CustomerDetailAPIView.as_view(), name="customer-detail")
+
 ]

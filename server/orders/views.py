@@ -9,10 +9,13 @@ from .serializers import createOrderSerializer
 from rest_framework.permissions import IsAuthenticated , IsAuthenticatedOrReadOnly
 from cart.models import Cart , CartItem
 from django.db import transaction
-from orders.serializers import OrderSerializer ,PaymentAndOrderStatusSerializer, ShippingInfoSerializer,OrderDetailSerializer,OrderTableSerializer,SellerOrderDetailsSerializer
+from orders.serializers import (OrderSerializer ,PaymentAndOrderStatusSerializer, ShippingInfoSerializer,OrderDetailSerializer,OrderTableSerializer,
+                                SellerOrderDetailsSerializer,UnifiedCustomerSerializer)
 from decimal import Decimal
 from notifications.utils import send_notifications
 from product.models import Product, ProductVariants
+from rest_framework.pagination import PageNumberPagination
+from django.db.models import OuterRef, Subquery
 
 
 
@@ -273,3 +276,146 @@ class GuestOrderCreateAPIView(APIView):
         )
 
         return Response({"order_id": order.id}, status=status.HTTP_201_CREATED)
+
+
+
+
+from django.db.models import Count, Sum, Max, Value as V, BooleanField, F, OuterRef, Subquery
+from django.db.models.functions import Coalesce
+from itertools import chain
+from rest_framework.authentication import get_user_model
+from accounts.models import CustomUser
+from django.db.models import Sum, Q, Count
+
+class CustomerListAPIView(APIView):
+    permission_classes = [IsAuthenticated]  # or IsAuthenticated
+
+    def get(self, request):
+        # Subquery for latest registered user's order
+        latest_order = Order.objects.filter(user=OuterRef('pk')).order_by('-created_at')
+        country_subquery = Order.objects.filter(user=OuterRef('pk')).order_by('-created_at').values('shipping_info__country')[:1]
+        city_subquery = Order.objects.filter(user=OuterRef('pk')).order_by('-created_at').values('shipping_info__city')[:1]
+
+        # Registered customers
+        registered_customers = (
+        CustomUser.objects
+            .filter(orders__isnull=False)
+            .annotate(
+                name=Coalesce(F("first_name"), V("")),
+                annotated_email=F("email"),
+                is_registered=V(True, output_field=BooleanField()),
+                order_count=Count("orders"),
+                total_spent=Sum("orders__total_price"),
+                last_order_date=Max("orders__created_at"),
+                country=Subquery(country_subquery),
+                city=Subquery(city_subquery),
+                main_image=F("profile_url"),
+            )
+            .values("name", "annotated_email", "is_registered", "order_count", "total_spent", "last_order_date", "country", "city", "main_image")
+        )
+        # Guest customers (grouped by guest_email)
+        guest_orders = (
+            Order.objects
+            .filter(user__isnull=True)
+            .exclude(guest_email__isnull=True)
+            .order_by('-created_at')
+        )
+
+        guest_data = {}
+        for order in guest_orders:
+            key = order.guest_email
+            guest_data[key] = {
+                "name": order.guest_full_name or "Guest",
+                "annotated_email": key,
+                "is_registered": False,
+                "order_count": 0,
+                "total_spent": 0,
+                "last_order_date": None,
+                "country": None,
+                "city": None,
+                "main_image": None,
+            }
+            guest_data[key]["order_count"] += 1
+            guest_data[key]["total_spent"] += order.total_price
+            if not guest_data[key]["last_order_date"] or order.created_at > guest_data[key]["last_order_date"]:
+                guest_data[key]["last_order_date"] = order.created_at
+                if order.shipping_info:
+                    guest_data[key]["country"] = order.shipping_info.country
+                    guest_data[key]["city"] = order.shipping_info.city
+
+        guest_customers = list(guest_data.values())
+
+        all_customers = list(chain(registered_customers, guest_customers))
+        all_customers_sorted = sorted(all_customers, key=lambda x: x["last_order_date"] or "", reverse=True)
+
+        paginator = PageNumberPagination()
+        paginator.page_size = 10  # You can adjust or make this dynamic
+        result_page = paginator.paginate_queryset(all_customers_sorted, request)
+        serializer = UnifiedCustomerSerializer(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+class CustomerDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]  # seller auth
+
+    def get(self, request, email):
+        seller = request.user
+
+        # All orders placed by this customer containing this seller's products
+        orders = Order.objects.filter(
+            Q(user__email=email) | Q(guest_email=email),
+            items__product__seller=seller
+        ).distinct().prefetch_related("items__product", "shipping_info")
+
+        if not orders.exists():
+            return Response({"detail": "No such customer for this seller"}, status=404)
+
+        # Use first matching order to get basic info
+        first_order = orders.first()
+        is_registered = bool(first_order.user)
+        customer_name = first_order.user.get_full_name() if is_registered else first_order.guest_full_name
+        customer_email = first_order.user.email if is_registered else first_order.guest_email
+        customer_phone = first_order.user.phone_number if is_registered else first_order.guest_phone
+
+        last_shipping = orders.order_by("-created_at").first().shipping_info
+        country = last_shipping.country if last_shipping else None
+        city = last_shipping.city if last_shipping else None
+
+        # Analytics
+        total_cost = orders.aggregate(total=Sum("total_price"))["total"] or 0
+        total_orders = orders.count()
+        completed_orders = orders.filter(status="delivered").count()
+        canceled_orders = orders.filter(status="cancelled").count()
+
+        # Orders list
+        orders_list = []
+        for order in orders:
+            for item in order.items.all():
+                if item.product.seller == seller:
+                    orders_list.append({
+                        "order_id": str(order.id),
+                        "product_name": item.product.name,
+                        "date": order.created_at,
+                        "status": order.status,
+                        "payment": order.status if order.status in ["paid", "cancelled"] else "pending",
+                        "price": item.price,
+                        "quantity": item.quantity,
+                    })
+
+        return Response({
+            "customer_info": {
+                "name": customer_name,
+                "email": customer_email,
+                "phone": customer_phone,
+                "country": country,
+                "city": city,
+                "is_registered": is_registered
+            },
+            "summary": {
+                "total_orders": total_orders,
+                "completed_orders": completed_orders,
+                "canceled_orders": canceled_orders,
+                "total_spent": total_cost,
+            },
+            "orders": orders_list
+        })
+
