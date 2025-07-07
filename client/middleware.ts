@@ -10,6 +10,7 @@ export function middleware(request:NextRequest){
             '/profile',
             '/dashboard',
             '/cart/checkout',
+            '/(seller)/orders'
           ];
 
       const isProtected = protectedRoutes.some(path =>

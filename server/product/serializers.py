@@ -197,6 +197,7 @@ class CreateProductSerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=20, required=True)
     description = serializers.CharField(max_length=255, required=True)
     price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    cost_price = serializers.DecimalField(max_digits=10, decimal_places=2, required=True)
     quantity = serializers.IntegerField(required = True)
     main_image = serializers.ImageField(required=True)
     gender = serializers.ChoiceField(choices=Product.Gender.choices, required=False)
@@ -219,7 +220,7 @@ class CreateProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
-            'name', 'description', 'price', 'quantity', 'main_image', 'gender',
+            'name', 'description', 'price', 'cost_price', 'quantity', 'main_image', 'gender',
             'images', 'brand', 'model_number', 'product_code', 'variants',
             'discount_value', 'discount_type', 'discount_start_date', 'discount_end_date',
             'category', 'product_location'
@@ -632,6 +633,7 @@ class CreateProductSerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=20, required=True)
     description = serializers.CharField(max_length=255, required=True)
     price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    cost_price = serializers.DecimalField(max_digits=10, decimal_places=2, required=True)
     quantity = serializers.IntegerField(required = True)
     main_image = serializers.ImageField(required=True)
     gender = serializers.ChoiceField(choices=Product.Gender.choices, required=False)
@@ -654,7 +656,7 @@ class CreateProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
-            'name', 'description', 'price', 'quantity', 'main_image', 'gender',
+            'name', 'description', 'price', 'cost_price', 'quantity', 'main_image', 'gender',
             'images', 'brand', 'model_number', 'product_code', 'variants',
             'discount_value', 'discount_type', 'discount_start_date', 'discount_end_date',
             'category', 'product_location'

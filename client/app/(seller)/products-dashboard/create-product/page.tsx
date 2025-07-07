@@ -39,7 +39,8 @@ const productSchema = z.object({
     storeLocation: z.string().min(1, "Store location is required"),
     category: z.string().min(1, "Category is required"),
     subCategory: z.string().min(1, "Subcategory is required"),
-    images: z.array(z.any()).min(1, "At least one image is required")
+    images: z.array(z.any()).min(1, "At least one image is required"),
+    cost_price: z.number().min(0, "Cost price must be greater than or equal to 0").optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -83,7 +84,8 @@ export default function CreateProduct() {
             storeLocation: '',
             category: '',
             subCategory: '',
-            images: []
+            images: [],
+            cost_price: 0,
         }
     });
 
@@ -144,6 +146,7 @@ export default function CreateProduct() {
             }
             if (data.discountStartDate) submitData.append('discount_start_date', data.discountStartDate.toISOString());
             if (data.discountEndDate) submitData.append('discount_end_date', data.discountEndDate.toISOString());
+            submitData.append('cost_price', String(data.cost_price));
 
             if (data.images.length > 0) {
                 submitData.append('main_image', data.images[0]);
@@ -241,6 +244,18 @@ export default function CreateProduct() {
                                             placeholder="brand name" 
                                             className="bg-white font-roboto text-gray-700 h-12 shadow-none border capitalize rounded-sm"
                                             {...register('brand')}
+                                        />
+                                    </div>
+                                    <div className="flex flex-col gap-2 px-2">
+                                        <label htmlFor="cost_price" className="capitalize font-roboto font-medium text-gray-500">product cost</label>
+                                        <Input 
+                                            id="cost_price"
+                                            placeholder="product cost" 
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            className="bg-white font-roboto text-gray-700 h-12 shadow-none border capitalize rounded-sm"
+                                            {...register('cost_price', { required: true })}
                                         />
                                     </div>
                                     <div className="flex flex-col gap-2 px-2">
