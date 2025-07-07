@@ -36,7 +36,8 @@ export interface CustomerOrder {
   product_name: string;
   date: string;
   status: string;
-  payment: string;
+  payment_status: string;
+  payment_method: string;
   price: number;
   quantity: number;
 }
@@ -83,7 +84,7 @@ const columns: ColumnDef<CustomerOrder>[] = [
     header: "Payment",
     cell: ({ row }) => (
       <div className="flex text-left gap-2 font-roboto">
-        {row.original.payment}
+        {row.original.payment_status}
       </div>
     ),
   },

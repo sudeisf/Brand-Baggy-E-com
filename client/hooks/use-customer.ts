@@ -23,7 +23,8 @@ export interface CustomerOrder {
   product_name: string;
   date: string;
   status: string;
-  payment: string;
+  payment_status: string;
+  payment_method: string;
   price: number;
   quantity: number;
 }

@@ -57,6 +57,12 @@ class Product(models.Model):
     gender = models.CharField(max_length=20,choices=Gender.choices,null=True,blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    cost_price = models.DecimalField(
+    max_digits=10,
+    decimal_places=2,
+    default=0.00,  
+    help_text="The cost to acquire or produce this product."
+)
     slug = models.SlugField(max_length=200, unique=True, null=True)
 
 

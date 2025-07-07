@@ -106,7 +106,36 @@ class OrderTableSerializer(serializers.ModelSerializer):
 
     def get_items(self, obj):
         return obj.items.count()
- 
+
+class SellerRecentOrderItemSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    product_image = serializers.ImageField(source='product.main_image', read_only=True)
+    payment_status = serializers.SerializerMethodField()
+    order_date = serializers.DateTimeField(source='order.created_at', format="%Y-%m-%d %H:%M")
+    customer = serializers.SerializerMethodField()
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    sold = serializers.IntegerField(source='quantity')
+    status = serializers.CharField(source='order.status')
+
+    class Meta:
+        model = OrderItem
+        fields = ['product_image', 'product_name', 'payment_status', 'order_date', 'customer', 'price', 'sold', 'status']
+
+    def get_payment_status(self, obj):
+        try:
+            return obj.order.payment.status
+        except:
+            return "no payment"
+
+    def get_customer(self, obj):
+        order = obj.order
+        if order.user:
+            return order.user.username
+        elif order.guest_full_name:
+            return f"{order.guest_full_name} ({order.guest_email or 'No Email'})"
+        else:
+            return "Guest"
+
 
 
 class PaymentAndOrderStatusSerializer(serializers.Serializer):

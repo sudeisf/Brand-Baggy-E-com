@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated , IsAuthenticatedOrReadOn
 from cart.models import Cart , CartItem
 from django.db import transaction
 from orders.serializers import (OrderSerializer ,PaymentAndOrderStatusSerializer, ShippingInfoSerializer,OrderDetailSerializer,OrderTableSerializer,
-                                SellerOrderDetailsSerializer,UnifiedCustomerSerializer)
+                                SellerOrderDetailsSerializer,UnifiedCustomerSerializer,SellerRecentOrderItemSerializer)
 from decimal import Decimal
 from notifications.utils import send_notifications
 from product.models import Product, ProductVariants
@@ -369,7 +369,6 @@ class CustomerDetailAPIView(APIView):
         if not orders.exists():
             return Response({"detail": "No such customer for this seller"}, status=404)
 
-        # Use first matching order to get basic info
         first_order = orders.first()
         is_registered = bool(first_order.user)
         customer_name = first_order.user.get_full_name() if is_registered else first_order.guest_full_name
@@ -380,13 +379,11 @@ class CustomerDetailAPIView(APIView):
         country = last_shipping.country if last_shipping else None
         city = last_shipping.city if last_shipping else None
 
-        # Analytics
         total_cost = orders.aggregate(total=Sum("total_price"))["total"] or 0
         total_orders = orders.count()
         completed_orders = orders.filter(status="delivered").count()
         canceled_orders = orders.filter(status="cancelled").count()
 
-        # Orders list
         orders_list = []
         for order in orders:
             for item in order.items.all():
@@ -396,10 +393,12 @@ class CustomerDetailAPIView(APIView):
                         "product_name": item.product.name,
                         "date": order.created_at,
                         "status": order.status,
-                        "payment": order.status if order.status in ["paid", "cancelled"] else "pending",
+                        "payment_method": order.payment.method if hasattr(order, "payment") else None,
+                        "payment_status": order.payment.status if hasattr(order, "payment") else "pending",
                         "price": item.price,
                         "quantity": item.quantity,
                     })
+
 
         return Response({
             "customer_info": {
@@ -419,3 +418,142 @@ class CustomerDetailAPIView(APIView):
             "orders": orders_list
         })
 
+# Product name	p.status Order date	Customer	Price	Sold	Satus
+class SellerRecentOrdersAPIView(APIView):
+    permission_classes = [IsAuthenticated]  # The authenticated user must be the seller
+
+    def get(self, request):
+        seller = request.user
+
+        # Get all order items where product.seller = seller
+        order_items = OrderItem.objects.filter(product__seller=seller).select_related('product', 'order', 'order__payment')
+
+        serializer = SellerRecentOrderItemSerializer(order_items, many=True)
+        return Response(serializer.data)
+
+
+
+import humanize
+import pytz
+from django.utils.timezone import now
+class SellerRecentOrderActivityAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        seller = request.user
+
+        # Fetch recent orders containing seller's products
+        orders = Order.objects.filter(
+            items__product__seller=seller
+        ).distinct().order_by('-created_at')[:20]
+
+        activity = []
+        for order in orders:
+            if order.user:
+                customer_name = order.user.get_full_name()
+            else:
+                customer_name = order.guest_full_name or "Guest"
+
+            localized_time = order.created_at.astimezone(pytz.timezone("Africa/Nairobi"))  # adjust as needed
+            relative_time = humanize.naturaltime(now() - order.created_at)
+            exact_time = localized_time.strftime("%A at %I:%M %p")
+
+            activity.append({
+                "order_id": str(order.id),
+                "customer": customer_name,
+                "status": order.status,
+                "timestamp": relative_time,
+                "exact_time": exact_time
+            })
+
+        return Response(activity)
+
+from django.db.models import DecimalField, F, Sum
+from datetime import datetime, timedelta
+def calculate_percent_change(current, previous):
+    if previous == 0:
+        return None, None
+    change = ((current - previous) / previous) * 100
+    direction = "up" if change > 0 else "down" if change < 0 else "no change"
+    return round(abs(change), 2), direction
+
+class SellerAnalyticsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        seller = request.user
+        
+        # Define date ranges for this week and last week (Monday to Sunday)
+        today = datetime.today()
+        start_of_this_week = today - timedelta(days=today.weekday())
+        end_of_this_week = start_of_this_week + timedelta(days=6, hours=23, minutes=59, seconds=59)
+
+        start_of_last_week = start_of_this_week - timedelta(days=7)
+        end_of_last_week = start_of_this_week - timedelta(seconds=1)
+
+        def get_metrics(start_date, end_date):
+            order_items = OrderItem.objects.filter(
+                product__seller=seller,
+                order__created_at__gte=start_date,
+                order__created_at__lte=end_date,
+            ).select_related('product', 'order')
+
+            total_income = Order.objects.filter(
+                items__product__seller=seller,
+                created_at__gte=start_date,
+                created_at__lte=end_date,
+            ).distinct().aggregate(total_income=Sum('total_price'))['total_income'] or Decimal('0')
+
+            total_expenses = order_items.aggregate(
+                total_expenses=Sum(
+                    F('product__cost_price') * F('quantity'),
+                    output_field=DecimalField(max_digits=20, decimal_places=2)
+                )
+            )['total_expenses'] or Decimal('0')
+
+            total_orders = Order.objects.filter(
+                items__product__seller=seller,
+                created_at__gte=start_date,
+                created_at__lte=end_date,
+            ).distinct().count()
+
+            total_profit = total_income - total_expenses
+
+            return {
+                "income": total_income,
+                "expenses": total_expenses,
+                "profit": total_profit,
+                "orders": total_orders,
+            }
+
+        def calculate_percent_change(current, previous):
+            if previous == 0:
+                # If no previous data, treat as 100% increase if current > 0 else no change
+                if current > 0:
+                    return 100.0, "up"
+                else:
+                    return 0.0, "no change"
+            change = ((current - previous) / previous) * 100
+            direction = "up" if change > 0 else ("down" if change < 0 else "no change")
+            return round(abs(change), 2), direction
+
+        this_week = get_metrics(start_of_this_week, end_of_this_week)
+        last_week = get_metrics(start_of_last_week, end_of_last_week)
+
+        percent_changes = {}
+        for key in ['income', 'expenses', 'profit', 'orders']:
+            pct, direction = calculate_percent_change(this_week[key], last_week[key])
+            percent_changes[key] = {
+                "percent": pct,
+                "direction": direction
+            }
+
+        response_data = {
+            "total_income": float(this_week["income"]),
+            "total_expenses": float(this_week["expenses"]),
+            "total_profit": float(this_week["profit"]),
+            "total_orders": this_week["orders"],
+            "percent_changes": percent_changes
+        }
+
+        return Response(response_data)
