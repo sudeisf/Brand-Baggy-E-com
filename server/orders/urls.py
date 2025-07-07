@@ -12,7 +12,8 @@ from .views import (
     CustomerDetailAPIView,
     SellerRecentOrdersAPIView,
     SellerRecentOrderActivityAPIView,
-    SellerAnalyticsAPIView
+    SellerAnalyticsAPIView,
+    SellerRevenueAnalyticsAPIView
     )
 
 urlpatterns = [
@@ -29,6 +30,7 @@ urlpatterns = [
     path("seller/recent-orders/",SellerRecentOrdersAPIView.as_view(),name="seller-recent-orders"),
     path("seller/recent-activity/",SellerRecentOrderActivityAPIView.as_view(),name="seller-recent-activity"),
     path("seller/analytics/",SellerAnalyticsAPIView.as_view(),name="seller-analytics"),
+    path("seller/analytics/revenue/", SellerRevenueAnalyticsAPIView.as_view(), name="seller-revenue-analytics"),
 
 
 

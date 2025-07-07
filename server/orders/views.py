@@ -16,6 +16,7 @@ from notifications.utils import send_notifications
 from product.models import Product, ProductVariants
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import OuterRef, Subquery
+from django.utils.timezone import get_current_timezone
 
 
 
@@ -122,17 +123,12 @@ class AdminOrderTableAPIView(APIView):
         return Response(serializer.data)
 
 
-import logging
-
-logger = logging.getLogger(__name__)
-
 class PaymentAndOrderStatusUpdate(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request):
         serializer = PaymentAndOrderStatusSerializer(data=request.data)
         if not serializer.is_valid():
-            logger.error(f"Validation error: {serializer.errors}")
             return Response({"detail": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         order_id = serializer.validated_data.get("order_id")
@@ -147,7 +143,6 @@ class PaymentAndOrderStatusUpdate(APIView):
                 if payment_status:
                     payment = getattr(order, "payment", None)
                     if payment is None:
-                        logger.error(f"No payment record found for order ID {order_id}")
                         return Response(
                             {"detail": "Payment record not found for this order"},
                             status=status.HTTP_400_BAD_REQUEST
@@ -162,20 +157,17 @@ class PaymentAndOrderStatusUpdate(APIView):
                     order.save()
                     updates["order_status"] = order.status
 
-            logger.info(f"Successfully updated order ID {order_id}: {updates}")
             return Response(
                 {"message": "Update successful", "updates": updates},
                 status=status.HTTP_200_OK
             )
 
         except Order.DoesNotExist:
-            logger.error(f"Order with ID {order_id} not found")
             return Response(
                 {"detail": f"Order with ID {order_id} not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
         except Exception as e:
-            logger.exception(f"Unexpected error updating order ID {order_id}: {str(e)}")
             return Response(
                 {"detail": f"Unexpected error: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -557,3 +549,126 @@ class SellerAnalyticsAPIView(APIView):
         }
 
         return Response(response_data)
+
+from django.db import models
+from django.utils import timezone
+from datetime import datetime, time, timedelta
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from orders.models import Order
+from django.db.models.functions import TruncMonth, TruncDate
+from django.db.models import Sum, F, ExpressionWrapper, DateTimeField
+import pytz
+
+class SellerRevenueAnalyticsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        if user.user_role != 'seller':
+            return Response({'detail': 'Forbidden'}, status=403)
+
+        # Set timezone to EAT
+        tz = pytz.timezone('Africa/Nairobi')
+        now = timezone.now().astimezone(tz)  # Current time in EAT
+
+        # === Yearly (last 12 months) ===
+        yearly_qs = (
+            Order.objects.filter(
+                items__product__seller=user,
+                payment__status='completed'
+            )
+            .annotate(month=TruncMonth('created_at'))
+            .values('month')
+            .annotate(revenue=Sum('total_price'))
+            .order_by('month')
+        )
+
+        # Create a complete year structure with all months
+        month_names = [
+            "January", "February", "March", "April", 
+            "May", "June", "July", "August",
+            "September", "October", "November", "December"
+        ]
+
+        # Initialize all months with zero revenue
+        yearly_data = [{'month': month, 'revenue': 0} for month in month_names]
+
+        # Update with actual data from queryset
+        for item in yearly_qs:
+            month_name = item['month'].strftime("%B")
+            # Find the month in our structure and update its revenue
+            for month_data in yearly_data:
+                if month_data['month'] == month_name:
+                    month_data['revenue'] = float(item['revenue'] or 0)
+                    break
+
+        # If you only want the last 6 months (like in your example), you can:
+        # 1. First get current month index
+        current_month_index = datetime.now().month - 1  # January is 0
+        # 2. Get the last 6 months with wrap-around if needed
+        last_six_months = []
+        for i in range(6):
+            index = (current_month_index - i) % 12
+            last_six_months.append(yearly_data[index])
+        # 3. Reverse to get chronological order
+        yearly_data = list(reversed(last_six_months))
+
+        # === Monthly (current month) ===
+        start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        monthly_revenue = (
+            Order.objects.filter(
+                items__product__seller=user,
+                created_at__gte=start_of_month,
+                payment__status='completed'
+            )
+            .aggregate(revenue=Sum('total_price'))['revenue'] or 0
+        )
+        monthly_data = [{'month': now.strftime("%B"), 'revenue': float(monthly_revenue)}]
+
+        # === Daily (current week) - Fixed Version ===
+        # Calculate start of week (Monday) in EAT
+        start_of_week = now - timedelta(days=now.weekday())
+        start_of_week = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
+        # Calculate end of week (Sunday 23:59:59) in EAT
+        end_of_week = start_of_week + timedelta(days=6, hours=23, minutes=59, seconds=59)
+
+        # Convert to UTC for database query (if your DB stores UTC)
+        start_of_week_utc = start_of_week.astimezone(pytz.UTC)
+        end_of_week_utc = end_of_week.astimezone(pytz.UTC)
+
+        # Query using UTC for filtering but EAT for display
+        daily_qs = (
+            Order.objects.filter(
+                items__product__seller=user,
+                created_at__range=(start_of_week_utc, end_of_week_utc),
+                payment__status='completed'
+            )
+            .annotate(
+                # Convert to EAT before truncating to date
+                eat_time=ExpressionWrapper(
+                    F('created_at') + timedelta(hours=3),  # UTC to EAT conversion
+                    output_field=DateTimeField()
+                )
+            )
+            .annotate(day=TruncDate('eat_time'))
+            .values('day')
+            .annotate(revenue=Sum('total_price'))
+            .order_by('day')
+        )
+
+        # Build week map with proper day names
+        base = {day: 0 for day in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]}
+        for entry in daily_qs:
+            if entry['day']:  # Ensure day exists
+                weekday = entry['day'].strftime("%A")
+                base[weekday] = float(entry['revenue'] or 0)
+
+        daily_data = [{"day": day, "revenue": base[day]} for day in base]
+
+        return Response({
+            "yearly": yearly_data,
+            "monthly": monthly_data,
+            "daily": daily_data
+        })
