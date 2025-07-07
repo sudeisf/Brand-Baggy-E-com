@@ -91,6 +91,7 @@ class StripePaymentIntentAPIView(APIView):
 
 class PayPalPaymentAPIView(APIView):
     permission_classes = [IsAuthenticated]
+
     def post(self, request):
         serializer = PaymentRequestSerializer(data=request.data)
         if serializer.is_valid():
@@ -98,21 +99,30 @@ class PayPalPaymentAPIView(APIView):
             try:
                 order = Order.objects.get(id=order_id)
 
-                if hasattr(order, 'payment'):
-                    return Response({'error': 'Payment already exists'}, status=400)
-                
+                try:
+                    payment = Payment.objects.get(order=order)
+                except Payment.DoesNotExist:
+                    return Response({'error': 'Payment record missing for order.'}, status=404)
+
+                if payment.method == Payment.Method.PAYPAL and payment.transaction_id:
+                    return Response({'error': 'PayPal payment already initialized.'}, status=400)
+
+                # Get PayPal access token
                 auth_response = requests.post(
                     f"{settings.PAYPAL_API_BASE}/v1/oauth2/token",
                     auth=(settings.PAYPAL_CLIENT_ID, settings.PAYPAL_CLIENT_SECRET),
                     data={"grant_type": "client_credentials"},
                 )
                 access_token = auth_response.json().get("access_token")
+                if not access_token:
+                    return Response({'error': 'PayPal authentication failed'}, status=400)
 
                 headers = {
-                        "Content-Type": "application/json",
-                        "Authorization": f"Bearer {access_token}",
-                    }
-                
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {access_token}",
+                }
+
+                # Create PayPal order
                 body = {
                     "intent": "CAPTURE",
                     "purchase_units": [{
@@ -130,27 +140,24 @@ class PayPalPaymentAPIView(APIView):
                 )
 
                 if create_order_response.status_code != 201:
-                    return Response({'error': 'PayPal order creation failed'}, status=400)
+                    return Response({'error': 'Failed to create PayPal order'}, status=400)
 
                 paypal_data = create_order_response.json()
 
-                
-                Payment.objects.create(
-                        order=order,
-                        method=Payment.Method.PAYPAL,
-                        status=Payment.Status.PENDING,
-                        amount=order.total_price,
-                        transaction_id=paypal_data["id"],
-                        provider_response=paypal_data
-                    )
-                return Response({
-                        'paypal_order_id': paypal_data["id"]
-                    }, status=200)
-               
+                # Update existing payment record
+                payment.method = Payment.Method.PAYPAL
+                payment.transaction_id = paypal_data["id"]
+                payment.provider_response = paypal_data
+                payment.status = Payment.Status.PENDING
+                payment.save()
+
+                return Response({'paypal_order_id': paypal_data["id"]}, status=200)
+
             except Order.DoesNotExist:
                 return Response({'error': 'Order not found'}, status=404)
+
         return Response(serializer.errors, status=400)
-    
+
 
 class PayPalCaptureAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -308,22 +315,18 @@ class StripeCaptureAPIView(APIView):
 from .tasks import send_payment_receipt_email
 
 class StripePayAndCaptureAPIView(APIView):
-
-    def record_failed_payment(self, order, status_code, error):
-        """Avoid duplicate failed payments for orders with OneToOneField."""
-        if Payment.objects.filter(order=order).exists():
-            print(f"[DEBUG] Skipping failed payment record: payment already exists for order {order.id}")
+    def update_failed_payment(self, payment, status_code, error):
+        """Update existing payment record with failed status."""
+        if payment.status == Payment.Status.FAILED:
+            print(f"[DEBUG] Payment already marked as failed for order {payment.order.id}")
             return
 
-        print(f"[DEBUG] Recording failed payment for order {order.id} | reason: {error}")
-        Payment.objects.create(
-            order=order,
-            method=Payment.Method.STRIPE,
-            status=Payment.Status.FAILED,
-            amount=order.total_price,
-            provider_status=status_code,
-            provider_response={'error': str(error)},
-        )
+        print(f"[DEBUG] Updating failed payment for order {payment.order.id} | reason: {error}")
+        payment.method = Payment.Method.STRIPE
+        payment.status = Payment.Status.FAILED
+        payment.provider_status = status_code
+        payment.provider_response = {'error': str(error)}
+        payment.save()
 
     def post(self, request):
         serializer = PaymentRequestSerializer(data=request.data)
@@ -338,9 +341,15 @@ class StripePayAndCaptureAPIView(APIView):
             order = Order.objects.get(id=order_id)
             print(f"[DEBUG] Found order: {order.id}, total price: {order.total_price}")
 
-            if hasattr(order, "payment"):
-                print(f"[DEBUG] Order {order.id} already has a payment.")
-                return Response({'error': 'Payment already exists for this order'}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                payment = Payment.objects.get(order=order)
+            except Payment.DoesNotExist:
+                print(f"[DEBUG] No payment record found for order {order.id}")
+                return Response({'error': 'Payment record missing for order'}, status=status.HTTP_404_NOT_FOUND)
+
+            if payment.method == Payment.Method.STRIPE and payment.transaction_id:
+                print(f"[DEBUG] Stripe payment already initiated for order {order.id}")
+                return Response({'error': 'Stripe payment already exists for this order'}, status=400)
 
             # ✅ Create Stripe PaymentIntent
             payment_intent = stripe.PaymentIntent.create(
@@ -359,16 +368,13 @@ class StripePayAndCaptureAPIView(APIView):
             is_success = payment_status == 'succeeded'
             print(f"[DEBUG] Stripe status: {payment_status} | success: {is_success}")
 
-            # ✅ Create Payment record
-            payment = Payment.objects.create(
-                order=order,
-                method=Payment.Method.STRIPE,
-                status=Payment.Status.COMPLETED if is_success else Payment.Status.FAILED,
-                amount=order.total_price,
-                transaction_id=payment_intent.id,
-                provider_status=payment_status,
-                provider_response=payment_intent,
-            )
+            # ✅ Update existing payment
+            payment.method = Payment.Method.STRIPE
+            payment.transaction_id = payment_intent.id
+            payment.provider_status = payment_status
+            payment.provider_response = payment_intent
+            payment.status = Payment.Status.COMPLETED if is_success else Payment.Status.FAILED
+            payment.save()
 
             if is_success:
                 order.status = Order.OrderStatus.PAID
@@ -397,16 +403,18 @@ class StripePayAndCaptureAPIView(APIView):
 
         except stripe.error.CardError as e:
             print(f"[DEBUG] Stripe CardError: {e}")
-            self.record_failed_payment(order, getattr(e, 'code', 'card_error'), e)
+            if 'payment' in locals():
+                self.update_failed_payment(payment, getattr(e, 'code', 'card_error'), e)
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         except stripe.error.StripeError as e:
             print(f"[DEBUG] Stripe error: {e}")
-            self.record_failed_payment(order, getattr(e, 'code', 'stripe_error'), e)
+            if 'payment' in locals():
+                self.update_failed_payment(payment, getattr(e, 'code', 'stripe_error'), e)
             return Response({'error': f'Stripe error: {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         except Exception as e:
             print(f"[DEBUG] Unexpected error: {e}")
-            if 'order' in locals():
-                self.record_failed_payment(order, 'unexpected_error', e)
+            if 'payment' in locals():
+                self.update_failed_payment(payment, 'unexpected_error', e)
             return Response({'error': f'Unexpected error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
