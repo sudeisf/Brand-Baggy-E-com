@@ -24,7 +24,7 @@ import { useAnalystics } from "@/hooks/useAnalaytics";
               <h2 className="text-md mb-2 text-gray-400 text-start font-medium font-roboto capitalize">
                 {item.header}
               </h2>
-              <p className="text-4xl font-medium flex items-center text-[#331d67]">
+              <p className="text-3xl font-medium flex items-center text-[#331d67]">
                 <DollarSign className="w-8 h-8 stroke-3"/>
                 {item.amount} ETB
               </p>

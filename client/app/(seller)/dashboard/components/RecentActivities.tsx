@@ -7,64 +7,11 @@ import { User } from "lucide-react"
 import { formatRelative, parse } from "date-fns"
 import { useSellerActivity } from "@/hooks/use-order"
 
-// const activities = [
-//   {
-//     name: "John Doe",
-//     dateTime: "2025-05-17 12:34",
-//     orderType: "new order",
-//   },
-//   {
-//     name: "Jane Smith",
-//     dateTime: "2025-05-19 09:15",
-//     orderType: "completed",
-//   },
-//   {
-//     name: "Alex Johnson",
-//     dateTime: "2025-05-20 14:22",
-//     orderType: "new order",
-//   },
-//   {
-//     name: "Emily Brown",
-//     dateTime: "2025-05-18 16:45",
-//     orderType: "cancelled",
-//   },
-//   {
-//     name: "Michael Lee",
-//     dateTime: "2025-05-20 08:30",
-//     orderType: "new order",
-//   },
-//   {
-//     name: "Sarah Davis",
-//     dateTime: "2025-05-19 11:50",
-//     orderType: "completed",
-//   },
-//   {
-//     name: "David Wilson",
-//     dateTime: "2025-05-17 18:20",
-//     orderType: "cancelled",
-//   },
-//   {
-//     name: "Laura Martinez",
-//     dateTime: "2025-05-20 10:47",
-//     orderType: "new order",
-//   },
-//   {
-//     name: "Chris Taylor",
-//     dateTime: "2025-05-18 13:10",
-//     orderType: "completed",
-//   },
-//   {
-//     name: "Anna Clark",
-//     dateTime: "2025-05-19 15:30",
-//     orderType: "new order",
-//   },
-// ]
 
 export default function RecentActivity() {
   const [filter, setFilter] = useState("all")
   const {data: activities, isLoading} = useSellerActivity()
 
-  // Map API data to UI shape
   const mappedActivities = activities?.map((activity) => ({
     name: activity.customer,
     dateTime: activity.exact_time,
@@ -82,7 +29,7 @@ export default function RecentActivity() {
 
   const getOrderTypeStyles = (orderType: string) => {
     switch (orderType) {
-      case "new order":
+      case "paid":
         return "bg-[#331d67]/5 text-[#331d67] font-medium font-roboto capitalize"
       case "completed":
         return "bg-green-100 text-green-800 font-medium font-roboto capitalize"
