@@ -520,7 +520,6 @@ class SellerAnalyticsAPIView(APIView):
 
         def calculate_percent_change(current, previous):
             if previous == 0:
-                # If no previous data, treat as 100% increase if current > 0 else no change
                 if current > 0:
                     return 100.0, "up"
                 else:
@@ -573,7 +572,7 @@ class SellerRevenueAnalyticsAPIView(APIView):
         tz = pytz.timezone('Africa/Nairobi')
         now = timezone.now().astimezone(tz)  # Current time in EAT
 
-        # === Yearly (last 12 months) ===
+    
         yearly_qs = (
             Order.objects.filter(
                 items__product__seller=user,
@@ -592,20 +591,17 @@ class SellerRevenueAnalyticsAPIView(APIView):
             "September", "October", "November", "December"
         ]
 
-        # Initialize all months with zero revenue
         yearly_data = [{'month': month, 'revenue': 0} for month in month_names]
 
-        # Update with actual data from queryset
         for item in yearly_qs:
             month_name = item['month'].strftime("%B")
-            # Find the month in our structure and update its revenue
+           
             for month_data in yearly_data:
                 if month_data['month'] == month_name:
                     month_data['revenue'] = float(item['revenue'] or 0)
                     break
 
-        # If you only want the last 6 months (like in your example), you can:
-        # 1. First get current month index
+        
         current_month_index = datetime.now().month - 1  # January is 0
         # 2. Get the last 6 months with wrap-around if needed
         last_six_months = []

@@ -10,6 +10,7 @@ from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import AccessToken
 from orders.models import Order, OrderItem
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +34,8 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
 
             await self.channel_layer.group_add(self.group_name, self.channel_name)
             await self.accept()
-
-            await self.send_metrics()
+            self.keep_sending = True
+            asyncio.create_task(self.periodic_send())
 
         except Exception as e:
             logger.error(f"WebSocket connection error: {e}")
@@ -50,6 +51,7 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
             return None
 
     async def disconnect(self, close_code):
+        self.keep_sending = False
         if hasattr(self, 'group_name'):
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
             logger.info(f"Seller {self.seller.id} disconnected.")
@@ -76,7 +78,6 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
         prev_inc = await database_sync_to_async(self.get_income)(self.seller, start_last_week, end_last_week)
         chart_inc = await database_sync_to_async(self.get_daywise)(self.seller, start_this_week, end_this_week, metric="income")
         metrics.append(self.build_block("Total Income", curr_inc, prev_inc, chart_inc, percent_base=this_week_inc))
-
         # Total Orders (lifetime)
         curr_ord = await database_sync_to_async(self.get_total_orders_value)(self.seller)
         this_week_ord = await database_sync_to_async(self.get_orders_value)(self.seller, start_this_week, end_this_week)
@@ -105,13 +106,13 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
         return Order.objects.filter(
             items__product__seller=seller,
             created_at__range=(start, end),
-            payment__status='COMPLETED'
+            payment__status='completed'
         ).distinct().aggregate(total=Sum("total_price"))["total"] or Decimal("0")
 
     def get_total_income(self, seller):
         return Order.objects.filter(
             items__product__seller=seller,
-            payment__status='COMPLETED'
+            payment__status='completed'
         ).distinct().aggregate(total=Sum("total_price"))["total"] or Decimal("0")
 
     def get_orders_value(self, seller, start, end):
@@ -139,7 +140,7 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
             qs = Order.objects.filter(
                 items__product__seller=seller,
                 created_at__range=(start, end),
-                payment__status='COMPLETED'
+                payment__status='completed'
             ).annotate(day=TruncDate("created_at")).values("day").annotate(
                 total=Sum("total_price")
             )
@@ -159,6 +160,7 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
 
     def build_block(self, title, current, previous, chart, percent_base=None):
         percent, direction = self.calculate_percent(percent_base or current, previous)
+        percent = min(percent, 100.0)  # Clamp percent to 100 max
         return {
             "header": title,
             "amount": float(current),
@@ -173,3 +175,8 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
             return (100.0, "up") if current > 0 else (0.0, "no change")
         change = ((current - previous) / previous) * 100
         return round(abs(change), 2), "up" if change > 0 else "down" if change < 0 else "no change"
+
+    async def periodic_send(self):
+        while self.keep_sending:
+            await self.send_metrics()
+            await asyncio.sleep(10)  # send every 10 seconds

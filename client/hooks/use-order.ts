@@ -3,6 +3,7 @@ import { useAuthStore } from "@/store/authStore"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {OrderResponse} from "@/types/orders"
 import { OrderDetailResponse } from "@/types/order-detail";
+import { AnalyticsRevenueResponse, SellerOrderActivityResponse, SellerRecentOrderResponse } from "@/types/analytics";
 
 interface ShippingInfo {
       full_name : string;
@@ -207,6 +208,64 @@ export const useSellerOrderDetails = (order_id: number) => {
             }
           );
     
+          return response.data;
+        },
+      });
+    };
+
+export const useRevenuChartDataForOrders = () =>{
+      const token = useAuthStore((s) => s.accessToken);
+    
+      return useQuery({
+        queryKey: ["RevenuChartDataForOrders"],
+        queryFn: async () => {
+          const response = await api.get<AnalyticsRevenueResponse>(
+            `orders/seller/analytics/revenue/`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+    
+          return response.data;
+        },
+      });
+    };
+
+export const useSellerActivity = () =>{
+      const token = useAuthStore((s) => s.accessToken);
+    
+      return useQuery({
+        queryKey: ["sellerActivity"],
+        queryFn: async () => {
+          const response = await api.get<SellerOrderActivityResponse>(
+            `orders/seller/recent-activity/`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          return response.data;
+        },
+      });
+    };
+
+export const useSellerRecentOrders = () =>{
+      const token = useAuthStore((s) => s.accessToken);
+    
+      return useQuery({
+        queryKey: ["sellerRecentOrders"],
+        queryFn: async () => {
+          const response = await api.get<SellerRecentOrderResponse>(
+            `orders/seller/recent-orders/`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
           return response.data;
         },
       });

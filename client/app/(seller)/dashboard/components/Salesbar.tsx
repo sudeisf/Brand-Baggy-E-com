@@ -16,6 +16,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useRevenuChartDataForOrders } from "@/hooks/use-order"
 
 // Data for different time periods
 const yearlyData = [
@@ -51,19 +52,20 @@ const chartConfig = {
   } satisfies ChartConfig
 
 export function RevenueChart() {
+  const {data ,isLoading} = useRevenuChartDataForOrders()
   const [activeTab, setActiveTab] = useState("year")
 
   // Select data based on active tab
   const getChartData = () => {
     switch (activeTab) {
       case "year":
-        return yearlyData
+        return data?.yearly
       case "month":
-        return monthlyData
+        return data?.monthly
       case "day":
-        return dailyData
+        return data?.monthly
       default:
-        return yearlyData
+        return data?.yearly
     }
   }
 

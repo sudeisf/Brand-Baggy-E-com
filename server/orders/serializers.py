@@ -109,7 +109,7 @@ class OrderTableSerializer(serializers.ModelSerializer):
 
 class SellerRecentOrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)
-    product_image = serializers.ImageField(source='product.main_image', read_only=True)
+    product_image = serializers.SerializerMethodField()
     payment_status = serializers.SerializerMethodField()
     order_date = serializers.DateTimeField(source='order.created_at', format="%Y-%m-%d %H:%M")
     customer = serializers.SerializerMethodField()
@@ -119,17 +119,28 @@ class SellerRecentOrderItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderItem
-        fields = ['product_image', 'product_name', 'payment_status', 'order_date', 'customer', 'price', 'sold', 'status']
+        fields = ['id','product_image', 'product_name', 'payment_status', 'order_date', 'customer', 'price', 'sold', 'status']
 
     def get_payment_status(self, obj):
         try:
             return obj.order.payment.status
         except:
             return "no payment"
+    
+    def get_product_image(self,obj):
+        if obj.product.main_image:
+            public_id = str(obj.product.main_image)
+            return CloudinaryImage(public_id).build_url(secure=True)
 
     def get_customer(self, obj):
         order = obj.order
         if order.user:
+            if order.user.profile_url:
+                public_id = str(order.user.profile_url)
+                return {
+                    "username" : order.user.username,
+                    "image" : CloudinaryImage(public_id).build_url(secure=True)
+                }
             return order.user.username
         elif order.guest_full_name:
             return f"{order.guest_full_name} ({order.guest_email or 'No Email'})"

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -6,62 +5,71 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { User } from "lucide-react"
 import { formatRelative, parse } from "date-fns"
+import { useSellerActivity } from "@/hooks/use-order"
 
-const activities = [
-  {
-    name: "John Doe",
-    dateTime: "2025-05-17 12:34",
-    orderType: "new order",
-  },
-  {
-    name: "Jane Smith",
-    dateTime: "2025-05-19 09:15",
-    orderType: "completed",
-  },
-  {
-    name: "Alex Johnson",
-    dateTime: "2025-05-20 14:22",
-    orderType: "new order",
-  },
-  {
-    name: "Emily Brown",
-    dateTime: "2025-05-18 16:45",
-    orderType: "cancelled",
-  },
-  {
-    name: "Michael Lee",
-    dateTime: "2025-05-20 08:30",
-    orderType: "new order",
-  },
-  {
-    name: "Sarah Davis",
-    dateTime: "2025-05-19 11:50",
-    orderType: "completed",
-  },
-  {
-    name: "David Wilson",
-    dateTime: "2025-05-17 18:20",
-    orderType: "cancelled",
-  },
-  {
-    name: "Laura Martinez",
-    dateTime: "2025-05-20 10:47",
-    orderType: "new order",
-  },
-  {
-    name: "Chris Taylor",
-    dateTime: "2025-05-18 13:10",
-    orderType: "completed",
-  },
-  {
-    name: "Anna Clark",
-    dateTime: "2025-05-19 15:30",
-    orderType: "new order",
-  },
-]
+// const activities = [
+//   {
+//     name: "John Doe",
+//     dateTime: "2025-05-17 12:34",
+//     orderType: "new order",
+//   },
+//   {
+//     name: "Jane Smith",
+//     dateTime: "2025-05-19 09:15",
+//     orderType: "completed",
+//   },
+//   {
+//     name: "Alex Johnson",
+//     dateTime: "2025-05-20 14:22",
+//     orderType: "new order",
+//   },
+//   {
+//     name: "Emily Brown",
+//     dateTime: "2025-05-18 16:45",
+//     orderType: "cancelled",
+//   },
+//   {
+//     name: "Michael Lee",
+//     dateTime: "2025-05-20 08:30",
+//     orderType: "new order",
+//   },
+//   {
+//     name: "Sarah Davis",
+//     dateTime: "2025-05-19 11:50",
+//     orderType: "completed",
+//   },
+//   {
+//     name: "David Wilson",
+//     dateTime: "2025-05-17 18:20",
+//     orderType: "cancelled",
+//   },
+//   {
+//     name: "Laura Martinez",
+//     dateTime: "2025-05-20 10:47",
+//     orderType: "new order",
+//   },
+//   {
+//     name: "Chris Taylor",
+//     dateTime: "2025-05-18 13:10",
+//     orderType: "completed",
+//   },
+//   {
+//     name: "Anna Clark",
+//     dateTime: "2025-05-19 15:30",
+//     orderType: "new order",
+//   },
+// ]
 
 export default function RecentActivity() {
   const [filter, setFilter] = useState("all")
+  const {data: activities, isLoading} = useSellerActivity()
+
+  // Map API data to UI shape
+  const mappedActivities = activities?.map((activity) => ({
+    name: activity.customer,
+    dateTime: activity.exact_time,
+    orderType: activity.status,
+  })) || []
 
   const getInitials = (name: string) => {
     return name
@@ -87,14 +95,14 @@ export default function RecentActivity() {
 
   // Helper to format dateTime as relative
   const formatRelativeDateTime = (dateTime: string) => {
-    const date = parse(dateTime, "yyyy-MM-dd HH:mm", new Date())
-    return formatRelative(date, new Date("2025-05-20T23:18:00+03:00"))
+    const date = parse(dateTime, "EEEE 'at' hh:mm a", new Date())
+    return formatRelative(date, new Date())
   }
 
   // Filter activities based on selected orderType
   const filteredActivities = filter === "all"
-    ? activities
-    : activities.filter((activity) => activity.orderType === filter)
+    ? mappedActivities
+    : mappedActivities.filter((activity) => activity?.orderType === filter)
 
   return (
     <div className="w-[500px] h-[350px] bg-white border rounded-md shadow-none flex flex-col">

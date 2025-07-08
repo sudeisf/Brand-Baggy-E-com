@@ -3,58 +3,14 @@ import { TrendingDown , TrendingUp , DollarSign } from "lucide-react"
 import { DashChart } from "./Dashchart"
 import { RevenueChart } from "./Salesbar";
 import Recentactivity from "./RecentActivities";
-const data = [
-    {
-      header: "Total Income",
-      amount: 1200,
-      discription: "from last week",
-      percentile: "12%",
-      growthType: "up",
-      chartData: [
-        { day: "Monday", value: 200 },
-        { day: "Tuesday", value: 214.29 },
-        { day: "Wednesday", value: 228.57 },
-        { day: "Thursday", value: 242.86 },
-        { day: "Friday", value: 257.14 },
-        { day: "Saturday", value: 271.43 },
-        { day: "Sunday", value: 285.71 },
-      ],
-    },
-    {
-      header: "Total Orders",
-      amount: 120,
-      discription: "from last week",
-      percentile: "15%",
-      growthType: "down",
-      chartData: [
-        { day: "Monday", value: 40 },
-        { day: "Tuesday", value: 38.57 },
-        { day: "Wednesday", value: 37.14 },
-        { day: "Thursday", value: 35.71 },
-        { day: "Friday", value: 34.29 },
-        { day: "Saturday", value: 32.86 },
-        { day: "Sunday", value: 31.43 },
-      ],
-    },
-    {
-      header: "Total Expenses",
-      amount: 7000,
-      discription: "from last week",
-      percentile: "10%",
-      growthType: "up",
-      chartData: [
-        { day: "Monday", value: 1000 },
-        { day: "Tuesday", value: 1071.43 },
-        { day: "Wednesday", value: 1142.86 },
-        { day: "Thursday", value: 1214.29 },
-        { day: "Friday", value: 1285.71 },
-        { day: "Saturday", value: 1357.14 },
-        { day: "Sunday", value: 1428.57 },
-      ],
-    },
-  ];
+import { useAnalyticsStore } from "@/store/metricStore";
+import { useAuthStore } from "@/store/authStore";
+import { useAnalystics } from "@/hooks/useAnalaytics";
 
   export default function Dashheads() {
+    const token  = useAuthStore(s=>s.accessToken)
+    useAnalystics(token)
+    const data = useAnalyticsStore(s=>s.metrics)
     return (
       <div className="flex flex-col gap-8 bg-white ">
       <div className="flex gap-4 px-4">
@@ -82,7 +38,7 @@ const data = [
             </div>
   
            
-            <div className="absolute right-2 bottom-0 h-[80px]">
+            <div className="absolute right-1 bottom-0 h-[90px]">
               <DashChart 
                 data={item.chartData} 
                 label={item.header} 

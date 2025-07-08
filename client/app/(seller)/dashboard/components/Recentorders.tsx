@@ -50,134 +50,28 @@ import { DatePickerWithRange } from "./DateFilter"
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useSellerRecentOrders } from "@/hooks/use-order"
+import { SellerRecentOrder } from "@/types/analytics"
 
 
-
-
-
-export const data: Order[] = [
-    {
-      id: 1,
-      customer: "John Doe",
-      product: "Product 1",
-      orderDate: "2025-05-20 12:06",
-      status: "Pending",
-      image: "/assets/products/product1.jpg",
-      price: 200,
-      sold: 120,
-      invoice: "INV-001",
-    },
-    {
-      id: 2,
-      customer: "Jane Doe",
-      product: "Product 2",
-      orderDate: "2025-05-20 09:15",
-      status: "Completed",
-      image: "/assets/products/product2.jpg",
-      price: 200,
-      sold: 120,
-      invoice: "INV-002",
-    },
-    {
-      id: 3,
-      customer: "Jane Doe",
-      product: "Product 3",
-      orderDate: "2025-05-19 16:45",
-      status: "Completed",
-      image: "/assets/products/product3.jpg",
-      price: 200,
-      sold: 120,
-      invoice: "INV-002",
-    },
-    {
-      id: 4,
-      customer: "Jane Doe",
-      product: "Product 4",
-      orderDate: "2025-05-19 14:20",
-      status: "Cancelled",
-      image: "/assets/products/product4.jpg",
-      price: 200,
-      sold: 120,
-      invoice: "INV-002",
-    },
-    {
-      id: 5,
-      customer: "Jane Doe",
-      product: "Product 5",
-      orderDate: "2025-05-18 10:30",
-      status: "Completed",
-      image: "/assets/products/product5.jpg",
-      price: 200,
-      sold: 120,
-      invoice: "INV-002",
-    },
-    {
-      id: 6,
-      customer: "Jane Doe",
-      product: "Product 6",
-      orderDate: "2025-05-18 08:00",
-      status: "Cancelled",
-      image: "/assets/products/product6.jpg",
-      price: 200,
-      sold: 120,
-      invoice: "INV-002",
-    },
-    {
-      id: 7,
-      customer: "Jane Doe",
-      product: "Product 7",
-      orderDate: "2025-05-17 15:10",
-      status: "Completed",
-      image: "/assets/products/product7.jpg",
-      price: 200,
-      sold: 120,
-      invoice: "INV-002",
-    },
-    {
-      id: 8,
-      customer: "Jane Doe",
-      product: "Product 8",
-      orderDate: "2025-05-17 11:25",
-      status: "Shipped",
-      image: "/assets/products/product8.jpg",
-      price: 200,
-      sold: 120,
-      invoice: "INV-002",
-    },
-    {
-      id: 9,
-      customer: "Jane Doe",
-      product: "Product 9",
-      orderDate: "2025-05-16 13:50",
-      status: "Shipped",
-      image: "/assets/products/product9.jpg",
-      price: 200,
-      sold: 120,
-      invoice: "INV-002",
-    },
-  ]
-
-
-export type Order = {
-    id: number;
-    customer: string;
-    product: string;
-    orderDate: string;
-    status: string;
-    image: string;
-    price: number;
-    sold: number;
-    invoice: string;
-}
 
 const statusStyles: Record<string, string> = {
-    Pending: "bg-yellow-500/5 text-yellow-500",
-    Completed: "bg-green-500/5 text-green-500",
-    Shipped: "bg-blue-500/5 text-blue-500",
-    Cancelled: "bg-red-500/5 text-red-500",
-  }
+    "pending": "bg-yellow-500/5 text-yellow-500",
+    "paid": "bg-green-500/5 text-green-500",
+    "delivered": "bg-green-500/5 text-green-500",
+    "shipped": "bg-blue-500/5 text-blue-500",
+    "cancelled": "bg-red-500/5 text-red-500",
+}
 
-export const columns : ColumnDef<Order>[] = [
+const paymentStatusStyles: Record<string, string> = {
+    "pending": "bg-yellow-500/5 text-yellow-500",
+    "completed": "bg-green-500/5 text-green-500",
+    "failed": "bg-red-500/5 text-red-500",
+    "refunded": "bg-blue-500/5 text-blue-500",
+    "cancelled": "bg-red-500/5 text-red-500",
+}
+
+export const columns : ColumnDef<SellerRecentOrder>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -208,20 +102,24 @@ export const columns : ColumnDef<Order>[] = [
         cell: ({row}) => {
             return (
                     <div className="flex items-center gap-2 px-2 font-roboto">
-                        <Image src={row.original.image} alt={row.original.product} width={40} height={40} className="rounded-md shadow-sm border-2 border-gray-300" />
-                        {row.original.product}
+                        <Image src={row.original.product_image} alt={row.original.product_image} width={40} height={40} className="rounded-md shadow-sm border-2 border-gray-300" />
+                        {row.original.product_name}
                     </div>
             )
         }
     },
     {
-        accessorKey: "invoice",
-        header: "Invoice",
+        accessorKey: "payment",
+        header: "Payment",
         cell: ({row}) => {
             return (
-                <div className="flex text-left gap-2 font-roboto">
-                    {row.original.invoice}
-                </div>
+              <span
+              className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
+                  paymentStatusStyles[row.original.payment_status] || "bg-gray-500 text-white"
+              }`}
+              >
+                    {row.original.payment_status}
+                </span>
             )
         }
     },
@@ -230,7 +128,7 @@ export const columns : ColumnDef<Order>[] = [
         header: "Order date",
         cell: ({row}) => {
           const formatted = format(
-            parse(row.original.orderDate, "yyyy-MM-dd HH:mm", new Date()),
+            parse(row.original.order_date, "yyyy-MM-dd HH:mm", new Date()),
             "MMM d, yyyy, h:mm a"
 
           );
@@ -262,12 +160,12 @@ export const columns : ColumnDef<Order>[] = [
             return (
                 <div className="flex text-md text-left items-center gap-2 font-roboto">
                       <Avatar className="">
-                              <AvatarImage src="https://github.com/shadcn.png" className="rounded-full w-8 h-8" />
+                              <AvatarImage src={row.original.customer.image} className="rounded-full w-8 h-8" />
                               <AvatarFallback>
                                   <User className="w-3 h-3" />
                               </AvatarFallback>
                       </Avatar>
-                    {row.original.customer}
+                    {row.original.customer.username}
                 </div>
             );
         }
@@ -279,17 +177,6 @@ export const columns : ColumnDef<Order>[] = [
             return (
                 <div className="flex text-left gap-2  font-roboto">
                     ${row.original.price}
-                </div>
-            )
-        }
-    },
-    {
-        accessorKey: "sold",
-        header: "Sold",
-        cell: ({row}) => {
-            return (
-                <div className="flex text-left gap-2 font-roboto ">
-                    {row.original.sold}
                 </div>
             )
         }
@@ -343,9 +230,10 @@ export default function RecentOrdersTable() {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const {data : recentOrders , isLoading} = useSellerRecentOrders()
 
   const table = useReactTable({
-    data,
+    data : recentOrders ?? [],
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,

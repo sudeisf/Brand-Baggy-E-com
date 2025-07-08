@@ -31,8 +31,4 @@ urlpatterns = [
     path("seller/recent-activity/",SellerRecentOrderActivityAPIView.as_view(),name="seller-recent-activity"),
     path("seller/analytics/",SellerAnalyticsAPIView.as_view(),name="seller-analytics"),
     path("seller/analytics/revenue/", SellerRevenueAnalyticsAPIView.as_view(), name="seller-revenue-analytics"),
-
-
-
-
 ]

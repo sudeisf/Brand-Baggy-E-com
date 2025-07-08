@@ -17,7 +17,7 @@ export function DashChart({
     <div className="flex-1 pr-4 mt-2">
       <AreaChart
         width={170}
-        height={50}
+        height={80}
         data={data}
         margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
       >
