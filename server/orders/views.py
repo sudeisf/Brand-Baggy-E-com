@@ -410,7 +410,7 @@ class CustomerDetailAPIView(APIView):
             "orders": orders_list
         })
 
-# Product name	p.status Order date	Customer	Price	Sold	Satus
+
 class SellerRecentOrdersAPIView(APIView):
     permission_classes = [IsAuthenticated]  # The authenticated user must be the seller
 
@@ -420,8 +420,11 @@ class SellerRecentOrdersAPIView(APIView):
         # Get all order items where product.seller = seller
         order_items = OrderItem.objects.filter(product__seller=seller).select_related('product', 'order', 'order__payment')
 
-        serializer = SellerRecentOrderItemSerializer(order_items, many=True)
-        return Response(serializer.data)
+        paginator = PageNumberPagination()
+        paginator.page_size = 10  # Default page size
+        result_page = paginator.paginate_queryset(order_items, request)
+        serializer = SellerRecentOrderItemSerializer(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
 
 
@@ -433,8 +436,6 @@ class SellerRecentOrderActivityAPIView(APIView):
 
     def get(self, request):
         seller = request.user
-
-        # Fetch recent orders containing seller's products
         orders = Order.objects.filter(
             items__product__seller=seller
         ).distinct().order_by('-created_at')[:20]
@@ -446,7 +447,7 @@ class SellerRecentOrderActivityAPIView(APIView):
             else:
                 customer_name = order.guest_full_name or "Guest"
 
-            localized_time = order.created_at.astimezone(pytz.timezone("Africa/Nairobi"))  # adjust as needed
+            localized_time = order.created_at.astimezone(pytz.timezone("Africa/Nairobi")) 
             relative_time = humanize.naturaltime(now() - order.created_at)
             exact_time = localized_time.strftime("%A at %I:%M %p")
 
@@ -474,8 +475,6 @@ class SellerAnalyticsAPIView(APIView):
 
     def get(self, request):
         seller = request.user
-        
-        # Define date ranges for this week and last week (Monday to Sunday)
         today = datetime.today()
         start_of_this_week = today - timedelta(days=today.weekday())
         end_of_this_week = start_of_this_week + timedelta(days=6, hours=23, minutes=59, seconds=59)
@@ -568,9 +567,8 @@ class SellerRevenueAnalyticsAPIView(APIView):
         if user.user_role != 'seller':
             return Response({'detail': 'Forbidden'}, status=403)
 
-        # Set timezone to EAT
         tz = pytz.timezone('Africa/Nairobi')
-        now = timezone.now().astimezone(tz)  # Current time in EAT
+        now = timezone.now().astimezone(tz) 
 
     
         yearly_qs = (
@@ -584,7 +582,7 @@ class SellerRevenueAnalyticsAPIView(APIView):
             .order_by('month')
         )
 
-        # Create a complete year structure with all months
+
         month_names = [
             "January", "February", "March", "April", 
             "May", "June", "July", "August",

@@ -162,14 +162,18 @@ export const columns : ColumnDef<SellerRecentOrder>[] = [
                       <Avatar className="">
                               <AvatarImage src={row.original.customer.image} className="rounded-full w-8 h-8" />
                               <AvatarFallback>
-                                  <User className="w-3 h-3" />
+                                  <User className="w-6 h-6" />
                               </AvatarFallback>
                       </Avatar>
-                    {row.original.customer.username}
-                </div>
-            );
-        }
-    },
+                    {row.original.customer.username
+                    ? row.original.customer.username
+                    : typeof row.original.customer === "string"
+                      ? (row.original.customer as string).split(" ").slice(0, 2).join(" ")
+                      : ""}
+                                  </div>
+                              );
+                          }
+                      },
     {
         accessorKey: "price",
         header: "Price",
@@ -230,11 +234,20 @@ export default function RecentOrdersTable() {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const {data : recentOrders , isLoading} = useSellerRecentOrders()
+  const [pagination, setPagination] = useState({
+    pageIndex: 0, 
+    pageSize: 10, 
+  });
+  const {data : recentOrders , isLoading} = useSellerRecentOrders(pagination.pageIndex)
+ 
+  // Calculate total page count for manual pagination
+  const pageCount = recentOrders ? Math.ceil(recentOrders.count / pagination.pageSize) : 0;
 
   const table = useReactTable({
-    data : recentOrders ?? [],
+    data : recentOrders?.results ?? [],
     columns,
+    pageCount,
+    manualPagination :true,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -242,12 +255,14 @@ export default function RecentOrdersTable() {
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange : setPagination,
     onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      pagination
     },
   });
 

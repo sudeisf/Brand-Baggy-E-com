@@ -40,7 +40,7 @@ const productSchema = z.object({
     category: z.string().min(1, "Category is required"),
     subCategory: z.string().min(1, "Subcategory is required"),
     images: z.array(z.any()).min(1, "At least one image is required"),
-    cost_price: z.number().min(0, "Cost price must be greater than or equal to 0").optional(),
+    cost_price: z.number({ required_error: "Cost price is required" }).min(0, "Cost price must be greater than or equal to 0"),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -255,7 +255,7 @@ export default function CreateProduct() {
                                             step="0.01"
                                             min="0"
                                             className="bg-white font-roboto text-gray-700 h-12 shadow-none border capitalize rounded-sm"
-                                            {...register('cost_price', { required: true })}
+                                            {...register('cost_price', { valueAsNumber: true })}
                                         />
                                     </div>
                                     <div className="flex flex-col gap-2 px-2">

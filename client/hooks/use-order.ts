@@ -3,7 +3,7 @@ import { useAuthStore } from "@/store/authStore"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {OrderResponse} from "@/types/orders"
 import { OrderDetailResponse } from "@/types/order-detail";
-import { AnalyticsRevenueResponse, SellerOrderActivityResponse, SellerRecentOrderResponse } from "@/types/analytics";
+import { AnalyticsRevenueResponse, SellerOrderActivityResponse, SellerRecentOrderPaginatedResponse, SellerRecentOrderResponse } from "@/types/analytics";
 
 interface ShippingInfo {
       full_name : string;
@@ -252,14 +252,14 @@ export const useSellerActivity = () =>{
       });
     };
 
-export const useSellerRecentOrders = () =>{
+export const useSellerRecentOrders = (page:number) =>{
       const token = useAuthStore((s) => s.accessToken);
     
       return useQuery({
-        queryKey: ["sellerRecentOrders"],
+        queryKey: ["sellerRecentOrders",page],
         queryFn: async () => {
-          const response = await api.get<SellerRecentOrderResponse>(
-            `orders/seller/recent-orders/`,
+          const response = await api.get<SellerRecentOrderPaginatedResponse>(
+            `orders/seller/recent-orders/?page=${page+1}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,

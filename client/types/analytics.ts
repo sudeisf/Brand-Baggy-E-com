@@ -63,3 +63,10 @@ export interface SellerRecentOrder {
 }
 
 export type SellerRecentOrderResponse = SellerRecentOrder[];
+
+export interface SellerRecentOrderPaginatedResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: SellerRecentOrder[];
+}

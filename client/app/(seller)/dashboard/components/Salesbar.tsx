@@ -63,9 +63,9 @@ export function RevenueChart() {
       case "month":
         return data?.monthly
       case "day":
-        return data?.monthly
+        return data?.daily
       default:
-        return data?.yearly
+        return data?.daily
     }
   }
 
