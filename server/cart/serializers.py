@@ -11,10 +11,23 @@ class CartItemSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='product.name')
     price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2)
     main_image = serializers.SerializerMethodField()
+    discount_type = serializers.SerializerMethodField()
+    discount_value = serializers.DecimalField(source='discount_amount', max_digits=10, decimal_places=2)
+    final_price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    subtotal = serializers.SerializerMethodField()
 
     class Meta:
         model = CartItem
-        fields = ['id', 'name', 'price', 'main_image', 'quantity', 'size']
+        fields = [
+            'id', 'name', 'price', 'main_image', 'quantity', 'size',
+            'discount_type', 'discount_value', 'final_price', 'subtotal'
+        ]
+
+    def get_discount_type(self, obj):
+        return obj.discount.discount_type if obj.discount else None
+
+    def get_subtotal(self, obj):
+        return obj.final_price * obj.quantity
 
     def get_main_image(self, obj):
         if obj.product.main_image:
@@ -22,134 +35,89 @@ class CartItemSerializer(serializers.ModelSerializer):
             return CloudinaryImage(public_id).build_url(secure=True)
         return None
 
+
+
 class CartSerializer(serializers.ModelSerializer):
     items = CartItemSerializer(many=True, read_only=True)
-
+    total = serializers.SerializerMethodField()
+    
     class Meta:
         model = Cart
-        fields = ['id', 'items']
+        fields = ['id', 'items' ,'total']
 
+    def get_total(self, obj):
+        return sum(item.final_price * item.quantity for item in obj.items.all())
+
+
+
+from decimal import Decimal
 class AddCartItemSerializer(serializers.Serializer):
-     product_id = serializers.IntegerField()
-     quantity = serializers.IntegerField(min_value=1)
-     size = serializers.CharField()
-     discount_value = serializers.CharField(required=False, allow_blank=True)
-     discount_type = serializers.CharField(required=False, allow_blank=True)
-     discount_start_date = serializers.CharField(required=False, allow_blank=True)
-     discount_end_date = serializers.CharField(required=False, allow_blank=True)
-     discount_is_valid = serializers.BooleanField(required=False)
-     discount_is_active = serializers.BooleanField(required=False)
+    product_id = serializers.IntegerField()
+    quantity = serializers.IntegerField(min_value=1)
+    size = serializers.CharField()
 
-     def validate_size(self, value):
-         if not value or value.strip() == "":
-             print("Validation error: Size is required.")
-             raise serializers.ValidationError("Size is required.")
-         return value
+    def validate_size(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("Size is required.")
+        return value
 
-     def validate_product_id(self, value):
-         try:
-            product = Product.objects.get(id=value)
-         except Product.DoesNotExist:
-             raise serializers.ValidationError('product does not exist')
-         return value
-     
-     def validate_quantity(self, value):
-         product_id = self.initial_data.get('product_id')
-         size = self.initial_data.get('size')
-         
-         if product_id and size:
-             try:
-                 product = Product.objects.get(id=product_id)
-                 if not product.in_stock:
-                     raise serializers.ValidationError("Product is out of stock")
-                 
-                 try:
-                     variant = product.variants.get(size__name=size)
-                     if value > variant.stock:
-                         raise serializers.ValidationError(f"Only {variant.stock} items available in size {size}")
-                 except product.variants.model.DoesNotExist:
-                     raise serializers.ValidationError(f"Size {size} not available for this product")
-             except Product.DoesNotExist:
-                 pass
-         
-         return value
-     
-     def validate_discount_type(self, value):
-         if value and value not in ['fixed_amount', 'percentage']:
-             raise serializers.ValidationError("Discount type must be 'fixed_amount' or 'percentage'")
-         return value
-     
-     def validate_discount_value(self, value):
-         if value:
-             try:
-                 float(value)
-             except ValueError:
-                 raise serializers.ValidationError("Discount value must be a valid number")
-         return value
-     
-     def validate_discount_start_date(self, value):
-         if value:
-             try:
-                 from datetime import datetime
-                 dt = datetime.fromisoformat(value.replace('Z', '+00:00'))
-                 return dt.date()
-             except ValueError:
-                 raise serializers.ValidationError("Invalid date format. Use ISO datetime format")
-         return None
-     
-     def validate_discount_end_date(self, value):
-         if value:
-             try:
-                 from datetime import datetime
-                 dt = datetime.fromisoformat(value.replace('Z', '+00:00'))
-                 return dt.date()
-             except ValueError:
-                 raise serializers.ValidationError("Invalid date format. Use ISO datetime format")
-         return None
-     
-     def validate(self, data):
-         discount_start = data.get('discount_start_date')
-         discount_end = data.get('discount_end_date')
-         
-         if discount_start and discount_end and discount_start > discount_end:
-             raise serializers.ValidationError("Discount start date cannot be after end date")
-         
-         return data
-     
-     def create(self, validated_data):
-         request = self.context['request']
-         cart, _ = Cart.objects.get_or_create(user=request.user)
-         product = Product.objects.get(id=validated_data['product_id'])
-         size = validated_data['size']
-         
-         discount_data = {
-             'discount_value': validated_data.get('discount_value'),
-             'discount_type': validated_data.get('discount_type'),
-             'discount_start_date': validated_data.get('discount_start_date'),
-             'discount_end_date': validated_data.get('discount_end_date'),
-             'discount_is_valid': validated_data.get('discount_is_valid'),
-             'discount_is_active': validated_data.get('discount_is_active'),
-         }
-         
-         cartItem, created = CartItem.objects.get_or_create(
-             cart=cart,
-             product=product,
-             size=size,
-             defaults={
-                 'quantity': validated_data['quantity'],
-                 **discount_data
-             }
-         )
+    def validate(self, data):
+        product_id = data.get('product_id')
+        size = data.get('size')
+        quantity = data.get('quantity')
 
-         if not created:
-             cartItem.quantity += validated_data['quantity']
-             for key, value in discount_data.items():
-                 if value is not None:
-                     setattr(cartItem, key, value)
-             cartItem.save()
-             print(f"Updated CartItem quantity: {cartItem.quantity}")
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            raise serializers.ValidationError("Product does not exist.")
 
-         return cartItem
+        if not product.in_stock:
+            raise serializers.ValidationError("Product is out of stock.")
+
+        # Check variant stock
+        try:
+            variant = product.variants.get(size__name=size)
+        except product.variants.model.DoesNotExist:
+            raise serializers.ValidationError(f"Size '{size}' not available for this product.")
+
+        if quantity > variant.stock:
+            raise serializers.ValidationError(f"Only {variant.stock} items available in size '{size}'.")
+
+        data['product'] = product 
+        return data
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        product = validated_data['product']
+        size = validated_data['size']
+        quantity = validated_data['quantity']
+
+        cart, _ = Cart.objects.get_or_create(user=user)
+
+        discount = product.active_discount
+        discount_amount = discount.calcualteDiscount(product.price) if discount else Decimal("0.00")
+        final_price = product.price - discount_amount
+
+        cart_item, created = CartItem.objects.get_or_create(
+            cart=cart,
+            product=product,
+            size=size,
+            defaults={
+                'quantity': quantity,
+                'discount': discount,
+                'discount_amount': discount_amount,
+                'final_price': final_price
+            }
+        )
+
+        if not created:
+            cart_item.quantity += quantity
+            cart_item.discount = discount
+            cart_item.discount_amount = discount_amount
+            cart_item.final_price = final_price
+            cart_item.save()
+
+        return cart_item
 
 class RemoveCartItemSerializer(serializers.Serializer):
     cart_item_id = serializers.IntegerField()

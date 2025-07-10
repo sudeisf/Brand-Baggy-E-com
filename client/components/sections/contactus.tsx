@@ -9,13 +9,7 @@ export default function Contactus() {
     return (
         <section className="relative bg-[#f9f9ff] py-8 sm:py-12 md:py-16 *:font-roboto mt-5">
             {/* Decorative SVG Background */}
-            <div className="absolute inset-0 -z-10 opacity-10">
-                <img
-                    src="/patterns/diagonal-lines.svg" // Place a pattern SVG in your public/patterns folder
-                    alt="Background pattern"
-                    className="w-full h-full object-cover"
-                />
-            </div>
+            
 
             <div className="container mx-auto px-4 sm:px-6 max-w-6xl flex flex-col md:flex-row items-start justify-center gap-6 md:gap-10">
                 {/* Left: Form */}

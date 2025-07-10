@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { Bold, LoaderCircle } from 'lucide-react';
 import { useState } from "react"
+import { useQueryClient } from "@tanstack/react-query";
 
 const formSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -35,6 +36,7 @@ export default function LoginPage() {
   const login = useAuthStore((state) => state.login);
   const isLoading = useAuthStore((state) => state.isLoading);
   const [redirecting, setRedirecting] = useState<Boolean>(false);
+  const queryClient = useQueryClient();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver : zodResolver(formSchema),
@@ -50,7 +52,8 @@ export default function LoginPage() {
         const user = result?.user;
 
         if(user?.user_role === "buyer"){
-          await syncMerge()
+          await syncMerge();
+          await queryClient.invalidateQueries({ queryKey: ['cart'] });
           setRedirecting(true)
           router.replace('/');
         } else if(user?.user_role === "seller"){

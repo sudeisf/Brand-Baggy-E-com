@@ -76,6 +76,24 @@ class Product(models.Model):
     def total_stock(self):
         return sum(variant.stock for variant in self.variants.all())
 
+    
+    @property
+    def active_discount(self):
+        now = timezone.now()
+        product_discounts = self.product_discounts.select_related('discount').all()
+        for pd in product_discounts:
+            discount = pd.discount
+            if discount and discount.is_valid():
+                return discount
+        return None
+
+    @property
+    def discounted_price(self):
+        discount = self.active_discount
+        if discount:
+            return self.price - discount.calculateDiscount(self.price)
+        return self.price
+    
     def __str__(self):
         return self.name
     
@@ -202,7 +220,7 @@ class Discount(models.Model):
         return discount_amount
     
 class ProductDiscount(models.Model):
-    product = models.ForeignKey(Product ,on_delete=models.CASCADE, related_name='discount')
+    product = models.ForeignKey(Product ,on_delete=models.CASCADE, related_name='product_discounts')
     discount = models.ForeignKey(Discount, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -9,23 +9,14 @@ import { useEffect, useState } from "react"
 import { useAuthStore } from "@/store/authStore"
 import { toast } from "sonner"
 
-// Custom hook to detect mobile viewport
 const useIsMobile = () => {
     const [isMobile, setIsMobile] = useState(false)
-  
-
     useEffect(() => {
         const checkIsMobile = () => {
-            setIsMobile(window.innerWidth < 1024) // 1024px is the lg breakpoint
+            setIsMobile(window.innerWidth < 1024) 
         }
-
-        // Initial check
         checkIsMobile()
-
-        // Add event listener for window resize
         window.addEventListener('resize', checkIsMobile)
-
-        // Cleanup
         return () => window.removeEventListener('resize', checkIsMobile)
     }, [])
 
@@ -46,22 +37,25 @@ export default function SideBarMenu() {
         try {
             const result = await logoutFn();
             if (result?.success) {
-                toast.success("accout logged out successfully.",
-                    {
-                        duration: 2000,
-                        style: {
-                            color: "#ffffff",
-                            background: "#331d67"
-                        }
-                    }
-                )
                 router.replace('/login');
+                toast.success("Account logged out successfully.", {
+                    duration: 2000,
+                    style: {
+                        color: "#ffffff",
+                        background: "#331d67"
+                    }
+                });
             }
-        } catch (error:  any) {
+        } catch (error: any) {
             console.error('Logout failed:', error);
-            toast.error(error)
+            // Show a user-friendly error message
+            toast.error(
+                error?.response?.data?.message ||
+                error?.message ||
+                typeof error === "string" ? error : "Logout failed. Please try again."
+            );
         }
-    }
+    };
 
     const tabs = [
         { path: defaultPath, icon: User, label: "Details" },

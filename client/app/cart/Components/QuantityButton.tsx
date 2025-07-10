@@ -5,7 +5,7 @@ import { Plus , Minus} from "lucide-react"
 import { useUpdateCartItemQuantity } from "@/hooks/useCart"
 
 interface QuantityButtonProps {
-    id: string;
+    id: number;
     quantity: number;
     size : string;
     onQuantityChange: (quantity: number) => void

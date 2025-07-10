@@ -31,21 +31,16 @@ interface CartItem {
 }
 
 interface AddToCartButtonProps{
-    isHeart : boolean;
-    onHeartClick : () => void ;
     cartItem : CartItem;
-    onAddToCartSuccess?: () => void;
     isSizeSelected: boolean
     product_id : number
 }
 
 export default function AddToCartButton({
-    isHeart , 
-    onHeartClick , 
     product_id,
     isSizeSelected,
     cartItem, 
-    onAddToCartSuccess}:AddToCartButtonProps){
+    }:AddToCartButtonProps){
 
     const addToCart = useCartStore((state)=> state.addCartItem)
     const isAuthenticated = useAuthStore((state)=>state.isAuthenticated)
@@ -55,38 +50,55 @@ export default function AddToCartButton({
         product_id : Number(cartItem.id),
         quantity: Number(cartItem.quantity),
         size : cartItem.size,
-        discount_value : Number(cartItem.discount.discount_value),
-        discount_type :cartItem.discount.discount_type,
-        discount_start_date :cartItem.discount.discount_start_date,
-        discount_end_date :cartItem.discount.discount_end_date,
-        discount_is_valid :cartItem.discount.discount_is_valid,
-        discount_is_active :cartItem.discount.discount_is_active,
     }
 
     const handleAddToCart = () => {
-        mutation.mutate(
-            payload,{
-                onError : (error) =>{
-                    console.error("Failed to add to cart:",error);
+        // Map cartItem to match the store's CartItem type
+        const storeCartItem = {
+            id: Number(cartItem.id),
+            main_image: cartItem.main_image,
+            name: cartItem.name,
+            size: cartItem.size,
+            quantity: cartItem.quantity,
+            price: Number(cartItem.price),
+            discount_type: cartItem.discount.discount_type === "fixed_amount" || cartItem.discount.discount_type === "percentage"
+                ? cartItem.discount.discount_type as "fixed_amount" | "percentage"
+                : null,
+            discount_value: cartItem.discount.discount_value,
+            final_price: Number(cartItem.price), // or calculate with discount if needed
+            subtotal: Number(cartItem.price) * cartItem.quantity, // or use discounted price
+        };
+
+        if (isAuthenticated) {
+            mutation.mutate(
+                payload,
+                {
+                    onError: (error) => {
+                        console.error("Failed to add to cart:", error);
+                    }
                 }
-            }
-        );
-    }
+            );
+        }else{
+            addToCart(storeCartItem);
+        }
+    };
 
 
     const { isFavorite, toggleFavorite } = useFavoritesStore();
     const handleToggleFavorite = () => {
-        toggleFavorite({
-          id: cartItem.id,
-          main_image: cartItem.main_image,
-          name: cartItem.name,
-          price: cartItem.price,
-          in_stock : cartItem.in_stock
-        });
+       
         if(isAuthenticated){
             fav_Mutation.mutate(
                 {product_id : product_id}
             )
+        }else{
+            toggleFavorite({
+                id: cartItem.id,
+                main_image: cartItem.main_image,
+                name: cartItem.name,
+                price: cartItem.price,
+                in_stock : cartItem.in_stock
+              });
         }
       };
     return(

@@ -15,23 +15,24 @@ export default function CartBadge() {
     const isAuthenticated = useAuthStore(state=>state.isAuthenticated)
  
     const totalQuantity = useCartStore((state)=>state.totalQuantity)
-    const totalPrice = useCartStore((state)=>state.totalPrice)
+    const totalPrice = useCartStore((state)=>state.subtotal)
 
     useEffect(()=>{
             setMounted(true)
     },[]);
+
     useEffect(()=>{
-      if(!mounted || !isAuthenticated) return;
-      const unsubscribe =useCartStore.subscribe(
+        if(!mounted) return;
+        const unsubscribe = useCartStore.subscribe(
             (state) => state.items,
             () => {
-                  setCount(totalQuantity());
-                  setTotal(totalPrice());
+                setCount(totalQuantity());
+                setTotal(totalPrice());
             },
             { fireImmediately: true }
-      );
-      return () => unsubscribe();
-    },[mounted,totalQuantity,totalPrice]);
+        );
+        return () => unsubscribe();
+    },[mounted, totalQuantity, totalPrice]);
 
     return (
         <div className="bg-white rounded-md p-1 sm:p-2 border relative">

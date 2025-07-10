@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from jsonschema import ValidationError
 
 from payment.models import Payment
 from  . models import Order , OrderItem, ShippingInfo
@@ -19,13 +20,14 @@ from django.db.models import OuterRef, Subquery
 from django.utils.timezone import get_current_timezone
 
 
-
 class CreateOrderAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @transaction.atomic
     def post(self, request):
         user = request.user
 
+        # Validate shipping info
         shipping_serializer = ShippingInfoSerializer(data=request.data.get('shipping_info'))
         if not shipping_serializer.is_valid():
             return Response(shipping_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -34,39 +36,73 @@ class CreateOrderAPIView(APIView):
 
         try:
             cart = Cart.objects.get(user=user)
-            cart_items = cart.items.all()
+            cart_items = cart.items.select_related('product').all()
         except Cart.DoesNotExist:
             return Response({'detail': 'Cart not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         if not cart_items:
             return Response({'detail': 'Cart is empty.'}, status=status.HTTP_400_BAD_REQUEST)
 
-       
+        # Calculate total and create order
         total = Decimal('0.00')
-        for item in cart_items:
-            total += item.product.price * item.quantity
-
-        
         order = Order.objects.create(
             user=user,
             cart=cart,
-            total_price=total,
+            total_price=total,  # Will be updated
             shipping_info=shipping_info,
             status=Order.OrderStatus.PENDING
         )
 
-       
+        # Create order items and calculate total
         for item in cart_items:
+            product = item.product
+            
+            # Get variant if size is specified
+            variant = None
+            if item.size:
+                try:
+                    variant = ProductVariants.objects.get(product=product, size__name=item.size)
+                    # Verify stock
+                    if variant.stock < item.quantity:
+                        raise ValidationError(
+                            f"Not enough stock for {product.name} in size {item.size}. "
+                            f"Available: {variant.stock}, Requested: {item.quantity}"
+                        )
+                    # Reduce stock
+                    variant.stock -= item.quantity
+                    variant.save()
+                except ProductVariants.DoesNotExist:
+                    pass
+
+            # Calculate pricing
+            base_price = product.price
+            discount = product.active_discount
+            discount_amount = discount.calcualteDiscount(base_price) if discount else Decimal("0.00")
+            final_price = base_price - discount_amount
+            subtotal = final_price * item.quantity
+            
+            # Create order item
             OrderItem.objects.create(
                 order=order,
-                product=item.product,
-                price=item.product.price,
+                product=product,
+                variants=variant,  # Changed from item.variants to variant
+                price=base_price,
+                discount_amount=discount_amount,
+                final_price=final_price,
                 quantity=item.quantity,
-                subtotal=item.product.price * item.quantity
+                subtotal=subtotal
             )
-        
+            
+            # Accumulate total
+            total += subtotal
+
+        # Update order total
+        order.total_price = total
+        order.save()
+
         serializer = OrderSerializer(order)
 
+        # YOUR EXACT NOTIFICATION LOGIC PRESERVED
         notified_sellers = set()
         for item in cart_items:
             seller_user = item.product.seller
@@ -75,8 +111,10 @@ class CreateOrderAPIView(APIView):
                 send_notifications(seller_user, message, notification_type="ORDER")
                 notified_sellers.add(seller_user.id)
 
+        # Clear cart
         cart.items.all().delete()
 
+        # Create payment
         Payment.objects.create(
             order=order,
             amount=total,
@@ -87,7 +125,6 @@ class CreateOrderAPIView(APIView):
             'id': order.id,
             'order': serializer.data
         }, status=status.HTTP_201_CREATED)
-    
 
 
 class UserOrderListAPIView(APIView):

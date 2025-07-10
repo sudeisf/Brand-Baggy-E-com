@@ -21,7 +21,7 @@ export default function FavBadge(){
             setMounted(true)
       },[]);
       useEffect(()=>{
-      if(!mounted || !isAuthenticated) return;
+      if(!mounted) return;
       const unsubscribe =useFavoritesStore.subscribe(
                   (state) => state.favorites,
                   () => {

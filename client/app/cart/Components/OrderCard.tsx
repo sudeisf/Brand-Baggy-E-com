@@ -6,8 +6,9 @@ import { ShieldCheck } from "lucide-react"
 import Link from "next/link"
 
 export default function OrderSummary() {
-    const subtotal = useCartStore(state => state.totalPrice);
-    const discout_price = useCartStore(state=> state.discountedPrice)
+    const subtotal = useCartStore(state => state.subtotal);
+    const discout_price = useCartStore(state=> state.totalDiscount)
+    const docountedAmount = useCartStore(s=>s.getDiscountAmount)
     return (
         <div className="border-2 space-y-4  border-gray-200 rounded-xl p-6 h-fit">
             <h1 className="text-2xl font-medium font-roboto text-[#331d67]">Order Summary</h1>
@@ -22,12 +23,12 @@ export default function OrderSummary() {
                 </div>
                 <div className="flex justify-between">
                     <p>Delivery Fee</p>
-                    <p className="font-roboto font-medium tracking-wider">{100}<span className="text-sm font-roboto">ETB</span> </p>
+                    <p className="font-roboto font-medium tracking-wider">Free<span className="text-sm font-roboto"></span> </p>
                 </div>
             </div>
             <div className="flex justify-between border-t-2 border-gray-200 pt-2">
                 <p>Total</p>
-                <p className="font-roboto font-medium tracking-wider">{(subtotal() - discout_price() + 100).toFixed(2)} <span className="text-sm font-roboto">ETB</span></p>
+                <p className="font-roboto font-medium tracking-wider">{((subtotal() - discout_price())).toFixed(2)} <span className="text-sm font-roboto">ETB</span></p>
             </div>
             <div className="flex items-start gap-2 bg-[#331d67]/5 text-[#331d67] p-4 rounded-md">
                 <ShieldCheck className="w-6 h-6" />

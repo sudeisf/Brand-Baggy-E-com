@@ -557,7 +557,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             return CloudinaryImage(public_id).build_url(secure=True)
     
     def get_discount(self, obj):
-        product_discounts = obj.discount.all()
+        product_discounts = obj.product_discounts.all()
         if product_discounts.exists():
             latest_discount = product_discounts.first()
             discount = latest_discount.discount
@@ -615,13 +615,25 @@ class SellerProductDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [ 
-            'id', 'name', 'description','model_number',"product_code" ,
-            'main_image', 'brand',"" 'category','price','gender',
-            'quantity','discount', 'variants', 'seller', "product_location"
+            'id',
+            'name',
+            'description',
+            'model_number',
+            'product_code',
+            'main_image',
+            'brand',
+            'category',
+            'price',
+            'gender',
+            'quantity',
+            'discount',
+            'variants',
+            'seller',
+            'product_location'
         ]
     
     def get_discount(self, obj):
-        latest_discount_link = obj.discount.order_by('-created_at').first()
+        latest_discount_link = obj.product_discounts.select_related('discount').order_by('-created_at').first()
         if latest_discount_link and latest_discount_link.discount:
             return ProductDiscountSerializer(latest_discount_link.discount).data
         return None
@@ -769,87 +781,180 @@ class SellerProductListSerializer(serializers.ModelSerializer):
         return obj.product_location.name if obj.product_location else None
       
 
+from django.db import transaction
+from decimal import Decimal
 class UpdateProductSerializer(serializers.ModelSerializer):
-    discount_value = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
-    discount_type = serializers.ChoiceField(choices=Discount.DiscountType.choices, required=False)
+    discount_value = serializers.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        required=False,
+        min_value=0,
+        max_value=100  # Assuming percentage discount (adjust if needed)
+    )
+    discount_type = serializers.ChoiceField(
+        choices=Discount.DiscountType.choices, 
+        required=False
+    )
     discount_start_date = serializers.DateTimeField(required=False)
     discount_end_date = serializers.DateTimeField(required=False)
     is_active = serializers.BooleanField(required=False)
     product_location = serializers.CharField(max_length=100, required=False)
+    variants = serializers.JSONField(required=False, write_only=True)
 
     class Meta:
         model = Product
         fields = [
-            'name',
-            'description',
-            'price',
-            'quantity',
-            'in_stock',
-            'brand',
-            'model_number',
-            'product_code',
-            'gender',
-            'product_location',
-            'discount_value',
-            'discount_type',
-            'discount_start_date',
-            'discount_end_date',
-            'is_active'
+            'name', 'description', 'price', 'quantity', 'in_stock',
+            'brand', 'model_number', 'product_code', 'gender',
+            'product_location', 'discount_value', 'discount_type',
+            'discount_start_date', 'discount_end_date', 'is_active',
+            'variants'
         ]
         extra_kwargs = {
-            'name': {'required': False},
-            'description': {'required': False},
-            'price': {'required': False, 'min_value': 0.01},
-            'quantity': {'required': False, 'min_value': 0},
-            'in_stock': {'required': False},
-            'brand': {'required': False},
-            'model_number': {'required': False},
-            'product_code': {'required': False},
-            'gender': {'required': False}
+            field: {'required': False} 
+            for field in fields if field not in [
+                'discount_value', 'discount_type', 'discount_start_date',
+                'discount_end_date', 'is_active', 'variants'
+            ]
         }
+        extra_kwargs.update({
+            'price': {'min_value': Decimal('0.01')},
+            'quantity': {'min_value': 0}
+        })
 
     def validate_product_location(self, value):
-        location, _ = ProductLocation.objects.get_or_create(name=value)
+        """Ensure product location exists or create it"""
+        if not value:
+            return None
+        location, _ = ProductLocation.objects.get_or_create(name=value.strip())
         return location
 
-    def update(self, instance, validated_data):
-        """Handle partial updates with image replacement and discount management"""
-        discount_value = validated_data.pop('discount_value', None)
-        discount_type = validated_data.pop('discount_type', None)
-        discount_start_date = validated_data.pop('discount_start_date', None)
-        discount_end_date = validated_data.pop('discount_end_date', None)
-        is_active = validated_data.pop('is_active', None)
+    def validate_variants(self, value):
+        """Validate variants data structure and values"""
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Variants must be a list of objects")
         
+        seen_sizes = set()
+        for variant in value:
+            if not isinstance(variant, dict):
+                raise serializers.ValidationError("Each variant must be an object")
+            
+            if 'size' not in variant or not variant['size']:
+                raise serializers.ValidationError("Each variant must have a size")
+            
+            if variant['size'] in seen_sizes:
+                raise serializers.ValidationError(f"Duplicate size: {variant['size']}")
+            seen_sizes.add(variant['size'])
+            
+            if 'stock' not in variant or not isinstance(variant['stock'], int):
+                raise serializers.ValidationError("Each variant must have an integer stock value")
+            
+            if variant['stock'] < 0:
+                raise serializers.ValidationError("Stock cannot be negative")
+        
+        return value
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        """Handle atomic updates of product and related models"""
+        discount_data = self._extract_discount_data(validated_data)
+        variants_data = validated_data.pop('variants', None)
+        
+        # Update core product fields
         instance = super().update(instance, validated_data)
 
-        if any([discount_value, discount_type, discount_start_date, discount_end_date, is_active is not None]):
-            latest_discount_link = instance.discount.order_by('-created_at').first()
-            
-            if latest_discount_link and latest_discount_link.discount:
-                discount = latest_discount_link.discount
-                if discount_value is not None:
-                    discount.value = discount_value
-                if discount_type is not None:
-                    discount.discount_type = discount_type
-                if discount_start_date is not None:
-                    discount.start_date = discount_start_date
-                if discount_end_date is not None:
-                    discount.end_date = discount_end_date
-                if is_active is not None:
-                    discount.is_active = is_active
-                discount.save()
-            else:
-                discount = Discount.objects.create(
-                    name=f"Discount for {instance.name}",
-                    description=f"Auto-generated discount for {instance.name}",
-                    discount_type=discount_type or Discount.DiscountType.PERCENTAGE,
-                    value=discount_value or 0,
-                    start_date=discount_start_date,
-                    end_date=discount_end_date,
-                    is_active=is_active if is_active is not None else True
-                )
-                ProductDiscount.objects.create(product=instance, discount=discount)
+        # Process discount if any discount-related fields were provided
+        if any(discount_data.values()):
+            self._process_discount(instance, discount_data)
+        
+        # Process variants if provided
+        if variants_data is not None:
+            self._process_variants(instance, variants_data)
+
         return instance
+
+    def _extract_discount_data(self, validated_data):
+        """Extract and clean discount-related data"""
+        return {
+            'value': validated_data.pop('discount_value', None),
+            'type': validated_data.pop('discount_type', None),
+            'start_date': validated_data.pop('discount_start_date', None),
+            'end_date': validated_data.pop('discount_end_date', None),
+            'is_active': validated_data.pop('is_active', None)
+        }
+
+    def _process_discount(self, product, discount_data):
+        """Handle discount creation or update"""
+        discount_link = product.product_discounts.select_related('discount').first()
+        
+        if discount_link and discount_link.discount:
+            discount = discount_link.discount
+            self._update_existing_discount(discount, discount_data)
+        else:
+            self._create_new_discount(product, discount_data)
+
+    def _update_existing_discount(self, discount, discount_data):
+        """Update existing discount with new values"""
+        update_fields = []
+        
+        for field, value in discount_data.items():
+            if value is None:
+                continue
+                
+            attr_name = f'discount_{field}' if field in ['type', 'value'] else field
+            setattr(discount, attr_name, value)
+            update_fields.append(attr_name)
+        
+        if update_fields:
+            discount.save(update_fields=update_fields)
+
+    def _create_new_discount(self, product, discount_data):
+        """Create new discount for product"""
+        discount = Discount.objects.create(
+            name=f"Discount for {product.name}",
+            description=f"Auto-generated discount for {product.name}",
+            discount_type=discount_data['type'] or Discount.DiscountType.PERCENTAGE,
+            value=discount_data['value'] or Decimal('0'),
+            start_date=discount_data['start_date'] or timezone.now(),
+            end_date=discount_data['end_date'],
+            is_active=discount_data.get('is_active', True)
+        )
+        ProductDiscount.objects.create(product=product, discount=discount)
+
+    def _process_variants(self, product, variants_data):
+        """Update product variants"""
+        existing_variants = {
+            v.size.name.lower(): v 
+            for v in product.variants.select_related('size').all()
+        }
+        updated_sizes = set()
+        
+        for variant_data in variants_data:
+            size_name = variant_data['size'].strip().lower()
+            stock = variant_data['stock']
+            
+            size, _ = ProductSize.objects.get_or_create(
+                name=variant_data['size'].strip(),
+                defaults={'code': variant_data['size'].strip()[:10].upper()}
+            )
+            
+            if size_name in existing_variants:
+                variant = existing_variants[size_name]
+                if variant.stock != stock:
+                    variant.stock = stock
+                    variant.save(update_fields=['stock'])
+            else:
+                ProductVariants.objects.create(
+                    product=product,
+                    size=size,
+                    stock=stock,
+                    sku=f"{product.id}-{size.code}"
+                )
+            
+            updated_sizes.add(size_name)
+        
+        # Delete variants not included in the update
+        product.variants.exclude(size__name__in=updated_sizes).delete()
 
 class SerachProductSerializer(serializers.ModelSerializer):
     main_image = serializers.SerializerMethodField()

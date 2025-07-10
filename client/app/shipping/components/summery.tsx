@@ -10,8 +10,10 @@ type Props = {
 }
 
 export default function Summery({ onPlaceOrder }: Props) {
-    const items = useCartStore(state => state.items)
-    const discount = useCartStore(state=> state.discountedPrice)
+    const items = useCartStore(s => s.items)
+    const total = useCartStore(state => state.total)
+    const discount = useCartStore(state=> state.totalDiscount)
+    const Subtotal = useCartStore(s => s.subtotal)
     
     const handlePlaceOrder = () => {
         if (onPlaceOrder) {
@@ -37,11 +39,11 @@ export default function Summery({ onPlaceOrder }: Props) {
             <div className="space-y-2 mt-4 border-t-2 border-t-gray-200 pt-4">
                 <div className="flex justify-between">
                     <p className="font-medium text-gray-500">Subtotal</p>
-                    <p className="font-medium tracking-wider">${items.reduce((acc, item) => acc + item.price * item.quantity, 0)}<span className="text-sm">ETB</span></p>
+                    <p className="font-medium tracking-wider">${Subtotal()}<span className="text-sm">ETB</span></p>
                 </div>
                 <div className="flex justify-between">
                     <p className="font-medium text-gray-500">Discount</p>
-                    <p className="font-medium tracking-wider">{discount().toFixed(2)}%</p>
+                    <p className="font-medium tracking-wider">{discount().toFixed(2)} <span className="">ETB</span></p>
                 </div>
                 <div className="flex justify-between">
                     <p className="font-medium text-gray-500">Delivery Fee</p>
@@ -50,7 +52,7 @@ export default function Summery({ onPlaceOrder }: Props) {
             </div>
             <div className="flex justify-between border-t-2 border-gray-200 pt-2">
                 <p className="font-medium text-gray-500">Total</p>
-                <p className="lg:text-2xl font-medium tracking-wider">${items.reduce((acc, item) => acc + item.price * item.quantity, 0)}<span className="">ETB</span></p>
+                <p className="lg:text-2xl font-medium tracking-wider">${total()}<span className="">ETB</span></p>
             </div>
             
             <div className="flex justify-center items-center">

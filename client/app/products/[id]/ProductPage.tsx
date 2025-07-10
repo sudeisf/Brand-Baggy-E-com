@@ -132,9 +132,9 @@ export default function ProductPage({ initialProduct }: ProductPageProps) {
 
                     <AddToCartButton
                         isSizeSelected={isSlectedSize}
-                        isHeart={isHeart}
+                        // isHeart={isHeart}
                         product_id={product?.id}
-                        onHeartClick={() => setIsHeart(!isHeart)}
+                        // onHeartClick={() => setIsHeart(!isHeart)}
                         cartItem={{
                             id: product?.id?.toString() ?? "",
                             main_image: product?.main_image ?? "",

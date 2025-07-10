@@ -9,18 +9,18 @@ import { useCart, useRemoveCartItem ,useUpdateCartItemQuantity } from "@/hooks/u
 import { useAuthStore } from "@/store/authStore"
 
 interface CartItem {
-    id : string;
-    main_image : string;
-    name : string;
-    size : string;
-    quantity : number;
-    price : number;
+    id: number; 
+    main_image: string;
+    name: string;
+    size: string;
+    quantity: number;
+    price: number;
 }
 
 export default function CartTable() {
 
     const items = useCartStore(state=>state.items);
-    const updateItemQuantity = useCartStore((state) => state.updateItmeQuantity);
+    const updateItemQuantity = useCartStore((state) => state.updateItemQuantity);
     const removeItem = useCartStore((state) => state.removeItem);
     const isAuthenticated = useAuthStore((state)=> state.isAuthenticated)
     const mutation = useRemoveCartItem()
@@ -35,13 +35,15 @@ export default function CartTable() {
     }
 
     const handleRemove = (item: CartItem) => {
-        removeItem(item.id, item.size);
+        removeItem(Number(item.id), item.size);
         if (isAuthenticated) {
             handleRemoveItem({
                 cart_id: Number(item.id)
             });
         }
     };
+    
+    
    
 
     return (
@@ -99,5 +101,6 @@ export default function CartTable() {
       </div>
     )
 }
+
 
 

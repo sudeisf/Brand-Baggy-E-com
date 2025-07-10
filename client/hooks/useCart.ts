@@ -6,16 +6,21 @@ import { UseQueryOptions } from "@tanstack/react-query";
 
 
 interface CartItem {
-      id: string;
+      id: number;
       main_image: string;
       name: string;
       size: string;
       quantity: number;
-      price: number;
+      price: number;          
+      discount_type: 'fixed_amount' | 'percentage' | null;
+      discount_value: string;      
+      final_price: number;         
+      subtotal: number;            
     }
     
-    interface CartApiResponse {
+interface CartApiResponse {
       items: CartItem[];
+      total: number;
     }
     
     export function useCart(
@@ -24,22 +29,34 @@ interface CartItem {
       }
     ) {
       const setCart = useCartStore((state) => state.setCart);
-      const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-      const token  = useAuthStore((state)=> state.accessToken)
+      const token = useAuthStore((state) => state.accessToken);
     
       return useQuery<CartApiResponse>({
         queryKey: ['cart'],
         queryFn: async () => {
           try {
             const { data } = await api.get('cart/get-cart/', {
-                  headers : {
-                        "Authorization" : `Bearer ${token}`
-                  }
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
             });
-            setCart(data.items)
-            return data;
+    
+            const normalizedItems: CartItem[] = data.items.map((item: any) => ({
+                  id: item.id,
+                  main_image: item.main_image,
+                  name: item.name,
+                  size: item.size,
+                  quantity: item.quantity,
+                  price: Number(item.price),
+                  discount_type: item.discount_type,
+                  discount_value: item.discount_value,
+                  final_price: Number(item.final_price),
+                  subtotal: Number(item.subtotal) || Number(item.final_price) * item.quantity
+                }));
+    
+            setCart(normalizedItems);
+            return { items: normalizedItems, total: data.total };
           } catch (error: any) {
-
             if (error?.response?.status === 401) {
               setCart([]);
             }
@@ -47,9 +64,9 @@ interface CartItem {
           }
         },
         ...options,
-        enabled: options?.requireAuth ? isAuthenticated : true,
-        refetchOnWindowFocus: false, 
-        staleTime: 5 * 60 * 1000, 
+        enabled: options?.requireAuth ? Boolean(token) : true,
+        refetchOnWindowFocus: false,
+        staleTime: 5 * 60 * 1000,
       });
     }
 
@@ -58,14 +75,7 @@ interface AddPayLoad {
       product_id: number;
       size: string;
       quantity: number;
-      discount_value : number;
-      discount_type :string;
-      discount_start_date :string;
-      discount_end_date :string;
-      discount_is_valid :boolean;
-      discount_is_active :boolean;
     }
-
 export const useAddCartMutation = ()=>{
       const token  = useAuthStore((state)=> state.accessToken)
       const queryClient = useQueryClient()
