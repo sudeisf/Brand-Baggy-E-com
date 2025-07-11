@@ -436,10 +436,16 @@ from django.utils import timezone
 User = get_user_model()
 
 class ProductReviewSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField(read_only = True)
+    user = serializers.StringRelatedField(read_only=True) 
+    user_image = serializers.CharField(source="user.profile_url", read_only=True)
+
     class Meta:
         model = ProductReview
-        fields = '__all__'
+        fields = ["id", "user", "user_image", "review", "rating", "created_at"]
+
+class ProductReviewSummarySerializer(serializers.Serializer):
+    average_rating = serializers.FloatField()
+    reviews = ProductReviewSerializer(many=True)
 
 class CatagorySerializer(serializers.ModelSerializer):
     class Meta:

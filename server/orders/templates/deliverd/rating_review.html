@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>We’d love your feedback!</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      background-color: #f0f2f5;
+    }
+
+    .email-container {
+      width: 100%;
+      padding: 40px 0;
+      background-color: #f0f2f5;
+    }
+
+    .card {
+      max-width: 600px;
+      margin: auto;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+      padding: 40px;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .logo img {
+      width: 120px;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    .greeting {
+      text-align: center;
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .product-list {
+      font-size: 15px;
+      margin: 20px auto;
+      padding: 0;
+      max-width: 480px;
+      list-style: none;
+      color: #444;
+    }
+
+    .product-list li {
+      background: #f9f9f9;
+      border: 1px solid #eee;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .button-container {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .review-button {
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: bold;
+      display: inline-block;
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    .review-button:hover {
+      background-color: #0056b3;
+    }
+
+    .footer {
+      font-size: 12px;
+      color: #999;
+      margin-top: 40px;
+      border-top: 1px solid #eee;
+      padding-top: 20px;
+      text-align: center;
+    }
+
+    .footer a {
+      color: #00aaff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="card">
+
+      <!-- Logo -->
+      <div class="logo">
+        <img src="https://cdn.affirm.com/logo/affirm-logo-blue.svg" alt="Logo" />
+      </div>
+
+      <!-- Title -->
+      <div class="title">We’d love your feedback!</div>
+
+      <!-- Greeting -->
+      <div class="greeting">
+        Hi {{ user_name }},<br/>
+        Thanks for your recent purchase! We’d really appreciate if you could take a moment to rate and review the following item(s):
+      </div>
+
+      <!-- Product List -->
+      <ul class="product-list">
+        {% for product in product_names %}
+          <li>{{ product }}</li>
+        {% endfor %}
+      </ul>
+
+      <!-- Review Button -->
+      <div class="button-container">
+        <a href="{{ review_link }}" class="review-button">Leave a Review</a>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        If you have any questions, just reply to this email or visit our 
+        <a href="https://www.example.com/help">Help Center</a>.
+      </div>
+    </div>
+  </div>
+</body>
+</html>

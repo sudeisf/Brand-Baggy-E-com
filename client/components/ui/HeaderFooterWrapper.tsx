@@ -27,7 +27,8 @@ export default function HeaderFooterWrapper({
     '/settings',
     '/products-dashboard',
     '/create-product',
-    '/profile-detail'
+    '/profile-detail',
+    '/reviews/'
 
 
   ];

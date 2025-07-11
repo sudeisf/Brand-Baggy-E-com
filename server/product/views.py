@@ -11,7 +11,8 @@ from .serializers import (ProductSerialier ,
                           SellerProductListSerializer,
                           FavoriteProductSerializer,
                           SerachProductSerializer,
-                          ProductChooseForSellerSerializer
+                          ProductChooseForSellerSerializer,
+                          ProductReviewSummarySerializer
                           )
 from rest_framework.pagination import PageNumberPagination
 
@@ -303,3 +304,28 @@ class SellerProductList(APIView):
             return Response({
                 "error" : "product doest not exist for this seller"
             },status=status.HTTP_404_NOT_FOUND)
+        
+from django.db.models import Avg
+
+class ProductReviewAndRatingAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, product_id):
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response({"detail": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Get average rating
+        avg_rating = ProductReview.objects.filter(product=product).aggregate(avg=Avg("rating"))["avg"] or 0.0
+
+        # Get reviews
+        reviews = ProductReview.objects.filter(product=product)
+        review_serializer = ProductReviewSerializer(reviews, many=True)
+
+        data = {
+            "average_rating": round(avg_rating, 1),
+            "reviews": review_serializer.data
+        }
+        summary_serializer = ProductReviewSummarySerializer(data)
+        return Response(summary_serializer.data, status=status.HTTP_200_OK)

@@ -138,6 +138,8 @@ class ProductReview(models.Model):
     def __str__(self):
         return f"{self.product.name} - {self.user.username}"
 
+
+
 class ProductSize(models.Model):
     name = models.CharField(max_length=20)
     code = models.CharField(max_length=10)

@@ -18,7 +18,8 @@ from .views import (
     RemoveAllFavItems,
     SearchProductAPIView,
     CategoryFilterView,
-    SellerProductList
+    SellerProductList,
+    ProductReviewAndRatingAPIView
     )
 
 
@@ -40,6 +41,7 @@ urlpatterns =[
     path('catagory-sub-list',CategorySubListView.as_view(),name="catagory-sub-list"),
     path('category-filter/', CategoryFilterView.as_view(), name='category-filter'),
     path('seller/product-select-list/', SellerProductList.as_view(), name='select-product'),
+    path('product-rating-reviews/<int:product_id>/',ProductReviewAndRatingAPIView.as_view(), name="product-review-rating-summery"),
 
 
     #fav product

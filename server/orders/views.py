@@ -18,6 +18,7 @@ from product.models import Product, ProductVariants
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import OuterRef, Subquery
 from django.utils.timezone import get_current_timezone
+from .tasks import send_review_rating_email
 
 
 class CreateOrderAPIView(APIView):
@@ -193,6 +194,10 @@ class PaymentAndOrderStatusUpdate(APIView):
                     order.status = order_status
                     order.save()
                     updates["order_status"] = order.status
+
+                    # Send review email if delivered
+                    if order_status == Order.OrderStatus.DELIVERED:
+                        send_review_rating_email.delay(order.id)
 
             return Response(
                 {"message": "Update successful", "updates": updates},
