@@ -321,11 +321,120 @@ class ProductReviewAndRatingAPIView(APIView):
 
         # Get reviews
         reviews = ProductReview.objects.filter(product=product)
-        review_serializer = ProductReviewSerializer(reviews, many=True)
 
+        # Create the data structure with model instances, not serialized data
         data = {
             "average_rating": round(avg_rating, 1),
-            "reviews": review_serializer.data
+            "reviews": reviews  # Pass model instances, not serialized data
         }
+        
         summary_serializer = ProductReviewSummarySerializer(data)
         return Response(summary_serializer.data, status=status.HTTP_200_OK)
+
+
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from django.core.exceptions import ObjectDoesNotExist
+from .models import ProductReview, Product
+from django.utils import timezone
+from orders.models import Order
+
+class CreateReviewAndRatingAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, order_id):
+        try:
+            # Get the order by order_id
+            order = Order.objects.get(id=order_id)
+
+            # Verify the order belongs to the authenticated user
+            if not order.user or order.user != request.user:
+                return Response(
+                    {"error": "Unauthorized: Only the user who placed the order can submit a review."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+            # Check if the order is delivered
+            if order.status != Order.OrderStatus.DELIVERED:
+                return Response(
+                    {"error": "Reviews can only be submitted for delivered orders."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Get input data
+            email = request.data.get('email')
+            rating = request.data.get('rating')
+            review_text = request.data.get('review')
+
+            # Validate email
+            if not email or email != request.user.email:
+                return Response(
+                    {"error": "Email does not match the authenticated user's email."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Validate rating
+            try:
+                rating = int(rating)
+                if not 1 <= rating <= 5:
+                    return Response(
+                        {"error": "Rating must be an integer between 1 and 5."},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            except (ValueError, TypeError):
+                return Response(
+                    {"error": "Rating must be a valid integer."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Validate review text
+            if not review_text or review_text == "[Prototype]: Object":
+                return Response(
+                    {"error": "A valid review text is required."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Since the body doesn't specify a product_id, assume the review is for the first product in the order
+            # (You may need to adjust this logic based on your requirements)
+            order_item = order.items.first()
+            if not order_item:
+                return Response(
+                    {"error": "No products found in the order."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            product = order_item.product
+
+            # Check for duplicate reviews
+            if ProductReview.objects.filter(product=product, user=request.user).exists():
+                return Response(
+                    {"error": f"You have already reviewed the product {product.name}."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Create the review
+            ProductReview.objects.create(
+                product=product,
+                user=request.user,
+                review=review_text,
+                rating=rating,
+                created_at=timezone.now(),
+                updated_at=timezone.now()
+            )
+
+            return Response(
+                {"message": "Review submitted successfully."},
+                status=status.HTTP_201_CREATED
+            )
+
+        except Order.DoesNotExist:
+            return Response(
+                {"error": "Order not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

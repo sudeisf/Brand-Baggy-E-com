@@ -113,7 +113,7 @@ export default function ProductPage({ initialProduct }: ProductPageProps) {
                 mx-auto rounded-lg
               ">
                 <ProductGalary
-                    mainImage={`${product?.main_image ?? ""} Fashion`}
+                    mainImage={product.main_image ?? ""}
                     images={product?.images ?? []}
                     name={product?.name ?? ""}
                 />
@@ -171,9 +171,7 @@ export default function ProductPage({ initialProduct }: ProductPageProps) {
             </div>
 
             <ProductReviews
-                avarageRating={4.5} 
-                totalReviews={50} 
-                reviews={reviews} 
+                ProductId = {product.id}
             />
 
             <RelatedProducts 

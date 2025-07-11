@@ -3,6 +3,7 @@ from .models import Discount, Product, ProductDiscount ,ProductImage, ProductLoc
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from cloudinary.models import CloudinaryField
+from cloudinary import CloudinaryImage
 from accounts.serializer import UserSerializer
 from django.utils import timezone
 
@@ -11,9 +12,17 @@ User = get_user_model()
 
 class ProductReviewSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only = True)
+    user_image = serializers.SerializerMethodField()
+
     class Meta:
         model = ProductReview
-        fields = '__all__'
+        fields = ['id', 'user', 'user_image', 'review', 'rating', 'created_at']
+
+    def get_user_image(self, obj):
+        if obj.user.profile_url:
+            public_id = str(obj.user.profile_url)
+            return CloudinaryImage(public_id).build_url(secure=True)
+        return None
 
 class CatagorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -293,43 +302,43 @@ class CreateProductSerializer(serializers.ModelSerializer):
             ProductDiscount.objects.create(product=product, discount=discount)
         return product
 # from cloudinary import CloudinaryImage
-# class SellerProductListSerializer(serializers.ModelSerializer):
-#     main_image = serializers.SerializerMethodField(read_only=True)
-#     product_location = serializers.SerializerMethodField(read_only=True)
-#     category = serializers.SerializerMethodField(read_only=True)
+class SellerProductListSerializer(serializers.ModelSerializer):
+    main_image = serializers.SerializerMethodField(read_only=True)
+    product_location = serializers.SerializerMethodField(read_only=True)
+    category = serializers.SerializerMethodField(read_only=True)
     
-#     class Meta:
-#         model = Product
-#         fields = [
-#             'id',
-#             'name',
-#             'price',
-#             'quantity',
-#             'in_stock',
-#             'main_image',
-#             'product_location',
-#             'slug',
-#             'category'
-#         ]
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'name',
+            'price',
+            'quantity',
+            'in_stock',
+            'main_image',
+            'product_location',
+            'slug',
+            'category'
+        ]
         
-#     def get_main_image(self, obj):
-#         if obj.main_image:
-#             return CloudinaryImage(obj.main_image).build_url(secure=True)
+    def get_main_image(self, obj):
+        if obj.main_image:
+            return CloudinaryImage(obj.main_image).build_url(secure=True)
         
-#     def get_category(self,obj):
-#         if obj.category:
-#             return {
-#                 'id': obj.category.id,w
-#                 'name': obj.category.name,
-#                 'parent': {
-#                     'id': obj.category.parent.id,
-#                     'name': obj.category.parent.name
-#                 } if obj.category.parent else None
-#             }
-#         return None
+    def get_category(self,obj):
+        if obj.category:
+            return {
+                'id': obj.category.id,
+                'name': obj.category.name,
+                'parent': {
+                    'id': obj.category.parent.id,
+                    'name': obj.category.parent.name
+                } if obj.category.parent else None
+            }
+        return None
     
-#     def get_product_location(self,obj):
-#         return obj.product_location.name if obj.product_location else None
+    def get_product_location(self,obj):
+        return obj.product_location.name if obj.product_location else None
       
 
 class UpdateProductSerializer(serializers.ModelSerializer):
@@ -437,11 +446,17 @@ User = get_user_model()
 
 class ProductReviewSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True) 
-    user_image = serializers.CharField(source="user.profile_url", read_only=True)
+    user_image = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductReview
         fields = ["id", "user", "user_image", "review", "rating", "created_at"]
+
+    def get_user_image(self, obj):
+        if obj.user.profile_url:
+            public_id = str(obj.user.profile_url)
+            return CloudinaryImage(public_id).build_url(secure=True)
+        return None  # Return None when no profile image exists
 
 class ProductReviewSummarySerializer(serializers.Serializer):
     average_rating = serializers.FloatField()

@@ -14,8 +14,40 @@ export const useListProducts = () =>{
       return useQuery({
             queryKey : ["sellerProductsLoop"],
             queryFn: async ()=>{
-                  const response = await api.get<APIResponse>('/product/seller/product-select-list/',{headers:{Authorization:`Beare ${token}`}})
+                  const response = await api.get<APIResponse>('/product/seller/product-select-list/',{headers:{Authorization:`Bearer ${token}`}})
                   return response.data
             }
       })
+}
+
+
+// Product Review Types
+export interface ProductReview {
+      id: number;
+      user: string;
+      user_image: string | null;
+      review: string;
+      rating: number;
+      created_at: string;
+    }
+    
+    export interface ProductReviewResponse {
+      average_rating: number;
+      reviews: ProductReview[];
+    }
+
+export const useProductReviewRating = (product_id: number) => {
+  const token = useAuthStore(s => s.accessToken)
+  return useQuery({
+    queryKey: ["ReviewAndRating", product_id],
+    queryFn: async () => {
+      const response = await api.get<ProductReviewResponse>(
+        `/product/product-rating-reviews/${product_id}/`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      )
+      return response.data
+    }
+  })
 }
