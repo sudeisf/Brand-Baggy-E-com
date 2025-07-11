@@ -23,13 +23,13 @@ export default function PaymentPage() {
       <ProductCrum />
 
       <div className="flex flex-col w-full max-w-[1250px] mx-auto mb-6">
-        <h1 className="text-4xl font-bold text-[#331d67] p-2 mt-2">Payment Method</h1>
-        <p className="text-gray-500 text-md p-2 mt-2">
+        <h1 className="text-4xl font-bold text-[#331d67] p-2 mt-2 mx-auto">Payment Method</h1>
+        <p className="text-gray-500 text-md p-2 mt-2 mx-auto">
           Please select the payment method you want to use
         </p>
       </div>
       <div className="flex max-w-[1240px] mx-auto space-x-5">
-      <div className="flex-col justify-between h-full">
+      <div className="flex-col justify-between h-full mx-auto">
       <div className="flex justify-center gap-4 mb-8">
         <Button
           variant="outline"
@@ -89,9 +89,7 @@ export default function PaymentPage() {
         </Button>
       </div>
       </div>
-          <div>  
-           <FinalSummery paymentMethod={paymentMethod} />
-          </div>
+         
       </div>
       
     </div>

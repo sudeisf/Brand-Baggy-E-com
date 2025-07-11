@@ -28,7 +28,7 @@ export default function OrderDashboard(){
             <h1 className="text-gray-500 font-roboto font-medium flex items-center gap-2">
                Avg. Order Value
             </h1>
-            <p className="text-xl font-medium text-[#331d67]">${analytics?.avarge_orders}</p>
+            <p className="text-xl font-medium text-[#331d67]">${analytics?.avarge_orders.toFixed(2)}</p>
             </div>
         </div>
         <div className="border-1 flex gap-3 items-center w-[14rem] shadow-xs  p-4 rounded-md">

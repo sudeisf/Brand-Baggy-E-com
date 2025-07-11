@@ -113,13 +113,13 @@ export default function ProductPage({ initialProduct }: ProductPageProps) {
                 mx-auto rounded-lg
               ">
                 <ProductGalary
-                    mainImage={product?.main_image ?? ""}
+                    mainImage={`${product?.main_image ?? ""} Fashion`}
                     images={product?.images ?? []}
                     name={product?.name ?? ""}
                 />
                 <div className="w-full px-0 md:px-3 flex flex-col mt-4 md:mt-0">
                     <ProductHeader
-                        catagory="Men Fashion"
+                        catagory={product?.gender ?? ""}
                         name={product?.name ?? ""}
                         price={product?.price ?? ""}
                     />

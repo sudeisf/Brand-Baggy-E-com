@@ -107,7 +107,7 @@ export default function SideBarMenu() {
                 </div>
             ) : (
                 // Desktop Sidebar
-                <div className="w-[300px] border-gray-200">
+                <div className="w-[300px] border-gray-200 realative sticky">
                     <div className="flex flex-col gap-4 px-4 pt-4">
                         {tabs.map((tab) => {
                             const Icon = tab.icon

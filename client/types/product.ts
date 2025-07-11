@@ -66,4 +66,5 @@ export interface Size {
       price: string;
       discount: Discount;
       in_stock: boolean;
+      gender: string
     }

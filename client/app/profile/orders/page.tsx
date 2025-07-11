@@ -88,7 +88,7 @@ export default function Orders() {
                 </Select>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-6 overflow-y-auto h-[800px]">
                 {filteredOrders.length === 0 ? (
                     <p className="text-gray-500">No orders found for the selected filters.</p>
                 ) : (
