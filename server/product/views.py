@@ -445,37 +445,30 @@ class ProductSuggestionAPIVIew(APIView):
     
     def get(self, request, product_id):
         try:
-            # Get the current product
+      
             product = Product.objects.select_related('category').get(id=product_id)
-            
-            # Get suggestions from same category, excluding current product
             suggestions = Product.objects.filter(
                 category=product.category
             ).exclude(
-                id=product_id  # Exclude current product
+                id=product_id 
             ).select_related('category').order_by('?')[:4]
             
-            # If not enough suggestions, try parent category
             if len(suggestions) < 4 and product.category and product.category.parent:
                 parent_suggestions = Product.objects.filter(
                     category=product.category.parent
                 ).exclude(
-                    id=product_id  # Exclude current product
+                    id=product_id  
                 ).select_related('category').order_by('?')[:4-len(suggestions)]
-                
-                # Combine suggestions
                 suggestions = list(suggestions) + list(parent_suggestions)
             
-            # If still not enough suggestions, get random products
             if len(suggestions) < 4:
                 remaining_count = 4 - len(suggestions)
                 random_suggestions = Product.objects.exclude(
-                    id=product_id  # Exclude current product
+                    id=product_id  
                 ).exclude(
-                    id__in=[s.id for s in suggestions]  # Exclude already selected products
+                    id__in=[s.id for s in suggestions]  
                 ).order_by('?')[:remaining_count]
-                
-                # Combine all suggestions
+
                 suggestions = list(suggestions) + list(random_suggestions)
             
             serializer = SuggestedProductsSerilaizer(suggestions, many=True)

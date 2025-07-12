@@ -51,3 +51,26 @@ export const useProductReviewRating = (product_id: number) => {
     }
   })
 }
+export type SuggestedProduct = {
+  id: number;
+  name: string;
+  price: string;
+  description: string;
+  main_image: string | null;
+};
+
+export type SuggestedProductsResponse = {
+  data: SuggestedProduct[];
+};
+
+export const useProuductSuggestion = (product_id: number) => {
+  return useQuery({
+    queryKey: ["suggestionProducts", product_id],
+    queryFn: async () => {
+      const response = await api.get<SuggestedProductsResponse>(
+        `/product/suggested-products/${product_id}/`
+      )
+      return response.data
+    }
+  })
+}

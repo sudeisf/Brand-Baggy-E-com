@@ -175,7 +175,7 @@ export default function ProductPage({ initialProduct }: ProductPageProps) {
             />
 
             <RelatedProducts 
-                products={products} 
+                product_id={product.id} 
             />
 
         </div>
