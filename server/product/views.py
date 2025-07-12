@@ -346,7 +346,7 @@ class CreateReviewAndRatingAPIView(APIView):
 
     def post(self, request, order_id):
         try:
-            # Get the order by order_id
+           
             order = Order.objects.get(id=order_id)
 
             # Verify the order belongs to the authenticated user

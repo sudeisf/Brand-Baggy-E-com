@@ -43,7 +43,7 @@ urlpatterns =[
     path('category-filter/', CategoryFilterView.as_view(), name='category-filter'),
     path('seller/product-select-list/', SellerProductList.as_view(), name='select-product'),
     path('product-rating-reviews/<int:product_id>/',ProductReviewAndRatingAPIView.as_view(), name="product-review-rating-summery"),
-    path('api/reviews/<int:order_id>/', CreateReviewAndRatingAPIView.as_view(), name='create_review'),
+    path('reviews/<int:order_id>/', CreateReviewAndRatingAPIView.as_view(), name='create_review'),
 
 
     #fav product

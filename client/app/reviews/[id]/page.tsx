@@ -1,17 +1,43 @@
 'use client';
 
 import { useState } from 'react';
-import { Star } from 'lucide-react';
+import { Router, Star } from 'lucide-react';
+import api from '@/lib/axios';
+import { useParams, useRouter } from 'next/navigation';
 
 export default function ProductReviewPage() {
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState('');
   const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const router = useRouter()
+  const path  = useParams()
+  const id = path.id;
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log({ rating, review, email });
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+    try {
+      await api.post(`/product/reviews/${id}/`, {
+        email,
+        rating,
+        review
+      });
+      setSuccess(true);
+      setRating(0);
+      setReview('');
+      setEmail('');
+      router.push('/products')
+
+    } catch (err: any) {
+      setError(err?.response?.data?.error || 'Failed to submit review.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -45,7 +71,34 @@ export default function ProductReviewPage() {
               />
             ))}
           </div>
+          {(loading || success) && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div className="bg-white rounded-lg shadow-lg p-8 flex flex-col items-center">
+      {loading && (
+        <>
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#331d67] mb-4"></div>
+          <p className="text-[#331d67] font-semibold">Submitting your review...</p>
+        </>
+      )}
+      {success && (
+        <>
+          <div className="text-green-600 text-4xl mb-2">✓</div>
+          <p className="text-[#331d67] font-semibold mb-2">Review submitted successfully!</p>
+          <button
+            className="mt-2 px-4 py-2 bg-[#331d67] text-white rounded"
+            onClick={() => router.push('/products')}
+          >
+            Continue Shopping
+          </button>
+        </>
+      )}
+    </div>
+  </div>
+)}
           <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="text-red-600 bg-red-100 rounded px-3 py-2 text-sm mb-2">{error}</div>
+            )}
             <div>
               <label className="block text-base font-medium text-[#331d67] mb-1 capitalize">
                 Product Review
@@ -75,9 +128,9 @@ export default function ProductReviewPage() {
             <button
               type="submit"
               className="w-full bg-[#331d67] hover:bg-[#27144d] text-white py-3 px-4 rounded-lg text-lg font-semibold transition-colors"
-              disabled={!rating || !review || !email}
+              disabled={!rating || !review || !email || loading}
             >
-              Submit product review
+              {loading ? 'Submitting...' : 'Submit product review'}
             </button>
           </form>
         </div>

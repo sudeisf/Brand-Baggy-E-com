@@ -63,7 +63,7 @@ export default function ShippingPage() {
         <div className="flex gap-4">
           <div className="w-[60%] border-1 shadow-xs border-gray-200 rounded-xl">
             <ShippingInformation onChange={handleShippingChange} />
-            <BillingInformation />
+            {/* <BillingInformation /> */}
           </div>
           <div className="w-[40%]">
             <Summery onPlaceOrder={handlePlaceOrder} />

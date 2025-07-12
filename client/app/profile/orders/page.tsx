@@ -46,6 +46,28 @@ export default function Orders() {
         const date = new Date(dateString)
         return date.toLocaleString('default', { month: 'long' , day: 'numeric' })
     }
+
+    const getStatusStyles = (status: string) => {
+        switch (status) {
+            case "pending":
+                return "text-yellow-600 bg-yellow-100";
+            case "paid":
+                return "text-green-600 bg-green-100";
+            case "processing":
+                return "text-orange-600 bg-orange-100";
+            case "shipped":
+                return "text-purple-600 bg-purple-100";
+            case "delivered":
+                return "text-blue-700 bg-blue-100";
+            case "cancelled":
+                return "text-red-600 bg-red-100";
+            case "returned":
+                return "text-red-600 bg-red-100";
+            default:
+                return "text-gray-500 bg-gray-100";
+        }
+    };
+
     return (
         <div className="container mx-auto p-4 max-w-4xl">
             <h1 className="text-3xl font-bold text-[#331d67] mb-2">My Orders</h1>
@@ -114,7 +136,7 @@ export default function Orders() {
                                             <span className="text-md font-bold text-[#331d67]">#{order.id}</span>
                                         </div>
                                         <div className="flex gap-2 w-full justify-start sm:justify-end">
-                                            <ViewInvoice />
+                                            {/* <ViewInvoice /> */}
                                             <ViewDetails id={order.id} />
                                         </div>
                                     </div>
@@ -124,7 +146,7 @@ export default function Orders() {
                                 <div className="flex flex-col gap-4 p-4">
                                     {/* <h1 className="text-lg text-[#331d67] font-bold">Delivered {""}</h1> */}
                                     <h2 
-                                    className="text-md inline-block font-semibold text-gray-500">Order Status: <span className={`${order.status === "paid" ? "text-green-500 ml-2 bg-green-500/10 px-2 py-1 rounded-sm" : "text-yellow-500 ml-2 bg-yellow-600/10 px-2 py-1 rounded-sm"}`}>{order.status}</span></h2>
+                                    className="text-md inline-block font-semibold text-gray-500">Order Status: <span className={`${getStatusStyles(order.status)} ml-2 px-2 py-1 capitalize font-medium font-roboto text-sm rounded-sm`}>{order.status}</span></h2>
                                     {order.items.map(item => (
                                         <div key={item.id} className="flex flex-col sm:flex-row gap-4 items-start sm:items-center border-b border-gray-200 pb-4">
                                             <h1 className="hidden sm:block">{item.id}</h1>
