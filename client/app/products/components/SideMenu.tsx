@@ -8,19 +8,24 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
+import { useProductFilterStore } from "@/store/productStore";
 
 interface Category {
   id: number;
   name: string;
+  slug: string;
   children?: Category[];
 }
 
 export function SideMenu() {
   const [openSections, setOpenSections] = useState<{ [key: number]: boolean }>({});
-  const [selectedFilters, setSelectedFilters] = useState<number[]>([]);
   const ref = useRef<HTMLDivElement>(null);
+  
+  const {
+    selectedSubcategories,
+    toggleSubcategory
+  } = useProductFilterStore();
 
-  // Fetch hierarchical category data
   const { data: categories, isLoading } = useQuery<Category[]>({
     queryKey: ['category-filter'],
     queryFn: () => 
@@ -33,12 +38,12 @@ export function SideMenu() {
     setOpenSections(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const handleFilterClick = (filterId: number) => {
-    setSelectedFilters(prev => 
-      prev.includes(filterId)
-        ? prev.filter(id => id !== filterId)
-        : [...prev, filterId]
-    );
+  const handleFilterClick = (category: Category, isParent: boolean = false) => {
+    toggleSubcategory({
+      id: isParent ? `parent_${category.id}` : category.id.toString(),
+      name: category.slug,
+      isParent
+    });
   };
 
   if (isLoading) return <div className="w-[300px] p-4">Loading categories...</div>;
@@ -62,19 +67,35 @@ export function SideMenu() {
           </CollapsibleTrigger>
           <CollapsibleContent className="w-32 mx-auto py-2">
             <div className="flex flex-col gap-4">
-              {category.children?.map((subcategory) => (
-                <div 
-                  key={subcategory.id}
-                  onClick={() => handleFilterClick(subcategory.id)} 
-                  className={`flex flex-col gap-2 border rounded-md py-2 px-4 border-gray-200 cursor-pointer ${
-                    selectedFilters.includes(subcategory.id) 
-                      ? 'bg-[#331d6710] border-2 border-[#261354] text-[#331d67]' 
-                      : ''
-                  }`}
-                >
-                  <p className="text-sm font-medium">{subcategory.name}</p>
-                </div>
-              ))}
+              {/* Parent category option */}
+              <div 
+                onClick={() => handleFilterClick(category, true)}
+                className={`flex flex-col gap-2 border rounded-md py-2 px-4 border-gray-200 cursor-pointer ${
+                  selectedSubcategories.some(item => item.id === `parent_${category.id}`) 
+                    ? 'bg-[#331d6710] border-2 border-[#261354] text-[#331d67]' 
+                    : ''
+                }`}
+              >
+                <p className="text-sm font-medium">All in {category.name}</p>
+              </div>
+
+              {/* Child categories */}
+              {category.children?.map((subcategory) => {
+                const isSelected = selectedSubcategories.some(item => item.id === subcategory.id.toString());
+                return (
+                  <div 
+                    key={subcategory.id}
+                    onClick={() => handleFilterClick(subcategory)} 
+                    className={`flex flex-col gap-2 border rounded-md py-2 px-4 border-gray-200 cursor-pointer ${
+                      isSelected 
+                        ? 'bg-[#331d6710] border-2 border-[#261354] text-[#331d67]' 
+                        : ''
+                    }`}
+                  >
+                    <p className="text-sm font-medium">{subcategory.name}</p>
+                  </div>
+                );
+              })}
             </div>
           </CollapsibleContent>
         </Collapsible>

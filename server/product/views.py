@@ -26,12 +26,33 @@ import cloudinary
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 20  # Change from 12 to 20 to match frontend
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 @method_decorator(cache_page(60*15), name="dispatch")
 class ProductListView(generics.ListAPIView):
     serializer_class = ProductPublicSerializer
     queryset = Product.objects.all()
     permission_classes = [AllowAny]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['brand']
+    search_fields = ['name', 'description']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        parent_category = self.request.query_params.get('parent_category')
+        child_category = self.request.query_params.get('child_category')
+
+        if parent_category:
+            queryset = queryset.filter(category__parent__slug=parent_category)
+
+        if child_category:
+            queryset = queryset.filter(category__slug=child_category)
+
+        return queryset
 
 
 class ProductDetailView(generics.RetrieveAPIView):

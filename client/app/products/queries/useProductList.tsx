@@ -2,6 +2,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useQuery } from '@tanstack/react-query';
 import { ProductDetail } from '@/types/product';
 import api from '@/lib/axios';
+import { useProductFilterStore } from '@/store/productStore';
 
 type Product = {
   id: number;
@@ -9,12 +10,25 @@ type Product = {
   price: number;
   description: string;
   main_image: string;
+  category?: string; // Added category field
 };
 
-const fetchProducts = async () => {
+const fetchProducts = async (params?: {
+  parent_category?: string;
+  child_category?: string[];
+  search?: string;
+  brand?: string;
+}) => {
   try {
     const response = await api.get('/product/product-list/', {
+      params: {
+        parent_category: params?.parent_category,
+        child_category: params?.child_category?.join(','),
+        search: params?.search,
+        brand: params?.brand
+      }
     });
+    
     if (response.status === 200) {
       return response.data.results.map((item: Product) => ({
         id: item.id,
@@ -22,6 +36,7 @@ const fetchProducts = async () => {
         price: item.price,
         description: item.description,
         main_image: item.main_image,
+        category: item.category // Include category if available
       }));
     }
     return [];
@@ -31,15 +46,27 @@ const fetchProducts = async () => {
   }
 };
 
-export const useProductsList = () => {
-
+export const useProductsList = (filters?: {
+  search?: string;
+  brand?: string;
+}) => {
+  const { getParentCategory, getChildCategories } = useProductFilterStore();
+  
   return useQuery<Product[], Error>({
-    queryKey: ['productsList'],
-    queryFn: () => fetchProducts(),
+    queryKey: ['productsList', 
+      getParentCategory()?.name, 
+      getChildCategories().map(c => c.name),
+      filters
+    ],
+    queryFn: () => fetchProducts({
+      parent_category: getParentCategory()?.name,
+      child_category: getChildCategories().map(c => c.name),
+      ...filters
+    }),
     staleTime: 5 * 60 * 1000,
+    placeholderData: (previousData) => previousData 
   });
 };
-
 
 
 const fetchProductDetail = async (id: number) : Promise<ProductDetail | null> => {

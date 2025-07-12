@@ -3,8 +3,6 @@ import Image from "next/image";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useProductsList } from "../queries/useProductList";
-import { useQueryClient } from "@tanstack/react-query";
-import { useCartStore } from "@/store/cartStore";
 import { useProductFilterStore } from "@/store/productStore";
 
 type Product = {
@@ -13,38 +11,24 @@ type Product = {
   price: number;
   description: string;
   main_image: string;
-  category: string; 
+  category?: string; 
 };
 
 type Props = {
-  products: Product[];
+  initialProducts?: Product[];
 };
 
-export function ProductList({ products }: Props) {
-  const queryClient = useQueryClient();
-  const { selectedCategories } = useProductFilterStore();
-  
+export function ProductList({ initialProducts }: Props) {
+  const { data: products, isLoading, error } = useProductsList();
+  const displayProducts = products || initialProducts || [];
 
-  const filteredProducts = products.filter(product => {
-
-    if (selectedCategories.length > 0 && !selectedCategories.includes(product.category)) {
-      return false;
-    }
-    return true;
-  });
-
-  queryClient.setQueryData(['productsList'], filteredProducts); 
-  const { data, isLoading, error } = useProductsList();
-
-  
-  const displayProducts = (data || filteredProducts);
   return (
     <div>
       <div className="relative w-full">
         {isLoading && <p>Loading...</p>}
         {error && <p className="text-red-500">Error loading products</p>}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 w-full ml-0">
-          {displayProducts.map((product) => (
+          {displayProducts?.map((product) => (
             <div
               key={product.id}
               className="bg-inherit rounded-md transition-shadow duration-300 w-64 md:w-96 h-[22rem] md:h-[24rem] flex flex-col flex-shrink-0 snap-start justify-between group border items-start border-gray-200"
@@ -70,7 +54,7 @@ export function ProductList({ products }: Props) {
                   <Link href={`/products/${product.id}`}
                     className="w-fit h-fit bg-[#331d67] rounded-md shadow-xs text-sm space-x-2 px-3 py-2 font-roboto capitalize flex items-center text-white"
                     aria-label={`Add ${product.name} to cart`}
-                    >
+                  >
                     <Plus className="text-white w-4 h-4 md:w-4 md:h-4 mr-2" /> add to Cart
                   </Link>
                 </div>

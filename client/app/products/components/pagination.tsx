@@ -1,48 +1,75 @@
+"use client";
 import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-  } from "@/components/ui/pagination"
-  
-  export function PaginationDemo() {
-    return (
-      <Pagination className="mt-10 mb-10">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious className="text-[#331d67] text-lg" href="#" />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink className="text-[#331d67] text-lg" href="#">1</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink className="text-[#331d67] text-lg" href="#" isActive>
-              2
-            </PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink className="text-[#331d67] text-lg" href="#">3</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink className="text-[#331d67] text-lg" href="#">4</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink className="text-[#331d67] text-lg" href="#">5</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink className="text-[#331d67] text-lg" href="#">6</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationEllipsis className="text-[#331d67] text-lg" />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext className="text-[#331d67] text-lg" href="#" />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-    )
-  }
-  
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
+
+interface PaginationProps {
+  totalItems: number;
+  itemsPerPage: number;
+  currentPage: number;
+}
+
+export function ProductPagination({ 
+  totalItems, 
+  itemsPerPage, 
+  currentPage 
+}: PaginationProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+  const createPageURL = (pageNumber: number) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('page', pageNumber.toString());
+    return `${pathname}?${params.toString()}`;
+  };
+
+  // Always render the pagination component
+  return (
+    <Pagination className="mt-4">
+      <PaginationContent>
+        {/* Previous Button */}
+        <PaginationItem>
+          <PaginationPrevious
+            href={createPageURL(Math.max(1, currentPage - 1))}
+            isActive={currentPage > 1}
+            onClick={(e) => {
+              e.preventDefault();
+              if (currentPage > 1) {
+                router.push(createPageURL(currentPage - 1));
+              }
+            }}
+          />
+        </PaginationItem>
+
+        {/* Current Page Indicator */}
+        <PaginationItem>
+          <PaginationLink isActive>
+            {currentPage}
+          </PaginationLink>
+        </PaginationItem>
+
+        {/* Next Button */}
+        <PaginationItem>
+          <PaginationNext
+            href={createPageURL(Math.min(totalPages, currentPage + 1))}
+            isActive={currentPage < totalPages}
+            onClick={(e) => {
+              e.preventDefault();
+              if (currentPage < totalPages) {
+                router.push(createPageURL(currentPage + 1));
+              }
+            }}
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  );
+}
