@@ -12,7 +12,8 @@ from .serializers import (ProductSerialier ,
                           FavoriteProductSerializer,
                           SerachProductSerializer,
                           ProductChooseForSellerSerializer,
-                          ProductReviewSummarySerializer
+                          ProductReviewSummarySerializer,
+                          SuggestedProductsSerilaizer
                           )
 from rest_framework.pagination import PageNumberPagination
 
@@ -438,3 +439,58 @@ class CreateReviewAndRatingAPIView(APIView):
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+class ProductSuggestionAPIVIew(APIView):
+    permission_classes = [AllowAny]
+    
+    def get(self, request, product_id):
+        try:
+            # Get the current product
+            product = Product.objects.select_related('category').get(id=product_id)
+            
+            # Get suggestions from same category, excluding current product
+            suggestions = Product.objects.filter(
+                category=product.category
+            ).exclude(
+                id=product_id  # Exclude current product
+            ).select_related('category').order_by('?')[:4]
+            
+            # If not enough suggestions, try parent category
+            if len(suggestions) < 4 and product.category and product.category.parent:
+                parent_suggestions = Product.objects.filter(
+                    category=product.category.parent
+                ).exclude(
+                    id=product_id  # Exclude current product
+                ).select_related('category').order_by('?')[:4-len(suggestions)]
+                
+                # Combine suggestions
+                suggestions = list(suggestions) + list(parent_suggestions)
+            
+            # If still not enough suggestions, get random products
+            if len(suggestions) < 4:
+                remaining_count = 4 - len(suggestions)
+                random_suggestions = Product.objects.exclude(
+                    id=product_id  # Exclude current product
+                ).exclude(
+                    id__in=[s.id for s in suggestions]  # Exclude already selected products
+                ).order_by('?')[:remaining_count]
+                
+                # Combine all suggestions
+                suggestions = list(suggestions) + list(random_suggestions)
+            
+            serializer = SuggestedProductsSerilaizer(suggestions, many=True)
+            
+            return Response({
+                "data": serializer.data
+            }, status=status.HTTP_200_OK)
+            
+        except Product.DoesNotExist:
+            return Response({
+                "error": "Product not found"
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                "error": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+   

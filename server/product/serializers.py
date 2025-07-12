@@ -1012,5 +1012,22 @@ class ProductChooseForSellerSerializer(serializers.ModelSerializer):
         return [variant.size.name for variant in variants]
 
 
-
+class SuggestedProductsSerilaizer(serializers.ModelSerializer):
+    main_image = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Product
+        fields = [
+            "id",
+            "name",
+            "price",
+            "description",
+            "main_image"
+        ]
+    
+    def get_main_image(self, obj):
+        if obj.main_image:
+            public_id = str(obj.main_image)
+            return CloudinaryImage(public_id).build_url(secure=True)
+        return None
     
