@@ -35,7 +35,12 @@ export default function Orders(){
       window.URL.revokeObjectURL(url);
     }; 
     return (
-        <div className="w-[1250px] mx-auto min-h-svh">
+        <div className="w-[1250px] mx-auto min-h-svh my-scrollable" style={{overflow: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+            <style>{`
+                .my-scrollable::-webkit-scrollbar {
+                    display: none;
+                }
+            `}</style>
             <div className="flex justify-between px-5 mt-6">
                 <div className="flex flex-col gap-1">
                 <h1 className="text-2xl font-semibold font-roboto text-[#331d67]/90">Order</h1>

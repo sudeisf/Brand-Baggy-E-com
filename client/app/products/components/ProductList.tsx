@@ -24,10 +24,15 @@ export function ProductList({ initialProducts }: Props) {
 
   return (
     <div>
-      <div className="relative w-full">
+      <div className="relative w-full h-[750px] overflow-y-auto" style={
+        {
+          scrollbarWidth : "none"
+        }
+      }>
+        
         {isLoading && <p>Loading...</p>}
         {error && <p className="text-red-500">Error loading products</p>}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 w-full ml-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 w-full ml-0 ">
           {displayProducts?.map((product) => (
             <div
               key={product.id}
@@ -48,14 +53,14 @@ export function ProductList({ initialProducts }: Props) {
                 <Link href={`/products/${product.id}`}>
                   <h2 className="text-base md:text-lg font-semibold text-gray-900 py-2 mb-1 md:mb-2 text-left">{product.name}</h2>
                 </Link>
-                <p className="text-sm md:text-base text-gray-600 mb-2 line-clamp-2 text-left">{product.description}</p>
+                <p className="text-sm md:text-base font-inter text-gray-600 mb-2 line-clamp-2 text-left">{product.description}</p>
                 <div className="flex justify-between w-full mt-2 mb-2">
                   <p className="text-base md:text-lg font-bold text-[#331d67]">${product.price}</p>
                   <Link href={`/products/${product.id}`}
-                    className="w-fit h-fit bg-[#331d67] rounded-full shadow-xs text-sm space-x-2 px-3 py-2 font-roboto capitalize flex items-center text-white"
+                    className="w-fit h-fit bg-[#331d67] rounded-sm shadow-xs text-sm space-x-2 px-3 py-2 font-inter  flex items-center text-white"
                     aria-label={`Add ${product.name} to cart`}
                   >
-                    <Plus className="text-white w-4 h-4 md:w-4 md:h-4 mr-2" /> add to Cart
+                    <Plus className="text-white w-4 h-4 md:w-4 md:h-4 mr-2" /> Add to Cart
                   </Link>
                 </div>
               </div>
