@@ -663,7 +663,7 @@ class SellerProductDetailSerializer(serializers.ModelSerializer):
 
 
 class CreateProductSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(max_length=20, required=True)
+    name = serializers.CharField(max_length=50, required=True)
     description = serializers.CharField(max_length=255, required=True)
     price = serializers.DecimalField(max_digits=10, decimal_places=2)
     cost_price = serializers.DecimalField(max_digits=10, decimal_places=2, required=True)

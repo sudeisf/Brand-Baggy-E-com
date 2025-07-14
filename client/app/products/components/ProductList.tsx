@@ -31,7 +31,7 @@ export function ProductList({ initialProducts }: Props) {
           {displayProducts?.map((product) => (
             <div
               key={product.id}
-              className="bg-inherit rounded-md transition-shadow duration-300 w-64 md:w-96 h-[22rem] md:h-[24rem] flex flex-col flex-shrink-0 snap-start justify-between group border items-start border-gray-200"
+              className="bg-inherit rounded-md transition-shadow duration-300 w-64 md:w-96 h-[22rem] md:h-[24rem] flex flex-col flex-shrink-0 snap-start justify-between group  items-start "
             >
               <div className="overflow-hidden rounded-t-md w-full h-48 md:h-56">
                 <Link href={`/products/${product.id}`}>
@@ -52,7 +52,7 @@ export function ProductList({ initialProducts }: Props) {
                 <div className="flex justify-between w-full mt-2 mb-2">
                   <p className="text-base md:text-lg font-bold text-[#331d67]">${product.price}</p>
                   <Link href={`/products/${product.id}`}
-                    className="w-fit h-fit bg-[#331d67] rounded-md shadow-xs text-sm space-x-2 px-3 py-2 font-roboto capitalize flex items-center text-white"
+                    className="w-fit h-fit bg-[#331d67] rounded-full shadow-xs text-sm space-x-2 px-3 py-2 font-roboto capitalize flex items-center text-white"
                     aria-label={`Add ${product.name} to cart`}
                   >
                     <Plus className="text-white w-4 h-4 md:w-4 md:h-4 mr-2" /> add to Cart

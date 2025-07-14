@@ -104,6 +104,22 @@ export const useAdminOrderTable = () => {
       });
 }
 
+export const useExportCsv = () => {
+  const token = useAuthStore((s) => s.accessToken);
+  return useQuery({
+    queryKey: ["adminOrderTableCsv"],
+    queryFn: async () => {
+      const response = await api.get("/orders/order/export-csv/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: "blob", 
+      });
+      return response.data; 
+    },
+  });
+};
+
 
 interface SendProps {
       order_id: number;

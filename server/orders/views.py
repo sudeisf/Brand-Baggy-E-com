@@ -156,9 +156,56 @@ class GetOrderItemAPIView(APIView):
 class AdminOrderTableAPIView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
-        orders = Order.objects.select_related('user', 'cart').prefetch_related('cart__items').all()
+        # Only allow sellers
+        if not hasattr(request.user, "user_role") or request.user.user_role != "seller":
+            return Response({"detail": "Forbidden"}, status=403)
+        orders = Order.objects.filter(items__product__seller=request.user).distinct()
         serializer = OrderTableSerializer(orders, many=True)
         return Response(serializer.data)
+
+class ExportSellerOrdersCSVAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        # Only allow sellers
+        if not hasattr(request.user, "user_role") or request.user.user_role != "seller":
+            return Response({"detail": "Forbidden"}, status=403)
+        orders = Order.objects.filter(items__product__seller=request.user).distinct()
+        try:
+            import csv
+            from django.http import HttpResponse
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="seller_orders.csv"'
+            writer = csv.writer(response)
+            writer.writerow(['order_id', 'date', 'customer', 'total', 'payment_status', 'items', 'status'])
+            for order in orders:
+                order_id = order.id
+                date = order.order_date.strftime("%m/%d/%y") if order.order_date else ""
+                if order.user:
+                    customer = order.user.username
+                elif order.guest_full_name:
+                    customer = f"{order.guest_full_name} ({order.guest_email or 'No Email'})"
+                else:
+                    customer = "Guest"
+                total = order.total_price
+                payment_status = getattr(getattr(order, 'payment', None), 'status', 'no payment')
+                items_count = order.items.count()
+                status_val = order.status
+                writer.writerow([
+                    order_id,
+                    date,
+                    customer,
+                    total,
+                    payment_status,
+                    items_count,
+                    status_val,
+                ])
+            return response
+        except Exception as e:
+            print("CSV export error:", e)
+            return Response({"detail": str(e)}, status=500)
+
+
+
 
 
 class PaymentAndOrderStatusUpdate(APIView):
@@ -532,7 +579,7 @@ class SellerAnalyticsAPIView(APIView):
             ).select_related('product', 'order')
 
             total_income = Order.objects.filter(
-                items__product__seller=seller,
+                items__pruoduct__seller=seller,
                 created_at__gte=start_date,
                 created_at__lte=end_date,
             ).distinct().aggregate(total_income=Sum('total_price'))['total_income'] or Decimal('0')
@@ -651,7 +698,7 @@ class SellerRevenueAnalyticsAPIView(APIView):
         # 3. Reverse to get chronological order
         yearly_data = list(reversed(last_six_months))
 
-        # === Monthly (current month) ===
+        
         start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         monthly_revenue = (
             Order.objects.filter(
@@ -663,18 +710,13 @@ class SellerRevenueAnalyticsAPIView(APIView):
         )
         monthly_data = [{'month': now.strftime("%B"), 'revenue': float(monthly_revenue)}]
 
-        # === Daily (current week) - Fixed Version ===
-        # Calculate start of week (Monday) in EAT
+       
         start_of_week = now - timedelta(days=now.weekday())
         start_of_week = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
-        # Calculate end of week (Sunday 23:59:59) in EAT
         end_of_week = start_of_week + timedelta(days=6, hours=23, minutes=59, seconds=59)
-
-        # Convert to UTC for database query (if your DB stores UTC)
         start_of_week_utc = start_of_week.astimezone(pytz.UTC)
         end_of_week_utc = end_of_week.astimezone(pytz.UTC)
 
-        # Query using UTC for filtering but EAT for display
         daily_qs = (
             Order.objects.filter(
                 items__product__seller=user,
@@ -682,9 +724,8 @@ class SellerRevenueAnalyticsAPIView(APIView):
                 payment__status='completed'
             )
             .annotate(
-                # Convert to EAT before truncating to date
                 eat_time=ExpressionWrapper(
-                    F('created_at') + timedelta(hours=3),  # UTC to EAT conversion
+                    F('created_at') + timedelta(hours=3),  
                     output_field=DateTimeField()
                 )
             )
@@ -694,7 +735,6 @@ class SellerRevenueAnalyticsAPIView(APIView):
             .order_by('day')
         )
 
-        # Build week map with proper day names
         base = {day: 0 for day in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]}
         for entry in daily_qs:
             if entry['day']:  # Ensure day exists

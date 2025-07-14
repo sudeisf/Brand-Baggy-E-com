@@ -5,13 +5,35 @@ import { CreateOrder } from "./components/CreateorderSheet"
 import OrderDashboard from "./components/OrderDashboard"
 import { Download } from "lucide-react"
 import OrdersTable from "./components/OrdersTable"
+import { useExportCsv } from "@/hooks/use-order"
 
 
 
 
 
 export default function Orders(){
+    const { data: csvBlob, error, isLoading } = useExportCsv();
 
+    const handleDownload = () => {
+      if (error) {
+        alert("Export failed: " + error.message);
+        return;
+      }
+      if (!csvBlob) return;
+      if (csvBlob.type === "application/json") {
+        csvBlob.text().then((text: string) => {
+          const err = JSON.parse(text);
+          alert(err.detail || "Unknown error");
+        });
+        return;
+      }
+      const url = window.URL.createObjectURL(csvBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "seller_orders.csv";
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }; 
     return (
         <div className="w-[1250px] mx-auto min-h-svh">
             <div className="flex justify-between px-5 mt-6">
@@ -21,7 +43,7 @@ export default function Orders(){
                 </div>
                 <div className = "flex gap-2 ">
                     <Button variant = "outline" className="rounded-sm shadow-xs">Today</Button>
-                    <Button variant = "outline" className="rounded-sm flex gap-2 shadow-2xs">
+                    <Button onClick={handleDownload} disabled={isLoading || !!error || !csvBlob} variant="outline" className="rounded-sm flex gap-2 shadow-2xs">
                         <Download/>
                         Export
                         </Button>
