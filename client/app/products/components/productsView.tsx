@@ -37,16 +37,18 @@ export default function ProductsView({ initialData }: ProductsViewProps) {
   const totalPages = Math.ceil(totalItems / 20);
 
   return (
-    <div className="flex flex-row">
-      <SideMenu />
-      <div className="w-[1250px] flex flex-col gap-4">
-        <div className="flex flex-row gap-4 items-center justify-between border-b border-gray-200 pb-4">
+    <div className="flex flex-col md:flex-row w-full gap-0 md:gap-4">
+      {/* SideMenu: Responsive */}
+      <div className="w-full md:w-64 mb-0 md:mb-0">
+        <SideMenu />
+      </div>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col gap-4 px-0 sm:px-2 md:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between border-b border-gray-200 pb-4 px-2 md:px-0">
           <AppliedFilters />
         </div>
-        <div>
+        <div className="px-2 md:px-0">
           <ProductList initialProducts={initialData.products} />
-          
-          {/* Always show pagination */}
           <ProductPagination 
             totalItems={totalItems}
             itemsPerPage={20}

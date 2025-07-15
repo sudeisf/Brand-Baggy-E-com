@@ -102,20 +102,45 @@ export default function AddToCartButton({
         }
       };
     return(
-        <div className="flex mt-4 gap-2 sm:gap-4 w-full items-center">
+        <div className="flex mt-4 gap-2 sm:gap-4 lg:gap-2 w-full items-center">
             <Button
                 disabled={!isSizeSelected}
                 onClick={handleAddToCart}
-                className="bg-[#331d67] py-4 sm:py-7 hover:bg-[#331d67]/80 text-base sm:text-lg font-medium text-white rounded-full w-[70%] sm:w-[88%]"
+                className="
+                    bg-[#331d67] 
+                    py-3 sm:py-5 md:py-6 lg:py-8
+                    text-sm sm:text-base md:text-lg lg:text-2xl
+                    font-medium text-white rounded-full
+                    w-[65%] sm:w-[80%] md:w-[85%] lg:w-[90%]
+                    hover:bg-[#331d67]/80
+                    transition-all
+                "
             >
                 Add to Cart
             </Button>
-            <div 
-                className="flex justify-center items-center gap-2 border-2 border-gray-300 rounded-full w-10 h-10 sm:w-12 sm:h-12"
+            <button
+                type="button"
+                aria-label="Add to favorites"
+                className="
+                    flex justify-center items-center
+                    border-2 border-gray-300 rounded-full
+                    w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16
+                    transition-all
+                    hover:border-red-400
+                    focus:outline-none
+                    bg-white
+                    p-4
+                "
                 onClick={handleToggleFavorite}
             >
-                <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isFavorite(cartItem.id) ? "fill-red-500 stroke-red-500" : "text-gray-500"}`} />
-            </div>
+                <Heart
+                    className={`
+                        transition-all
+                        w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 lg:w-8 lg:h-8
+                        ${isFavorite(cartItem.id) ? "fill-red-500 stroke-red-500" : "text-gray-500"}
+                    `}
+                />
+            </button>
         </div>
     )
 }

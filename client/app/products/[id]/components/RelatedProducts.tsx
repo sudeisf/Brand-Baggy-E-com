@@ -1,10 +1,9 @@
 "use client"
 
-import { useProuductSuggestion , SuggestedProduct } from "@/hooks/use-product";
+import { useProuductSuggestion, SuggestedProduct } from "@/hooks/use-product";
 import { Plus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-
 
 interface Product {
     id: number;
@@ -15,22 +14,22 @@ interface Product {
 }
 
 interface RelatedProductsProps {
-    product_id : number
+    product_id: number
 }
 
 export default function RelatedProducts({ product_id }: RelatedProductsProps) {
-    const {data:Products,isLoading} = useProuductSuggestion(product_id)
+    const { data: Products, isLoading } = useProuductSuggestion(product_id)
     return (
-        <div className="mt-10 w-full max-w-[1250px] mx-auto flex flex-col gap-6 sm:gap-8 md:gap-12 px-4 sm:px-6 mb-10">
+        <div className="mt-5 w-full max-w-[1250px] mx-auto flex flex-col gap-6 md:gap-10 mb-10">
             <h1 className="text-center font-roboto capitalize font-medium text-3xl sm:text-4xl md:text-5xl lg:text-6xl">
                 You might also like
             </h1>
             
-            <div className="flex flex-wrap justify-center gap-6 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-4 px-2 sm:px-0">
                 {Products?.data?.map((product: SuggestedProduct) => (
                     <div
                         key={product.id}
-                        className="w-80 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden"
+                        className="w-full max-w-[280px] bg-white rounded-md shadow-xs overflow-hidden mx-auto"
                     >
                         <div className="aspect-[4/3] overflow-hidden">
                             <Link href={`/products/${product.id}`}>

@@ -61,12 +61,11 @@ export default function ProductReviews({ ProductId }: ProductReviewsProps) {
         };
     }, []);
 
-    // Show loading state
+
     if (isLoading) {
         return <div>Loading reviews...</div>
     }
 
-    // Show error state if no data
     if (!details) {
         return <div>No reviews available</div>
     }
@@ -74,7 +73,7 @@ export default function ProductReviews({ ProductId }: ProductReviewsProps) {
     const hasReviews = details.reviews.length > 0;
 
     return (
-        <div className="w-full max-w-[1250px] mx-auto rounded-lg mb-4 px-4 sm:px-6">
+        <div className="w-full max-w-[1250px] mx-auto rounded-lg mb-4 md:mt-4 px-4 sm:px-6">
             <h1 className="text-2xl sm:text-3xl font-semibold font-roboto py-4">Rating & Reviews</h1>
             <div className="flex flex-col lg:flex-row gap-7 py-4">
                 {/* Rating Summary Section */}

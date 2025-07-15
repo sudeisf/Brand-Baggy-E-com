@@ -338,16 +338,16 @@ class ProductReviewAndRatingAPIView(APIView):
         except Product.DoesNotExist:
             return Response({"detail": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Get average rating
+
         avg_rating = ProductReview.objects.filter(product=product).aggregate(avg=Avg("rating"))["avg"] or 0.0
 
-        # Get reviews
+       
         reviews = ProductReview.objects.filter(product=product)
 
-        # Create the data structure with model instances, not serialized data
+        
         data = {
             "average_rating": round(avg_rating, 1),
-            "reviews": reviews  # Pass model instances, not serialized data
+            "reviews": reviews
         }
         
         summary_serializer = ProductReviewSummarySerializer(data)

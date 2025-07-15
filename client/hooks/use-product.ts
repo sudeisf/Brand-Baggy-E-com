@@ -42,10 +42,7 @@ export const useProductReviewRating = (product_id: number) => {
     queryKey: ["ReviewAndRating", product_id],
     queryFn: async () => {
       const response = await api.get<ProductReviewResponse>(
-        `/product/product-rating-reviews/${product_id}/`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        `/product/product-rating-reviews/${product_id}/`
       )
       return response.data
     }

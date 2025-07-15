@@ -13,62 +13,6 @@ import { useProductDetail } from "../queries/useProductList";
 import { ProductDetail } from "@/types/product";
 
 
-const products = [
-    {
-        id: 1,
-        name: "Product 1",
-        price: 100,
-        image: "/assets/products/product1.jpg",
-        description: "A stylish and comfortable product perfect for everyday use.",
-    },
-    {
-        id: 2,
-        name: "Product 2",
-        price: 200,
-        image: "/assets/products/product2.jpg",
-        description: "This is a description of the product",
-    },
-    {   
-        id: 3,
-        name: "Product 3",
-        price: 300,
-        image: "/assets/products/product3.jpg",
-        description: "An innovative product designed to meet your needs.",
-        
-    },
-    {
-        id: 4,  
-        name: "Product 4",
-        price: 400,
-        image: "/assets/products/product4.jpg",
-        description: "An innovative product designed to meet your needs.",
-    }
-]   
-
-
-const reviews = [
-    {
-      name: "John Doe",
-      rating: 4.5,
-      date: "13 Oct 2024",
-      comment: "This product strikes a great balance between functionality and design. As someone who uses it daily in a professional setting, I appreciate the attention to detail and thoughtful features.",
-      avatar: "https://github.com/shadcn.png"
-    },
-    {
-        name: "Jane Smith",
-        rating: 5,
-        date: "14 Oct 2024",
-        comment: "I've been using this product for a week now, and it's been a game-changer. The quality is top-notch, and the customer service is outstanding.",
-        avatar: "https://github.com/shadcn.png"
-    },
-    {
-        name: "John Doe",
-        rating: 4.5,
-        date: "13 Oct 2024",
-        comment: "This product strikes a great balance between functionality and design. As someone who uses it daily in a professional setting, I appreciate the attention to detail and thoughtful features.",
-        avatar: "https://github.com/shadcn.png"
-    }
-];
 
 
 function formatDate(date: Date) {
