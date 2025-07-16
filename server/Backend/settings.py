@@ -14,6 +14,8 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 import logging
+import dj_database_url
+
 
 load_dotenv()
 
@@ -76,7 +78,7 @@ CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 
-ASGI_APPLICATION = "first_django_server.asgi.application"
+ASGI_APPLICATION = "Backend.asgi.application"
 
 LOGGING = {
     'version': 1,
@@ -253,7 +255,7 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 
-ROOT_URLCONF = 'first_django_server.urls'
+ROOT_URLCONF = 'Backend.urls'
 
 TEMPLATES = [
     {
@@ -271,7 +273,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'first_django_server.wsgi.application'
+WSGI_APPLICATION = 'Backend.wsgi.application'
 
 
 

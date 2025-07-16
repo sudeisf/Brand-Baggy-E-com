@@ -5,7 +5,7 @@ from django.core.asgi import get_asgi_application
 import notifications.routing
 import orders.routing
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "first_django_server.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Backend.settings")
 websocket_urlpatterns = (
     notifications.routing.websocket_urlpatterns +
     orders.routing.websocket_urlpatterns
