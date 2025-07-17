@@ -12,8 +12,9 @@ export const useNotificationWs = (token : string | null ) =>{
   // Validate WebSocket URL before connecting
   const wsUrl = token && wsBaseUrl 
     ? `${wsBaseUrl}/ws/notifications/?token=${token}` 
-    : null;const {lastMessage} = useWebSocket(
-            wsUrl,
+    : null;
+    const {lastMessage} = useWebSocket(
+              token ? `${wsUrl}` : null,
             {
                   shouldReconnect: () => true,
                   reconnectInterval: 3000,
