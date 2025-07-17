@@ -9,7 +9,7 @@ export const useAnalystics = (token : string | null) =>
 {
       const setMetrics = useAnalyticsStore((state) => state.setMetrics)
       const wsBaseUrl = process.env.NEXT_PUBLIC_WS_URL;
-      const {lastMessage ,readyState} = useWebSocket(token ? `${wsBaseUrl}/ws/seller-analytics/?token=${token}` : null,
+      const {lastMessage ,readyState} = useWebSocket(token ? `${process.env.NEXT_PUBLIC_WS_URL}/ws/seller-analytics/?token=${token}` : null,
             {
                   shouldReconnect: () => true,
                   reconnectInterval: 3000,
