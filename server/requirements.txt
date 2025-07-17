@@ -47,6 +47,7 @@ drf-spectacular==0.28.0
 drf-spectacular-sidecar==2025.4.1
 executing==2.2.0
 fonttools==4.58.4
+git-filter-repo==2.47.0
 google-auth==2.39.0
 gprof2dot==2025.4.14
 gunicorn==23.0.0
@@ -96,6 +97,7 @@ python-crontab==3.2.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.0
 pytz==2025.2
+pywin32==310
 PyYAML==6.0.2
 pyzmq==27.0.0
 qiskit==2.0.2

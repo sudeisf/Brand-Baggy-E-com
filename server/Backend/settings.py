@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     'payment',
     'channels',
     'notifications',
-    'silk'
+    'silk',
+    'corsheaders',
 ]
 
 # Celery configuration
@@ -172,12 +173,12 @@ AUTHENTICATION_BACKENDS = [
 # CORS and CSRF
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
-    os.getenv('FRONTEND_URL', 'https://your-frontend.onrender.com'),
+    os.getenv('FRONTEND_URL'),
 ]
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
-    os.getenv('FRONTEND_URL', 'https://your-frontend.onrender.com'),
+    os.getenv('FRONTEND_URL'),
 ]
 
 # Database (Supabase)
