@@ -172,13 +172,15 @@ AUTHENTICATION_BACKENDS = [
 # CORS and CSRF
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
-    os.getenv('FRONTEND_URL'),
+    'https://e-commerce-platform-django-w-next-n47oqqcyb-sudeisfs-projects.vercel.app',
 ]
+
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
-    os.getenv('FRONTEND_URL'),
+    'https://e-commerce-platform-django-w-next-n47oqqcyb-sudeisfs-projects.vercel.app',
 ]
+
 
 # Database (Supabase)
 DATABASES = {
