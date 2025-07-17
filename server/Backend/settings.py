@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 import dj_database_url
 
 load_dotenv()
-
+ROOT_URLCONF = "Backend.urls"
 # Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 
