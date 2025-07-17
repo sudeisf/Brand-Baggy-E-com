@@ -54,7 +54,6 @@ INSTALLED_APPS = [
     'channels',
     'notifications',
     'silk',
-    'corsheaders',
 ]
 
 # Celery configuration
