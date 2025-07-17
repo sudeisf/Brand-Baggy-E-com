@@ -6,11 +6,13 @@ import { string } from 'zod'
 
 
 export const useNotificationWs = (token : string | null ) =>{
-      const addNotification = useNotificationStore(s => s.addNotification)
-      const wsBaseUrl = process.env.NEXT_PUBLIC_WS_URL;
+  const addNotification = useNotificationStore((s) => s.addNotification);
+  const wsBaseUrl = process.env.NEXT_PUBLIC_WS_URL;
 
-      const wsUrl = token ? `${process.env.NEXT_PUBLIC_WS_URL}/ws/notifications/?token=${token}` : null;
-      const {lastMessage} = useWebSocket(
+  // Validate WebSocket URL before connecting
+  const wsUrl = token && wsBaseUrl 
+    ? `${wsBaseUrl}/ws/notifications/?token=${token}` 
+    : null;const {lastMessage} = useWebSocket(
             wsUrl,
             {
                   shouldReconnect: () => true,
