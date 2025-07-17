@@ -8,7 +8,8 @@ import { AnalyticsMetric } from "@/types/analytics"
 export const useAnalystics = (token : string | null) =>
 {
       const setMetrics = useAnalyticsStore((state) => state.setMetrics)
-      const {lastMessage ,readyState} = useWebSocket(token ? `ws://localhost:8000/ws/seller-analytics/?token=${token}` : null,
+      const wsBaseUrl = process.env.NEXT_PUBLIC_WS_URL;
+      const {lastMessage ,readyState} = useWebSocket(token ? `${wsBaseUrl}/ws/seller-analytics/?token=${token}` : null,
             {
                   shouldReconnect: () => true,
                   reconnectInterval: 3000,
