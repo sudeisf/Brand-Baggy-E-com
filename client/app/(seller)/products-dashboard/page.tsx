@@ -24,7 +24,7 @@ type Product = {
 
 const getProducts  = async () =>{
     try {
-      const token =  (await cookies()).get('accessToken')?.value
+      const token = (await cookies()).get('accessToken')?.value
       console.log(token)
       const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/product/seller/dashboard/`,{
         headers : {

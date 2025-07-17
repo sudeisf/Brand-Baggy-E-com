@@ -60,7 +60,7 @@ export default function OrdersTable() {
   const [rowSelection, setRowSelection] = useState({});
   const {data: orders, refetch} = useAdminOrderTable();
   const table = useReactTable<OrderTableResponse>({
-    data: orders ,
+    data: orders ?? [],
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
