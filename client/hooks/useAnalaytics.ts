@@ -10,7 +10,8 @@ export const useAnalystics = (token : string | null) =>
       const wsBaseUrl = process.env.NEXT_PUBLIC_WS_URL;
       const wsUrl = token && wsBaseUrl
         ? `${wsBaseUrl}/ws/analytics/?token=${encodeURIComponent(token)}`
-        : null
+        : null;
+        console.log(wsUrl)
       const {lastMessage ,readyState} = useWebSocket(token ? `${wsUrl}` : null,
             {
                   shouldReconnect: () => true,
