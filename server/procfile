@@ -1,2 +1,2 @@
-web: daphne Backend.asgi:application --port $PORT
+web: daphne -b 0.0.0.0 -p $PORT Backend.asgi:application
 worker: celery -A Backend worker --pool=solo -l info
