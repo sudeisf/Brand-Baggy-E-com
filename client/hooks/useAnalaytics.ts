@@ -8,6 +8,7 @@ export const useAnalystics = (token : string | null) =>
 {
       const setMetrics = useAnalyticsStore((state) => state.setMetrics);
       const wsBaseUrl = process.env.NEXT_PUBLIC_WS_URL;
+      console.log(wsBaseUrl)
       const wsUrl = token && wsBaseUrl
         ? `${wsBaseUrl}/ws/analytics/?token=${encodeURIComponent(token)}`
         : null;
