@@ -1,1 +1,2 @@
-web: gunicorn Backend.wsgi:application --bind 0.0.0.0:$PORT & celery -A Backend worker --pool=solo -l info
+web: daphne Backend.asgi:application --port $PORT
+worker: celery -A Backend worker --pool=solo -l info
