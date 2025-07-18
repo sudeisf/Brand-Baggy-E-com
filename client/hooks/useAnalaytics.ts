@@ -5,10 +5,9 @@ import { AnalyticsMetric } from "@/types/analytics"
 export const useAnalystics = (token: string | null) => {
   const setMetrics = useAnalyticsStore((state) => state.setMetrics)
   const wsBaseUrl = process.env.NEXT_PUBLIC_WS_URL
-  const wsUrl =
-    token && wsBaseUrl
-      ? `${wsBaseUrl}/ws/analytics/?token=${encodeURIComponent(token)}`
-      : null
+  const wsUrl = token && wsBaseUrl
+  ? `${wsBaseUrl}/ws/seller-analytics/?token=${encodeURIComponent(token)}`
+  : null;
 
   const wsRef = useRef<WebSocket | null>(null)
 
