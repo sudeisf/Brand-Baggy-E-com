@@ -1,4 +1,3 @@
-import ueWebScocket from "react-use-websocket"
 import { useEffect } from "react"
 import useWebSocket from "react-use-websocket"
 import { useAnalyticsStore } from "@/store/metricStore"
@@ -22,7 +21,6 @@ export const useAnalystics = (token : string | null) =>
                     try {
                       const Wsdata = JSON.parse(lastMessage.data)
                       console.log("[Analytics WS] Received data:", Wsdata)
-                      // optionally wrap in { type: 'analytics', data: [...] } from backend
                       if (Array.isArray(Wsdata)) {
                         setMetrics(Wsdata as AnalyticsMetric[])
                       } else if (Wsdata.type === "analytics") {

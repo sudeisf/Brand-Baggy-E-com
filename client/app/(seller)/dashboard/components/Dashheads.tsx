@@ -14,7 +14,7 @@ import { useAnalystics } from "@/hooks/useAnalaytics";
     return (
       <div className="flex flex-col gap-8 bg-white ">
       <div className="flex gap-4 px-4">
-        {data.map((item, index) => (
+        {data.length === 0 ? <div>No analytics data</div> : data.map((item, index) => (
           <div 
             key={index}
             className="bg-white rounded-lg h-[200px] flex-1 flex justify-between p-5 items-baseline  border relative"
