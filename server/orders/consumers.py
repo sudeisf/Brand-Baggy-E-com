@@ -8,7 +8,7 @@ from django.db.models import Sum, F, DecimalField
 from django.db.models.functions import TruncDate
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
-from orders.models import Order, OrderItem
+from .models import Order, OrderItem
 import asyncio
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,6 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         try:
             from rest_framework_simplejwt.tokens import AccessToken
-
             raw_query_string = self.scope["query_string"].decode()
             token = raw_query_string.split("token=")[-1]
             access_token = AccessToken(token)
