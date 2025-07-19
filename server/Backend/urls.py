@@ -1,9 +1,14 @@
 
 from django.contrib import admin
 from django.urls import include, path
+from django.http import HttpResponse
 
+
+def health_check(request):
+    return HttpResponse("OK", status=200)
 
 urlpatterns = [
+    path('', health_check),
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('auth/', include('dj_rest_auth.urls')),

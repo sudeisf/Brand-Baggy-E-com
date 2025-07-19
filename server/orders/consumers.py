@@ -54,7 +54,8 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
         self.keep_sending = False
         if hasattr(self, 'group_name'):
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
-            logger.info(f"Seller {self.seller.id} disconnected.")
+        # Optionally: cancel any running tasks here if you store them
+        logger.info(f"Seller {getattr(self, 'seller', 'unknown')} disconnected.")
 
     async def send_metrics(self):
         today = timezone.now()
