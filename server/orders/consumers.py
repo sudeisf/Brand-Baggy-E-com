@@ -8,7 +8,6 @@ from django.db.models import Sum, F, DecimalField
 from django.db.models.functions import TruncDate
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
-from .models import Order, OrderItem
 import asyncio
 
 logger = logging.getLogger(__name__)
@@ -17,6 +16,7 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         try:
             from rest_framework_simplejwt.tokens import AccessToken
+
             raw_query_string = self.scope["query_string"].decode()
             token = raw_query_string.split("token=")[-1]
             access_token = AccessToken(token)
@@ -88,6 +88,7 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(metrics))
 
     def get_expenses(self, seller, start, end):
+        from .models import OrderItem
         return OrderItem.objects.filter(
             product__seller=seller,
             order__created_at__range=(start, end)
@@ -96,6 +97,7 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
         )["total"] or Decimal("0")
 
     def get_total_expenses(self, seller):
+        from .models import OrderItem
         return OrderItem.objects.filter(
             product__seller=seller
         ).aggregate(
@@ -103,6 +105,7 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
         )["total"] or Decimal("0")
 
     def get_income(self, seller, start, end):
+        from .models import Order
         return Order.objects.filter(
             items__product__seller=seller,
             created_at__range=(start, end),
@@ -110,18 +113,21 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
         ).distinct().aggregate(total=Sum("total_price"))["total"] or Decimal("0")
 
     def get_total_income(self, seller):
+        from .models import Order
         return Order.objects.filter(
             items__product__seller=seller,
             payment__status='completed'
         ).distinct().aggregate(total=Sum("total_price"))["total"] or Decimal("0")
 
     def get_orders_value(self, seller, start, end):
+        from .models import Order
         return Order.objects.filter(
             items__product__seller=seller,
             created_at__range=(start, end)
         ).distinct().aggregate(total=Sum("total_price"))["total"] or Decimal("0")
 
     def get_total_orders_value(self, seller):
+        from .models import Order
         return Order.objects.filter(
             items__product__seller=seller
         ).distinct().aggregate(total=Sum("total_price"))["total"] or Decimal("0")
@@ -130,6 +136,7 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
         base = {day: 0 for day in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]}
 
         if metric == "expenses":
+            from .models import OrderItem
             qs = OrderItem.objects.filter(
                 product__seller=seller,
                 order__created_at__range=(start, end)
@@ -137,6 +144,7 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
                 total=Sum(F("product__cost_price") * F("quantity"), output_field=DecimalField())
             )
         elif metric == "income":
+            from .models import Order
             qs = Order.objects.filter(
                 items__product__seller=seller,
                 created_at__range=(start, end),
@@ -145,6 +153,7 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
                 total=Sum("total_price")
             )
         else:
+            from .models import Order
             qs = Order.objects.filter(
                 items__product__seller=seller,
                 created_at__range=(start, end)
