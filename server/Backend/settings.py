@@ -172,13 +172,13 @@ AUTHENTICATION_BACKENDS = [
 # CORS and CSRF
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
-    'https://e-commerce-platform-django-w-next.vercel.app/',
+    'https://e-commerce-platform-django-w-next.vercel.app',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
-    'https://e-commerce-platform-django-w-next.vercel.app/',
+    'https://e-commerce-platform-django-w-next.vercel.app',
 ]
 
 # Database (Supabase)
@@ -253,6 +253,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom user model
 AUTH_USER_MODEL = 'accounts.CustomUser'
+APPEND_SLASH = False
 
 # Logging
 LOGGING = {
