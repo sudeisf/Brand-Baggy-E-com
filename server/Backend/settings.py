@@ -173,12 +173,14 @@ AUTHENTICATION_BACKENDS = [
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'https://e-commerce-platform-django-w-next.vercel.app',
+    'https://e-commerce-platform-django-w-next-1.onrender.com',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
     'https://e-commerce-platform-django-w-next.vercel.app',
+    'https://e-commerce-platform-django-w-next-1.onrender.com',
 ]
 
 # Database (Supabase)
