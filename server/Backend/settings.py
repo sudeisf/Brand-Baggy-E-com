@@ -25,6 +25,7 @@ ALLOWED_HOSTS = [
 # Application definition
 INSTALLED_APPS = [
     'daphne',
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -37,7 +38,6 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'accounts',
     'product',
-    'corsheaders',
     'dj_rest_auth',
     'dj_rest_auth.registration',
     'allauth',
@@ -151,9 +151,9 @@ PAYPAL_API_BASE = os.getenv('PAYPAL_API_BASE', 'https://api-m.sandbox.paypal.com
 
 # Middleware
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -253,7 +253,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom user model
 AUTH_USER_MODEL = 'accounts.CustomUser'
-APPEND_SLASH = False
 
 # Logging
 LOGGING = {
@@ -288,3 +287,5 @@ LOGGING = {
         },
     },
 }
+
+APPEND_SLASH = False
