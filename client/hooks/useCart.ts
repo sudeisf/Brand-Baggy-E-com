@@ -64,7 +64,7 @@ interface CartApiResponse {
           }
         },
         ...options,
-        enabled: options?.requireAuth ? Boolean(token) : true,
+        enabled: options?.requireAuth !== false ? Boolean(token) : true,
         refetchOnWindowFocus: false,
         staleTime: 5 * 60 * 1000,
       });

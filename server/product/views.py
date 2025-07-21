@@ -222,9 +222,7 @@ class CategoryFilterView(APIView):
     permission_classes = [AllowAny]
     
     def get(self, request):
-        # Get all parent categories with their immediate children
         parent_categories = Category.objects.filter(parent=None)
-        
         result = []
         for parent in parent_categories:
             parent_data = CatagorySerializer(parent).data

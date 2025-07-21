@@ -31,10 +31,9 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { isLoading, error } = useCart({ requireAuth: true });
-  const { isLoading: loading, error: err } = useFav({ requireAuth: true });
+  const { isLoading: loading, error: err } = useFav();
   const { clearFilters, toggleSubcategory } = useProductFilterStore();
 
-  // Define categories with proper IDs and slugs
   const categories = [
     { id: 1, name: "Men", slug: "men" },
     { id: 2, name: "Women", slug: "women" },
