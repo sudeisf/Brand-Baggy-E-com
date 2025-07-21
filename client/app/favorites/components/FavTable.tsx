@@ -15,7 +15,7 @@ export default function FavTable() {
     const isAuthenticated = useAuthStore((state)=>state.isAuthenticated)
     const remove_mutation = useRemoveFavorite();
     const removeall_mutuate = useRemoveAllFavorites()
-    const {isLoading,error} = useFav({requireAuth:true})
+    const {isLoading,error} = useFav()
 
     type param ={
         id : string;
