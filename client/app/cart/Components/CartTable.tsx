@@ -2,7 +2,7 @@
 import Image from "next/image"
 import QuantityButton from "@/app/cart/Components/QuantityButton"
 import {useCartStore} from "@/store/cartStore"
-import {  Trash2 } from "lucide-react"
+import {  Trash2, X } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useCart, useRemoveCartItem ,useUpdateCartItemQuantity } from "@/hooks/useCart"
@@ -47,7 +47,7 @@ export default function CartTable() {
    
 
     return (
-        <div className=" *:font-roboto w-[70%] ">
+        <div className=" *:font-roboto w-full sm:w-[70%] md:w-full lg:w-[80%] ">
         <div className="  border-gray-200 rounded-xl p-4">
           { items.length === 0 ?(
             <div className="text-center py-10 text-[#331d67]">
@@ -58,16 +58,16 @@ export default function CartTable() {
           </div>
           ):(
             <>
-            <div className="grid grid-cols-12 border-b-1 border-gray-200 gap-4 py-4">
+            <div className="hidden sm:grid grid-cols-12 border-b-1 border-gray-200 gap-4 py-4">
             <div className="col-span-6 font-roboto text-[#331d67] font-medium">Product name</div>
             <div className="col-span-2 text-center font-roboto text-[#331d67] font-medium">Quantity</div>
             <div className="col-span-2 text-center font-roboto text-[#331d67] font-medium">Total</div>
             <div className="col-span-2 text-center font-roboto text-[#331d67] font-medium">Action</div>
         </div>
-        <div className="space-y-6 py-4">
+        <div className="hidden sm:block space-y-6 py-4">
             {items.map((item :CartItem) => (
                 <div key={`${item.id}-${item.size}`} className="grid not-last:border-b-1 *:font-roboto grid-cols-12 gap-4 items-center">
-                <div className="col-span-6   flex items-center gap-4">
+                <div className="col-span-6 flex items-center gap-4">
                     <Image src={item.main_image} 
                     alt={item.name} 
                     width={80} 
@@ -75,7 +75,7 @@ export default function CartTable() {
                     className="rounded-md"
                      />
                     <div className="flex flex-col gap-1">
-                    <h2 className="text-lg font-medium font-roboto">{item.name}</h2>
+                    <h2 className="text-lg lg:text-md font-medium font-roboto">{item.name}</h2>
                     <p className="text-sm font-roboto text-[#331d67]">Set Size: {item.size}</p>
                     </div>
                     </div>
@@ -92,6 +92,45 @@ export default function CartTable() {
                         <Trash2  className="w-5 h-5 text-[#331d67] mx-auto" />
                         </Button>
                     </div>
+                </div>
+            ))}
+        </div>
+        {/* Mobile */}
+        <div className=" space-y-6 py-4 w-full sm:hidden ">
+            {items.map((item :CartItem) => (
+                <div key={`${item.id}-${item.size}`} className="  pt-2 border-t *:font-roboto flex gap-4 ">
+                    <Image src={item.main_image} 
+                    alt={item.name} 
+                    width={80} 
+                    height={80}
+                    className="rounded-md"
+                     />
+                     <div className="w-full py-1 space-y-4">
+                     <div className="flex justify-between items-start">
+                        <div className="flex flex-col gap-1">
+                            <h2 className="text-sm font-medium font-sans">{item.name}</h2>
+                            <p className="text-sm font-roboto text-[#331d67]">Set Size: {item.size}</p>
+                        </div>
+
+                        <div className="text-center font-roboto">
+                            <Button variant="ghost" onClick={() => handleRemove(item)}>
+                            <X  className="w-5 h-5 text-gray-400 mx-auto" />
+                            </Button>
+                        </div>
+                     </div>
+
+                        <div className="flex justify-between items-center">
+                            <div className=" text-[#331d67] text-center font-semibold font-sans">
+                                <p>${item.quantity * item.price}</p>
+                            </div>
+
+                            <div className=" text-center items-center font-roboto">
+                                <QuantityButton id={item.id} quantity={item.quantity} size={item.size} onQuantityChange={(newQty) => {
+                                    updateItemQuantity(item.id, newQty , item.size)
+                                }} />
+                            </div>
+                        </div>
+                     </div>
                 </div>
             ))}
         </div>

@@ -10,7 +10,7 @@ export default function OrderSummary() {
     const discout_price = useCartStore(state=> state.totalDiscount)
     const docountedAmount = useCartStore(s=>s.getDiscountAmount)
     return (
-        <div className="border-2 space-y-4  border-gray-200 rounded-xl p-6 h-fit">
+        <div className="sm:border-2 space-y-4 md:w-full lg:w-fit  sm:border-gray-200 rounded-xl p-6 h-fit">
             <h1 className="text-2xl font-medium font-roboto text-[#331d67]">Order Summary</h1>
             <div className="space-y-2">
                 <div className="flex justify-between">
@@ -30,16 +30,17 @@ export default function OrderSummary() {
                 <p>Total</p>
                 <p className="font-roboto font-medium tracking-wider">{((subtotal() - discout_price())).toFixed(2)} <span className="text-sm font-roboto">ETB</span></p>
             </div>
-            <div className="flex items-start gap-2 bg-[#331d67]/5 text-[#331d67] p-4 rounded-md">
-                <ShieldCheck className="w-6 h-6" />
-                <p className="font-roboto font-medium">90 days Limited Warranty against manufacturing defects</p>
-            </div>
-
             <div className="flex justify-center items-center ">
                 <Link href="/shipping" className="w-full"> 
-                <Button className="w-full py-6 rounded-md font-roboto font-semibold tracking-wider bg-[#331d67] text-white hover:bg-[#331d67]/80">Checkout Now</Button>
+                <Button className="w-full py-6 rounded-md font-sans font-medium tracking-wider bg-[#331d67] text-white hover:bg-[#331d67]/80">Checkout Now</Button>
                 </Link>
             </div>
+            <div className="flex items-start gap-2 bg-[#331d67]/5 text-[#331d67] p-4 rounded-md">
+                <ShieldCheck className="w-6 h-6" />
+                <p className="font-sans font-medium">90 days Limited Warranty against manufacturing defects</p>
+            </div>
+
+            
 
 
         </div>

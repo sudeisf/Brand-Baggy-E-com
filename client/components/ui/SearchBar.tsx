@@ -82,7 +82,7 @@ export default function SearchBar() {
   };
 
   return (
-    <div className="relative hidden sm:flex w-[10rem] md:w-[20rem] lg:w-[30rem] bg-white items-center justify-start gap-2 rounded-sm px-3 py-1.5 border-1">
+    <div className="relative hidden sm:flex w-[10rem] md:w-[15rem] lg:w-[20rem] bg-white items-center justify-start gap-2 rounded-sm px-3 py-1.5 border-1">
       <Search className="text-black w-4 h-4 md:w-5 md:h-5" />
       <input 
         type="text" 

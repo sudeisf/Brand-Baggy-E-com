@@ -37,7 +37,7 @@ export default function ProductsView({ initialData }: ProductsViewProps) {
   const totalPages = Math.ceil(totalItems / 20);
 
   return (
-    <div className="flex flex-col md:flex-row w-full gap-0 md:gap-4">
+    <div className="flex flex-col lg:flex-row w-full gap-0 md:gap-4">
       {/* SideMenu: Responsive */}
       <div className="w-full md:w-64 mb-0 md:mb-0">
         <SideMenu />

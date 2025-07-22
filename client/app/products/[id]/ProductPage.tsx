@@ -59,9 +59,9 @@ export default function ProductPage({ initialProduct }: ProductPageProps) {
         className="
           flex flex-col 
           md:flex-row 
-          p-2 mb-2 gap-4 
+          p-2  gap-4 
           max-w-full md:max-w-[1250px] 
-          h-auto md:h-[750px] 
+          h-auto sm:h-auto md:h-[750px] 
           mx-auto rounded-lg
         "
       >
@@ -105,20 +105,24 @@ export default function ProductPage({ initialProduct }: ProductPageProps) {
             }}
           />
 
+         
+        </div>
+
+      </div>
+      <div className="sm:flex gap-4">
           <ProductDescription description={product.description ?? ""} />
 
-          <ShippingInfo
-            discount={`Desc ${
-              product.discount?.is_active && product.discount?.is_valid
-                ? product.discount.value
-                : "0.00"
-            } ${product.discount?.type === "percentage" ? "%" : ""}`}
-            packageType="Regular package"
-            deliveryTime="3-5 Working days"
-            estimatedArrival={estimatedArrival}
-          />
-        </div>
-      </div>
+            <ShippingInfo
+              discount={`Desc ${
+                product.discount?.is_active && product.discount?.is_valid
+                  ? product.discount.value
+                  : "0.00"
+              } ${product.discount?.type === "percentage" ? "%" : ""}`}
+              packageType="Regular package"
+              deliveryTime="3-5 Working days"
+              estimatedArrival={estimatedArrival}
+            />
+          </div>
 
       <ProductReviews ProductId={product.id} />
 

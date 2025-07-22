@@ -58,14 +58,14 @@ export default function ShippingPage() {
   return (
     <div className="container mx-auto px-4 py-5 mb-10">
       <ProductCrum />
-      <h1 className="text-4xl w-[1250px] mx-auto text-[#331d67] font-roboto py-5 px-2.5 font-bold ">Shipping Details</h1>
-      <div className="w-[1250px] mx-auto">
-        <div className="flex gap-4">
-          <div className="w-[60%] border-1 shadow-xs border-gray-200 rounded-xl">
+      <h1 className="text-4xl max-w-[450px] md:w-[1250px] mx-auto text-[#331d67] font-roboto py-5 px-2.5 font-bold ">Shipping Details</h1>
+      <div className="max-w-[450px] md:w-[1250px] mx-auto">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="md:w-[60%] md:border-1 md:shadow-xs md:border-gray-200 md:rounded-xl">
             <ShippingInformation onChange={handleShippingChange} />
             {/* <BillingInformation /> */}
           </div>
-          <div className="w-[40%]">
+          <div className="md:w-[40%]">
             <Summery onPlaceOrder={handlePlaceOrder} />
           </div>
         </div>

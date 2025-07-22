@@ -61,7 +61,7 @@ export function SideMenu() {
   return (
     <>
       {/* Mobile Dialog Menu */}
-      <div className="block md:hidden w-full px-2 mb-4">
+      <div className="block lg:hidden w-full px-2 mb-4">
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <button
@@ -144,7 +144,7 @@ export function SideMenu() {
 
       {/* Desktop Menu */}
       <div
-        className="hidden md:block w-full md:w-[300px] max-h-60 md:max-h-[calc(100vh-100px)] overflow-x-auto md:overflow-x-visible overflow-y-auto border-gray-200 *:font-inter px-2 md:px-0 mb-2 md:mb-0"
+        className="hidden lg:block w-full md:w-[300px] max-h-60 md:max-h-[calc(100vh-100px)] overflow-x-auto md:overflow-x-visible overflow-y-auto border-gray-200 *:font-inter px-2 md:px-0 mb-2 md:mb-0"
       >
         {categories?.map((category) => (
           <Collapsible 

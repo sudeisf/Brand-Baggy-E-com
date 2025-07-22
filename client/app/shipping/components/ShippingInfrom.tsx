@@ -51,7 +51,7 @@ export default function ShippingInformation({ onChange }: Props) {
     }, [form, onChange]);
 
     return (
-        <div className="w-full  border-gray-200 p-4">
+        <div className="w-full  md:p-4">
             <h1 className="text-lg font-medium text-[#331d67] p-2">Shipping Information</h1>
             <Form {...form}>
                 <form className="space-y-4">
