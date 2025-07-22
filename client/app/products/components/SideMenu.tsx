@@ -18,6 +18,7 @@ import {
   DialogDescription,
   // VisuallyHidden, // Uncomment if you want to visually hide the title
 } from "@/components/ui/dialog";
+import axios from "axios";
 
 interface Category {
   id: number;
@@ -38,7 +39,7 @@ export function SideMenu() {
   const { data: categories, isLoading } = useQuery<Category[]>({
     queryKey: ['category-filter'],
     queryFn: () => 
-      api.get('/product/category-filter/')
+      axios.get('http://localhost:8000/product/category-filter/')
         .then(res => res.data),
     staleTime: 1000 * 60 * 15, 
   });

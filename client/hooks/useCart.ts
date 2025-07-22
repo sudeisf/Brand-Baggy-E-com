@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import { useAuthStore } from "@/store/authStore";
 import { UseQueryOptions } from "@tanstack/react-query";
+import axios from "axios";
 
 
 interface CartItem {
@@ -34,8 +35,9 @@ interface CartApiResponse {
       return useQuery<CartApiResponse>({
         queryKey: ['cart'],
         queryFn: async () => {
+            console.log(process.env.NEXT_PUBLIC_API_URL)
           try {
-            const { data } = await api.get('cart/get-cart/', {
+            const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cart/get-cart/`, {
               headers: {
                 Authorization: `Bearer ${token}`,
               },

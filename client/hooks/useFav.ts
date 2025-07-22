@@ -30,7 +30,7 @@ export function useFav(
     queryKey: ['favorites'],
     queryFn: async ()  => {
       try {
-        const { data } = await api.get<FavApiResponse>('product/favorite-products/', {
+        const { data } = await api.get<FavApiResponse>('/product/favorite-products/', {
               headers : {
                     "Authorization" : `Bearer ${token}`
               }
