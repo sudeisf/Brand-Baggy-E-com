@@ -70,11 +70,16 @@ type props = {
 }
 
 export default function ProductListPage({initialProducts}:props) {
-  const {data : queryProducts, isFetching , error: queryError } = useProducts()
+  const [page,setPage] = useState<number>(1);
+  // const totalPages = Math.ceil((query.data?.count || 0) / 10);
+  const {data : queryProducts, isFetching , error: queryError } = useProducts(page)
   const queryClient = useQueryClient();
 
   // Use queryProducts if available, otherwise initialProducts
-  const products = queryProducts ?? initialProducts;
+  const products = queryProducts?.results ?? initialProducts;
+  const totalPages = Math.ceil((queryProducts?.count ?? initialProducts.length) / 10);
+
+
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -358,22 +363,23 @@ export default function ProductListPage({initialProducts}:props) {
       </div>
       <div className="flex items-center justify-end space-x-2 py-4 px-5">
         <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
+        {table.getFilteredSelectedRowModel().rows.length} of {products.length} row(s) selected.
+
         </div>
         <div className="space-x-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            onClick={() => setPage((p) => Math.max(p - 1, 1))}
+            disabled={page === 1}
           >
             Previous
           </Button>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+            disabled={page === totalPages}
           >
             Next
           </Button>

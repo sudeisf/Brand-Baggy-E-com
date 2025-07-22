@@ -26,53 +26,57 @@ type Product = {
   category: Category;
 };
 
-const fetchProducts  = async (token : string) =>{
-    try {
-      
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/product/seller/dashboard/`,{
-        headers : {
-          Authorization : `Bearer ${token}`
-        }
-      });
-    
-    if (response.status === 200) {
-      return response.data.results.map((item: Product) => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        quantity : item.quantity,
-        in_stock : item.in_stock,
-        main_image : item.main_image,
-        category: item.category,
-        product_location: item.product_location,
-        status: item.in_stock,
-        slug: item.slug
-      }));
-    }
-    return [];
-  }catch(error){
-    console.error("lose",error);
-    return [];
-  }
+export interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
 }
+export const fetchProducts = async (
+  token: string,
+  page = 1
+): Promise<PaginatedResponse<Product>> => {
+  try {
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/product/seller/dashboard/?page=${page}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-export const useProducts = () => {
-  const token  = useAuthStore((state)=>state.accessToken)
-const {setProducts} = useProductStore();
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return {
+      count: 0,
+      next: null,
+      previous: null,
+      results: [],
+    };
+  }
+};
 
-const query =  useQuery<Product[], Error>({
-      queryKey: ['products'],
-      queryFn: () => fetchProducts(token as string),
-      enabled: !!token, 
-      staleTime: 5 * 60 * 1000, 
-});
-      useEffect(()=>{
-            if (query.isSuccess && query.data) {
-                  setProducts(query.data);
-                }
-      },[query.isSuccess, query.data, setProducts])
+export const useProducts = (page: number) => {
+  const token = useAuthStore((state) => state.accessToken);
+  const { setProducts } = useProductStore(); // optional: you might not even need this if you use React Table directly
 
-return query
+  const query = useQuery({
+    queryKey: ["products", page],
+    queryFn: () => fetchProducts(token as string, page),
+    enabled: !!token,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  // optional: sync result to Zustand if needed
+  useEffect(() => {
+    if (query.isSuccess && query.data?.results) {
+      setProducts(query.data.results);
+    }
+  }, [query.data, query.isSuccess, setProducts]);
+
+  return query;
 };
 
 

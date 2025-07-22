@@ -1,4 +1,5 @@
-"use client"
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Clock } from "lucide-react";
 import { useState } from "react";
@@ -8,7 +9,7 @@ export default function CashOnDelivery() {
 
   if (isConfirmed) {
     return (
-      <div className="p-6 w-[700px] mx-auto rounded-xl border-2 border-green-200 bg-green-50 mt-4">
+      <div className="p-6 w-full max-w-lg mx-auto rounded-xl border-2 border-green-200 bg-green-50 mt-4">
         <div className="flex items-center gap-3 mb-3">
           <CheckCircle className="w-6 h-6 text-green-500" />
           <h1 className="text-xl font-semibold text-[#331d67]">Order Confirmed!</h1>
@@ -25,7 +26,7 @@ export default function CashOnDelivery() {
   }
 
   return (
-    <div className="p-6 w-[700px] mx-auto rounded-xl border-2 border-gray-200 bg-gray-50 mt-4 space-y-4">
+    <div className="p-6 w-full max-w-lg mx-auto rounded-xl border-2 border-gray-200 bg-gray-50 mt-4 space-y-4">
       <h1 className="text-xl font-semibold text-[#331d67]">Cash On Delivery</h1>
       <div className="space-y-2 text-gray-600">
         <p>• Pay with cash when your order arrives</p>
@@ -48,7 +49,7 @@ export default function CashOnDelivery() {
         </div>
       </div>
 
-      <Button 
+      <Button
         onClick={() => setIsConfirmed(true)}
         className="w-full mt-4 bg-[#331d67] hover:bg-[#4a2d8a]"
       >

@@ -8,23 +8,23 @@ const api = axios.create({
   timeout: 30000, // 30-second timeout
 });
 
-// Fetch CSRF token
-async function getCsrfToken() {
-  try {
-    const response = await api.get("/accounts/login/", { headers: {}, params: {}, skipCsrf: true } as any);
-    const csrfToken = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("csrftoken"))
-      ?.split("=")[1];
-    if (csrfToken) {
-      api.defaults.headers["X-CSRFToken"] = csrfToken;
-      return csrfToken;
-    }
-  } catch (error) {
-    console.error("Failed to fetch CSRF token:", error);
-  }
-  return null;
-}
+// // Fetch CSRF token
+// async function getCsrfToken() {
+//   try {
+//     const response = await api.get("/accounts/login/", { headers: {}, params: {}, skipCsrf: true } as any);
+//     const csrfToken = document.cookie
+//       .split("; ")
+//       .find((row) => row.startsWith("csrftoken"))
+//       ?.split("=")[1];
+//     if (csrfToken) {
+//       api.defaults.headers["X-CSRFToken"] = csrfToken;
+//       return csrfToken;
+//     }
+//   } catch (error) {
+//     console.error("Failed to fetch CSRF token:", error);
+//   }
+//   return null;
+// }
 
 // Request Interceptor
 api.interceptors.request.use(
@@ -40,10 +40,10 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
 
-    // Fetch CSRF token for POST requests
-    if (config.method?.toLowerCase() === "post" && !(config as any).skipCsrf) {
-      await getCsrfToken();
-    }
+    // // Fetch CSRF token for POST requests
+    // if (config.method?.toLowerCase() === "post" && !(config as any).skipCsrf) {
+    //   await getCsrfToken();
+    // }
 
     return config;
   },

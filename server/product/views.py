@@ -25,6 +25,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 import cloudinary
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
+from rest_framework.pagination import PageNumberPagination
 
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 20  # Change from 12 to 20 to match frontend
@@ -144,12 +145,17 @@ class ProductCreateAPIView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"message": "Product created successfully."}, status=status.HTTP_201_CREATED)
-        
+
+class SellerProductPagination(PageNumberPagination):
+        page_size = 10
+        max_page_size = 100
+
 class SellerProductDashboardView(generics.ListAPIView):
     serializer_class = SellerProductListSerializer
     permission_classes = [IsAuthenticated , IsSeller]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['in_stock', 'category']
+    pagination_class = SellerProductPagination
     
     def get_queryset(self):
         return Product.objects.filter(
