@@ -11,9 +11,9 @@ interface ShippingInfoProps {
 
 export default function ShippingInfo({discount,packageType,deliveryTime,estimatedArrival}:ShippingInfoProps){
     return (
-        <div className="mt-4 border-2 rounded-lg p-2 px-2 sm:px-4 space-y-2 border-gray-200">
-        <h1 className="text-md text-[#331d67] font-medium font-roboto mt-2">Shipping</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 grid-rows-4 sm:grid-rows-2 gap-2">
+        <div className="mt-4 border-2 rounded-lg px-3 sm:px-4 space-y-2 border-gray-200">
+        <h1 className="text-lg p-2 text-[#331d67] font-semibold font-sans mt-2">Shipping</h1>
+        <div className="grid p-2 grid-cols-1 sm:grid-cols-2 grid-rows-4 sm:grid-rows-2 gap-2">
 
             <div className="flex gap-2 h-fit items-center">
                 <div className="rounded-full bg-[#331d67]/10  h-12 w-12 flex justify-center items-center">
@@ -22,8 +22,8 @@ export default function ShippingInfo({discount,packageType,deliveryTime,estimate
                     </div>
                 </div>
                 <div className="flex flex-col gap-1 p-2">
-                    <h1 className="text-sm font-medium font-roboto text-gray-500">Discount</h1>
-                    <h1 className="text-sm capitalize text-[#331d67] font-medium font-roboto">{discount}</h1>
+                    <h1 className="text-md font-medium font-sans text-gray-500">Discount</h1>
+                    <h1 className="text-md capitalize text-[#331d67] font-medium font-sans">{discount}</h1>
                 </div>
             </div>
 
@@ -32,8 +32,8 @@ export default function ShippingInfo({discount,packageType,deliveryTime,estimate
                     <Package className="w-7 h-7 stroke-1 stroke-white  fill-[#331d67]" />
                 </div>
                 <div className="flex flex-col gap-1 p-2">
-                    <h1 className="text-sm font-medium font-roboto text-gray-500">Package</h1>
-                    <h1 className="text-sm capitalize text-[#331d67] font-medium font-roboto">{packageType}</h1>
+                    <h1 className="text-md font-medium font-sans text-gray-500">Package</h1>
+                    <h1 className="text-md capitalize text-[#331d67] font-medium font-sans">{packageType}</h1>
                 </div>
             </div>
             <div className="flex gap-2 h-fit">
@@ -41,8 +41,8 @@ export default function ShippingInfo({discount,packageType,deliveryTime,estimate
                     <CalendarDaysIcon className="w-6 h-6 stroke-1 stroke-white fill-[#331d67]" />
                 </div>
                 <div className="flex flex-col gap-1 p-2">
-                    <h1 className="text-sm font-medium font-roboto text-gray-500">Delivery-time</h1>
-                    <h1 className="text-sm capitalize text-[#331d67] font-medium font-roboto">{deliveryTime}</h1>
+                    <h1 className="text-md font-medium font-sans text-gray-500">Delivery-time</h1>
+                    <h1 className="text-md capitalize text-[#331d67] font-medium font-sans">{deliveryTime}</h1>
                 </div>
             </div>
             <div className="flex gap-2 h-fit">
@@ -50,8 +50,8 @@ export default function ShippingInfo({discount,packageType,deliveryTime,estimate
                     <Truck className="w-7 h-7 stroke-1 stroke-white fill-[#331d67]" />
                 </div>
                 <div className="flex flex-col gap-1 p-2">
-                    <h1 className="text-sm font-medium font-roboto text-gray-500">Estimation Arrive</h1>
-                    <h1 className="text-sm capitalize text-[#331d67] font-medium font-roboto">{estimatedArrival}</h1>
+                    <h1 className="text-md font-medium font-sans text-gray-500">Estimation Arrive</h1>
+                    <h1 className="text-md capitalize text-[#331d67] font-medium font-sans">{estimatedArrival}</h1>
                 </div>
             </div>
 

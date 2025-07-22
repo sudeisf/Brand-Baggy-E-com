@@ -35,8 +35,8 @@ export default function CartBadge() {
     },[mounted, totalQuantity, totalPrice]);
 
     return (
-        <div className="bg-white rounded-md p-1 sm:p-2 border relative">
-            <Link href="/cart" className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2">
+        <div className="bg-white rounded-md p-2 sm:p-2  relative">
+            <Link href="/cart" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-2">
                 <ShoppingCart className="text-[#2d1a4d] w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="hidden sm:inline text-[#2d1a4d] text-sm font-semibold">
                     ${total ? total.toFixed(2) : "0.00"}

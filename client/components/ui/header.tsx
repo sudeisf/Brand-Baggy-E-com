@@ -80,7 +80,7 @@ export default function Header() {
 
       {/* Logo */}
       <div className="flex items-center">
-        <h1 className="text-[#331d67] tracking-tighter text-md sm:text-xl font-roboto">Baggy-Brand</h1>
+        <h1 className="text-[#331d67]  text-lg sm:text-xl font-sans font-semibold">Baggy-Brand</h1>
       </div>
 
       {/* Desktop Navigation */}
@@ -121,8 +121,8 @@ export default function Header() {
           <div className="bg-white rounded-full border border-gray-300 w-10 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
             {mounted && isAuthenticated && user?.user_role === "buyer" ? (
               <Link href="/profile" className="flex items-center justify-center w-full h-full">
-                <Avatar className="w-8 h-8">
-                  <AvatarImage src={user?.profile_url || undefined} />
+                <Avatar className="w-10 h-10">
+                  <AvatarImage src={user?.profile_url || undefined} className="object-center object-cover" />
                   <AvatarFallback>
                     <p className="font-roboto capitalize font-semibold text-gray-700"> {user?.username[0]}</p>
                   </AvatarFallback>
@@ -134,8 +134,11 @@ export default function Header() {
               </Link>
             )}
           </div>
+       
           <CartBadge />
           <FavBadge />
+  
+         
         </div>
       </div>
 

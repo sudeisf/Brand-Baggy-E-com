@@ -53,7 +53,6 @@ export default function AddToCartButton({
     }
 
     const handleAddToCart = () => {
-        // Map cartItem to match the store's CartItem type
         const storeCartItem = {
             id: Number(cartItem.id),
             main_image: cartItem.main_image,
@@ -65,8 +64,8 @@ export default function AddToCartButton({
                 ? cartItem.discount.discount_type as "fixed_amount" | "percentage"
                 : null,
             discount_value: cartItem.discount.discount_value,
-            final_price: Number(cartItem.price), // or calculate with discount if needed
-            subtotal: Number(cartItem.price) * cartItem.quantity, // or use discounted price
+            final_price: Number(cartItem.price), 
+            subtotal: Number(cartItem.price) * cartItem.quantity,
         };
 
         if (isAuthenticated) {
@@ -108,10 +107,10 @@ export default function AddToCartButton({
                 onClick={handleAddToCart}
                 className="
                     bg-[#331d67] 
-                    py-3 sm:py-5 md:py-6 lg:py-8
-                    text-sm sm:text-base md:text-lg lg:text-2xl
-                    font-medium text-white rounded-full
-                    w-[65%] sm:w-[80%] md:w-[85%] lg:w-[90%]
+                    py-7 sm:py-5 md:py-6 lg:py-8
+                    text-lg sm:text-base md:text-lg lg:text-2xl
+                    font-medium text-white rounded-md
+                    w-[80%] md:w-[85%] lg:w-[90%]
                     hover:bg-[#331d67]/80
                     transition-all
                 "
@@ -124,7 +123,7 @@ export default function AddToCartButton({
                 className="
                     flex justify-center items-center
                     border-2 border-gray-300 rounded-full
-                    w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16
+                    w-14 h-14  lg:w-16 lg:h-16
                     transition-all
                     hover:border-red-400
                     focus:outline-none

@@ -25,11 +25,11 @@ export default function RelatedProducts({ product_id }: RelatedProductsProps) {
                 You might also like
             </h1>
             
-            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-4 px-2 sm:px-0">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-4 px-2 sm:px-0">
                 {Products?.data?.map((product: SuggestedProduct) => (
                     <div
                         key={product.id}
-                        className="w-full max-w-[280px] bg-white rounded-md shadow-xs overflow-hidden mx-auto"
+                        className="w-full max-w-[280px] bg-white rounded-md shadow-xs flex flex-col justify-evenly space-y-2 overflow-hidden mx-auto"
                     >
                         <div className="aspect-[4/3] overflow-hidden">
                             <Link href={`/products/${product.id}`}>
@@ -43,18 +43,18 @@ export default function RelatedProducts({ product_id }: RelatedProductsProps) {
                             </Link>
                         </div>
                         
-                        <div className="p-5">
-                            <h2 className="font-semibold text-gray-900 text-base mb-2">
+                        <div className="p-2 space-y-4">
+                            <h2 className="text-sm sm:text-lg font-sans font-medium tet-gray-800 mb-2">
                                 {product.name}
                             </h2>
-                            <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                            {/* <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                                 {product.description}
-                            </p>
+                            </p> */}
                             <div className="flex items-center justify-between">
-                                <p className="font-bold text-xl text-[#331d67]">
+                                <p className="font-bold text-md sm:text-xl text-[#331d67]">
                                     ${product.price}
                                 </p>
-                                <div className="w-10 h-10 bg-[#331d67] rounded-full flex items-center justify-center">
+                                <div className="w-6 h-6 bg-[#331d67] rounded-full flex items-center justify-center">
                                     <Plus className="text-white w-5 h-5" />
                                 </div>
                             </div>

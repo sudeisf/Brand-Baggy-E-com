@@ -34,7 +34,7 @@ export default function FavBadge(){
 
       return(
             <>
-          <div className="bg-white rounded-full w-10 h-10 flex items-center justify-center border border-gray-400 relative">
+          <div className="bg-white rounded-full w-10 h-10 flex items-center justify-center  relative">
                         <Link href="/favorites" className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2">
                             <Heart className="text-[#2d1a4d] w-4 h-4 sm:w-5 sm:h-5" />
                         </Link>

@@ -16,8 +16,8 @@ export default function SizeSelector({
 
   return (
     <div className="mt-4 w-full">
-      <h1 className="text-sm text-gray-500 font-medium font-rubik">Select Size</h1>
-      <div className="flex flex-wrap justify-center sm:justify-start mt-3 gap-2 sm:gap-3 md:gap-4 w-full items-center">
+      <h1 className="text-md text-gray-500 font-medium font-sans">Select Size</h1>
+      <div className="flex flex-wrap  sm:justify-start mt-3 gap-2 sm:gap-3 md:gap-4 w-full items-center">
         {allSizes.map((size) => {
           const isAvailable = availableSizes.includes(size);
           const isSelected = selectedSize === size;
@@ -27,8 +27,8 @@ export default function SizeSelector({
               key={size}
               disabled={!isAvailable}
               className={`
-                rounded-full
-                min-w-[36px] sm:min-w-[44px] md:min-w-[64px]
+                rounded-lg
+                min-w-[50px] sm:min-w-[55px] md:min-w-[64px]
                 px-2 py-1 sm:px-3 sm:py-1.5 md:px-6 md:py-4
                 w-fit border-2
                 transition-all duration-200 ease-in-out
@@ -40,7 +40,7 @@ export default function SizeSelector({
               `}
               onClick={() => isAvailable && onSizeChange(size)}
             >
-              <span className="text-xs sm:text-sm md:text-base font-medium font-roboto">
+              <span className="text-lg sm:text-sm md:text-base font-medium font-rubik">
                 {size}
                 {!isAvailable && (
                   <span className="text-[8px] sm:text-[10px] md:text-xs block text-gray-400">(Out of stock)</span>

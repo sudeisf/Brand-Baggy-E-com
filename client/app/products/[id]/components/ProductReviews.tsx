@@ -74,14 +74,14 @@ export default function ProductReviews({ ProductId }: ProductReviewsProps) {
 
     return (
         <div className="w-full max-w-[1250px] mx-auto rounded-lg mb-4 md:mt-4 px-4 sm:px-6">
-            <h1 className="text-2xl sm:text-3xl font-semibold font-roboto py-4">Rating & Reviews</h1>
+            <h1 className="text-2xl sm:text-3xl text-[#331d67] font-semibold font-roboto py-4">Rating & Reviews</h1>
             <div className="flex flex-col lg:flex-row gap-7 py-4">
                 {/* Rating Summary Section */}
                 <div className="flex flex-col md:flex-row gap-4 items-center rounded-lg w-full justify-center lg:justify-start">
                     <div className="flex flex-col items-center md:items-start">
                         <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-[10rem] font-medium font-inter p-0 m-0 leading-none">
                             {details.average_rating}
-                            <span className="text-xl sm:text-2xl md:text-3xl font-medium text-[#331d67]">/5</span>
+                            <span className="text-2xl sm:text-2xl md:text-3xl font-medium text-[#331d67]">/5</span>
                         </h1>
                         <p className="text-base sm:text-lg font-medium text-gray-500 mt-1 sm:mt-2">
                             ({details.reviews.length} Reviews)
@@ -91,8 +91,8 @@ export default function ProductReviews({ ProductId }: ProductReviewsProps) {
                     <div className="flex flex-col justify-center gap-2 w-full max-w-md">
                         {[5, 4, 3, 2, 1].map((rating) => (
                             <div key={rating} className="flex flex-row gap-2 items-center">
-                                <Star className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 stroke-1 stroke-white fill-[#331d67]" />
-                                <p className="text-xs sm:text-sm md:text-base min-w-[1.25rem]">{rating}</p>
+                                <Star className="w-6 h-6 sm:w-6 sm:h-6 md:w-7 md:h-7 stroke-1 stroke-white fill-[#331d67]" />
+                                <p className="text-lg sm:text-sm md:text-base min-w-[1.25rem]">{rating}</p>
                                 <Progress 
                                     value={rating === 5 ? 100 : rating === 4 ? 30 : rating === 3 ? 20 : 10} 
                                     className="w-full h-1.5 sm:h-2" 
@@ -104,7 +104,6 @@ export default function ProductReviews({ ProductId }: ProductReviewsProps) {
                 </div>
             
                 {hasReviews ? (
-                    // Reviews Carousel Section
                     <div className="relative w-full lg:w-[600px] mt-6 lg:mt-0">
                         <div 
                             ref={scrollContainerRef}
@@ -124,7 +123,6 @@ export default function ProductReviews({ ProductId }: ProductReviewsProps) {
                             ))}
                         </div>
                         
-                        {/* Navigation Buttons */}
                         {showLeftButton && (
                             <Button 
                                 className="absolute p-1 w-8 h-8 sm:w-10 sm:h-10 -left-2 sm:-left-4 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-white/90 rounded-full shadow-md border border-[#331d67]"
@@ -144,13 +142,13 @@ export default function ProductReviews({ ProductId }: ProductReviewsProps) {
                         )}
                     </div>
                 ) : (
-                    // Simple fallback card with same dimensions and icon
+                    
                     <div className="relative w-full lg:w-[600px] mt-6 lg:mt-0">
                         <div className="flex-shrink-0 flex items-center justify-center w-[90vw] max-w-[350px] sm:max-w-[400px] md:max-w-[500px] lg:max-w-[600px] h-full">
-                            <div className="w-full bg-white  border-gray-100 shadow-sm border-1 rounded-2xl p-6 flex flex-col items-center justify-center gap-3"
+                            <div className="w-full bg-white  border-gray-100 shadow-xs border-1 rounded-lg p-6 flex flex-col items-center justify-center gap-3"
                                 style={{ minHeight: 260, maxHeight: 320, height: "32vh" }}>
                                 <MessageCircle className="w-8 h-8 text-gray-400" />
-                                <p className="text-gray-500 text-lg">No reviews yet</p>
+                                <p className="text-[#331d67] text-lg capitalize">No reviews yet</p>
                             </div>
                         </div>
                     </div>

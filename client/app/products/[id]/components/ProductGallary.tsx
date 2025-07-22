@@ -30,7 +30,7 @@ export default function ProductGalary({mainImage,images,name} :ProductGalleryPro
                 height={400}
                 className="
                     rounded-lg object-cover w-full 
-                    max-w-[350px] h-auto 
+                    max-w-[450px] h-auto 
                     mx-auto
                     sm:max-w-[500px] sm:w-[500px] sm:h-[600px]
                     md:max-w-[400px] md:w-[400px] md:h-[500px]
@@ -44,11 +44,11 @@ export default function ProductGalary({mainImage,images,name} :ProductGalleryPro
                         key={image} 
                         src={image} 
                         alt={name} 
-                        width={80} // smaller default
+                        width={80} 
                         height={60}
                         className={`
                             rounded-lg object-cover border-[2px] border-white 
-                            w-14 h-10
+                            w-42 h-32
                             sm:w-[120px] sm:h-[80px]
                             md:w-[80px] md:h-[60px]
                             lg:w-[200px] lg:h-[100px]
