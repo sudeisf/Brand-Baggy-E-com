@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.views import APIView 
 from rest_framework import generics , status 
 from rest_framework.response import Response
@@ -14,13 +13,8 @@ from .serializer import (
 )
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework_simplejwt.views import TokenObtainPairView , TokenRefreshView
-from google.oauth2 import id_token
-from google.auth.transport import requests
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
-from .services import sendEmail
-import random
-from .models import OTP
 User = get_user_model()
 from .models import CustomUser
 
@@ -179,49 +173,6 @@ class UserDeleteView(APIView):
                }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ForgotPasswordView(APIView):
-     permission_classes = [AllowAny]
-
-     def post(self, request):
-
-          email = request.data.get('email')
-          if not email:
-               return Response(
-                    {
-                         'error': 'Email is required'
-                    },
-                    status = status.HTTP_400_BAD_REQUEST               
-                    )
-
-          try:
-               user = User.objects.get(email = email)
-              
-               OTP_CODE = random.randint(100000, 999999)
-               OTP.objects.create(
-                    email = email,
-                    otp = OTP_CODE
-               )
-               sendEmail(
-                    'Reset Password',
-                    email,
-                    f'Click the link to reset your password: http://localhost:8000/otp/{OTP_CODE}'
-                    f'OTP CODE: {OTP_CODE}'
-               )
-               return Response(
-                    {
-                         'message': 'Email sent successfully'
-                    },
-                    status = status.HTTP_200_OK
-               )
-          except User.DoesNotExist:
-               return Response(
-                    {
-                         'error': 'User does not exist'
-                    },
-                    status = status.HTTP_400_BAD_REQUEST
-               )   
-          
-          
 class Email_varify_OTP_generate_view(generics.CreateAPIView):
     
      permission_classes = [AllowAny]

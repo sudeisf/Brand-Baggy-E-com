@@ -43,41 +43,6 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         fields = ['id', "status" , "order_date" ,"items"]
 
 
-class createOrderSerializer(serializers.Serializer):
-    """create serializer"""
-    shipping_address = serializers.CharField()
-    shipping_city = serializers.CharField()
-    shipping_state = serializers.CharField()
-    shipping_zip_code = serializers.CharField()
-    shipping_country = serializers.CharField()
-    shipping_phone =serializers.CharField()
-    shipping_email = serializers.EmailField()
-    guest_email= serializers.CharField()
-  
-
-
-class GetOrderSerializer(serializers.Serializer):
-    pass
-
-
-class ListUserOrdersSerializer(serializers.Serializer):
-    pass
-
-
-class UpdateOrderSerializer(serializers.Serializer):
-    pass
-
-
-class CancelOrderSerializer(serializers.Serializer):
-    pass 
-
-class UpdateOrderItemStatusSerializer(serializers.Serializer):
-    pass
-
-class AdminOrderListViewSerializer(serializers.Serializer):
-    pass
-
-
 class OrderTableSerializer(serializers.ModelSerializer):
     order_id = serializers.IntegerField(source='id')
     date = serializers.DateTimeField(source='order_date', format="%Y-%m-%d %H:%M")

@@ -12,6 +12,10 @@ ROOT_URLCONF = "Backend.urls"
 # Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+def env_list(name, default=""):
+    return [item.strip() for item in os.getenv(name, default).split(",") if item.strip()]
+
 # Security settings
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-8__#a0r#&cfj-8l8w7eq+_45dl74#u^^3bz0l-!w^%*6+&l$mq')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
@@ -20,7 +24,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     os.getenv('RENDER_EXTERNAL_HOSTNAME', ''),
     '*.onrender.com',
-]
+] + env_list('ALLOWED_HOSTS')
 
 # Application definition
 INSTALLED_APPS = [
@@ -131,6 +135,7 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'your_email@gmail.com')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'your_app_password')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 CONTACT_EMAIL = EMAIL_HOST_USER
+FRONT_END_URL = os.getenv('FRONT_END_URL', 'http://localhost:3000')
 
 # Cloudinary configuration
 CLOUDINARY_STORAGE = {
@@ -173,39 +178,20 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'https://e-commerce-platform-django-w-next.vercel.app',
     'https://e-commerce-platform-django-w-next-1.onrender.com',
-]
+] + env_list('CORS_ALLOWED_ORIGINS')
 
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
     'https://e-commerce-platform-django-w-next.vercel.app',
     'https://e-commerce-platform-django-w-next-1.onrender.com',
-]
+] + env_list('CSRF_TRUSTED_ORIGINS')
 
-# Database (Supabase)
-# DATABASES = {
-#     'default': {
-#         **dj_database_url.config(
-#             default=os.getenv('DATABASE_URL', "postgresql://postgres:BMB8DB4L9RQ@localhost:5432/first_django_db"),
-#             conn_max_age=600,
-#         ),
-#         # 'OPTIONS': {
-#         #     'sslmode': 'require' if not DEBUG else 'prefer'
-#         # }
-#     }
-# }
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'first_django_db',
-        'USER': 'postgres',
-        'PASSWORD': 'BMB8DB4L9RQ',
-        'HOST': 'localhost',
-        'PORT': '5432',
-        'OPTIONS': {
-            'sslmode': 'disable'  # Disable SSL for local development
-        }
-    }
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL', "postgresql://postgres:BMB8DB4L9RQ@localhost:5432/first_django_db"),
+        conn_max_age=600,
+    )
 }
 
 CACHES = {
@@ -225,8 +211,9 @@ STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesSto
 
 # Security
 SECURE_SSL_REDIRECT = False if DEBUG else True
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_HSTS_SECONDS = 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = False
 SECURE_HSTS_PRELOAD = False

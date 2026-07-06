@@ -1,23 +1,19 @@
-import paypalrestsdk.exceptions
 import requests
 from rest_framework import status 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .serilizers import PaymentSerializer, PaymentRequestSerializer , PayPalSuccessSerializer
+from .serilizers import PaymentSerializer, PaymentRequestSerializer
 from orders.models import Order
 from .models import Payment
 import stripe
 from django.conf import settings
 import paypalrestsdk
 from django.http import HttpResponse
-import json
 from rest_framework.permissions import IsAuthenticated
 
 from rest_framework.decorators import api_view 
 
 from django.views.decorators.csrf import csrf_exempt
-from django.conf import Settings
 
 paypalrestsdk.configure({
     "mode": "sandbox",
@@ -53,40 +49,6 @@ class CODPaymentAPIView(APIView):
                 return Response({'error' : "order not found"} , status=status.HTTP_404_NOT_FOUND)
             
         return Response(serializer.errors , status=400)
-
-
-class StripePaymentIntentAPIView(APIView):
-    def post(self, request):
-        serializer = PaymentRequestSerializer(data=request.data)
-        if serializer.is_valid():
-            order_id = serializer.validated_data['order_id']
-            try:
-                order = Order.objects.get(id=order_id)
-
-                if hasattr(order , "payment"):
-                    return Response({'error' : 'payment already exists'} ,status=400) 
-                
-                intent = stripe.PaymentIntent.create(
-                    amount=int(order.total_price * 100),
-                    currency='usd',
-                    metadata={'order_id': str(order.id)}
-                )
-
-                payment = Payment.objects.create(
-                    order=order,
-                    method=Payment.Method.STRIPE,
-                    status=Payment.Status.PENDING,
-                    amount=order.total_price,
-                    transaction_id=intent.id,
-                )
-                return Response({'client_secret': intent.client_secret}, status=200)
-            except Order.DoesNotExist:
-                return Response({"error" : "order not found"} ,status=404)
-        return Response(serializer.errors, status=400)
-    
-
-
-
 
 
 class PayPalPaymentAPIView(APIView):

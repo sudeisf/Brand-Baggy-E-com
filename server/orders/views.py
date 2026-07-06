@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from jsonschema import ValidationError
 
 from payment.models import Payment
@@ -6,9 +5,8 @@ from  . models import Order , OrderItem, ShippingInfo
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import createOrderSerializer
-from rest_framework.permissions import IsAuthenticated , IsAuthenticatedOrReadOnly
-from cart.models import Cart , CartItem
+from rest_framework.permissions import IsAuthenticated
+from cart.models import Cart
 from django.db import transaction
 from orders.serializers import (OrderSerializer ,PaymentAndOrderStatusSerializer, ShippingInfoSerializer,OrderDetailSerializer,OrderTableSerializer,
                                 SellerOrderDetailsSerializer,UnifiedCustomerSerializer,SellerRecentOrderItemSerializer)
@@ -17,7 +15,6 @@ from notifications.utils import send_notifications
 from product.models import Product, ProductVariants
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import OuterRef, Subquery
-from django.utils.timezone import get_current_timezone
 from .tasks import send_review_rating_email
 
 
@@ -552,13 +549,6 @@ class SellerRecentOrderActivityAPIView(APIView):
 
 from django.db.models import DecimalField, F, Sum
 from datetime import datetime, timedelta
-def calculate_percent_change(current, previous):
-    if previous == 0:
-        return None, None
-    change = ((current - previous) / previous) * 100
-    direction = "up" if change > 0 else "down" if change < 0 else "no change"
-    return round(abs(change), 2), direction
-
 class SellerAnalyticsAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -639,7 +629,7 @@ class SellerAnalyticsAPIView(APIView):
 
 from django.db import models
 from django.utils import timezone
-from datetime import datetime, time, timedelta
+from datetime import datetime, timedelta
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated

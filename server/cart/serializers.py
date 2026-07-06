@@ -1,11 +1,7 @@
 from .models import Cart , CartItem
-from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from product.models import Product
-from .utils import get_or_create_cart
 from cloudinary import CloudinaryImage
-
-User = get_user_model()
 
 class CartItemSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='product.name')
@@ -119,21 +115,6 @@ class AddCartItemSerializer(serializers.Serializer):
 
         return cart_item
 
-class RemoveCartItemSerializer(serializers.Serializer):
-    cart_item_id = serializers.IntegerField()
-
-    def validate_cartItemId(self,values):
-         try:
-             cartItem = CartItem.objects.get(id=values)
-         except CartItem.DoesNotExist:
-             raise serializers.ValidationError('cart item does not exist')
-         return values
-    
-    def create(self, validated_data):
-        cart_item_id = validated_data['cart_item_id']
-        CartItem.objects.filter(cart_item_id).delete()
-        return {'message' : 'item removed'}
-    
 class UpdateCartItemSerializer(serializers.ModelSerializer):
     quantity = serializers.IntegerField()
     class Meta:
