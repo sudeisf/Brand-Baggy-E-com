@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: brandbaggy_backend
     env_file:
-      - path: ./server/.env
+      - path: ./.env
         required: false
     environment:
       DJANGO_SETTINGS_MODULE: Backend.settings
@@ -13,6 +13,8 @@ services:
       RUN_COLLECTSTATIC: "1"
     expose:
       - "8000"
+    ports:
+      - "8002:8000"
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; req=urllib.request.Request('http://127.0.0.1:8000/admin/login/', headers={'X-Forwarded-Proto':'https'}); urllib.request.urlopen(req, timeout=5)\""]
       interval: 20s
@@ -29,7 +31,7 @@ services:
       dockerfile: Dockerfile
     container_name: brandbaggy_celery_worker
     env_file:
-      - path: ./server/.env
+      - path: ./.env
         required: false
     environment:
       DJANGO_SETTINGS_MODULE: Backend.settings
@@ -49,7 +51,7 @@ services:
       dockerfile: Dockerfile
     container_name: brandbaggy_celery_beat
     env_file:
-      - path: ./server/.env
+      - path: ./.env
         required: false
     environment:
       DJANGO_SETTINGS_MODULE: Backend.settings
@@ -73,7 +75,7 @@ services:
         NEXT_PUBLIC_STRIPE_PUBLIC_KEY: ${NEXT_PUBLIC_STRIPE_PUBLIC_KEY:-}
     container_name: brandbaggy_frontend
     env_file:
-      - path: ./client/.env
+      - path: ./.env
         required: false
     environment:
       NODE_ENV: production
@@ -81,6 +83,8 @@ services:
       HOSTNAME: 0.0.0.0
     expose:
       - "3000"
+    ports:
+      - "3002:3000"
     healthcheck:
       test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
       interval: 20s
