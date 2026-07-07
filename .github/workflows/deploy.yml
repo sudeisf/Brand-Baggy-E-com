@@ -19,7 +19,7 @@ jobs:
           script_stop: true
           script: |
             set -e
-            cd ~/Brand-Baggy-E-com-1
+            cd ~/brandbaggy
             git pull --ff-only origin main
             docker compose up -d --build --remove-orphans
             docker compose exec -T backend python manage.py migrate --noinput
