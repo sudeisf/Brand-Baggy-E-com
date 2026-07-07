@@ -29,9 +29,12 @@ class RegisterView(generics.CreateAPIView):
           role = request.data.get('role', CustomUser.Role.BUYER)  
           if role not in [CustomUser.Role.SELLER, CustomUser.Role.BUYER, CustomUser.Role.ADMIN]:
                return Response({"error": "Invalid role specified."}, status=status.HTTP_400_BAD_REQUEST)
-          request.data['role'] = role
+          
+          # Create a mutable copy of request.data
+          data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
+          data['role'] = role
                
-          serializer = self.get_serializer(data= request.data)
+          serializer = self.get_serializer(data=data)
           serializer.is_valid(raise_exception = True)
           user = serializer.save()
           return Response({
