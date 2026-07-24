@@ -4,6 +4,7 @@ attrs==25.3.0
 autobahn==24.4.2
 Automat==25.4.16
 billiard==4.2.1
+bleach==6.1.0
 cachetools==5.5.2
 celery==5.4.0
 certifi==2024.8.30
