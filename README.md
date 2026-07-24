@@ -1,4 +1,3 @@
-Here’s a detailed README for your codebase:
 
 ---
 
@@ -156,5 +155,3 @@ docker-compose up --build
 MIT
 
 ---
-
-Let me know if you want to add sections for API documentation, environment variable examples, or anything else!
