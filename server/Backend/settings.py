@@ -57,8 +57,10 @@ INSTALLED_APPS = [
     'payment',
     'channels',
     'notifications',
-    'silk',
 ]
+
+if os.environ.get("ENABLE_SILK", "false").lower() == "true":
+    INSTALLED_APPS.append('silk')
 
 # Celery configuration
 CELERY_BROKER_URL = os.getenv('REDIS_URL')
@@ -164,8 +166,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
-    'silk.middleware.SilkyMiddleware',
 ]
+
+if os.environ.get("ENABLE_SILK", "false").lower() == "true":
+    MIDDLEWARE.append('silk.middleware.SilkyMiddleware')
 
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
