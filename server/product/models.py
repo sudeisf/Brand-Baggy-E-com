@@ -47,7 +47,7 @@ class Product(models.Model):
     product_location = models.ForeignKey(ProductLocation,on_delete=models.CASCADE,related_name="product_location" , null=True,blank=True)
     description = models.TextField()
     in_stock = models.BooleanField(default=True)
-    main_image = CloudinaryField('image')
+    main_image = CloudinaryField('image', blank=True, null=True)
     seller  = models.ForeignKey(CustomUser,on_delete=models.CASCADE, related_name='product_role' , limit_choices_to={'user_role': CustomUser.Role.SELLER} , null=True , blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     brand = models.CharField(max_length=200 , null=True , blank=True)
@@ -164,10 +164,9 @@ class ProductVariants(models.Model):
         return f"{self.product.name} - {self.size.name}"
     
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs) 
         if not self.sku:
             self.sku = f"{self.product.id}-{self.size.code}"
-            super().save(update_fields=['sku'])  
+        super().save(*args, **kwargs)  
 
 class FavoriteProduct(models.Model): #uiop
     product = models.ForeignKey(Product ,on_delete=models.CASCADE, related_name='favorites')

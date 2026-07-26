@@ -274,6 +274,7 @@ class CreateProductSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         images_data = validated_data.pop('images', [])
+        main_image_file = validated_data.pop('main_image', None)
         variants_data = validated_data.pop('variants', [])
         discount_value = validated_data.pop('discount_value', None)
         discount_type = validated_data.pop('discount_type', None)
@@ -288,10 +289,32 @@ class CreateProductSerializer(serializers.ModelSerializer):
             except json.JSONDecodeError:
                 raise serializers.ValidationError("Invalid variants JSON format")
 
+        # Create product immediately (no image upload blocking the request)
         product = Product.objects.create(seller=seller, **validated_data)
 
-        for image_data in images_data:
-            ProductImage.objects.create(product=product, image=image_data)
+        # Save image files to a temp directory so Celery can upload them
+        import tempfile
+        import os
+        temp_dir = tempfile.mkdtemp(prefix='product_upload_')
+
+        main_path = None
+        if main_image_file:
+            main_path = os.path.join(temp_dir, f'main_{main_image_file.name}')
+            with open(main_path, 'wb') as f:
+                for chunk in main_image_file.chunks():
+                    f.write(chunk)
+
+        additional_paths = []
+        for i, img in enumerate(images_data):
+            path = os.path.join(temp_dir, f'img_{i}_{img.name}')
+            with open(path, 'wb') as f:
+                for chunk in img.chunks():
+                    f.write(chunk)
+            additional_paths.append(path)
+
+        # Dispatch background task for parallel Cloudinary upload
+        from product.tasks import upload_product_images
+        upload_product_images.delay(product.id, main_path, additional_paths)
 
         for variant_data in variants_data:
             size_data = variant_data.pop('size', {})

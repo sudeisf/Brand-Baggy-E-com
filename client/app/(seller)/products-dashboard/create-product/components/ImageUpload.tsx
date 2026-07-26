@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import Image from 'next/image'
 import { X } from 'lucide-react'
+import imageCompression from 'browser-image-compression'
 
 interface ImageUploadProps {
   onChange: (files: File[]) => void
@@ -12,15 +13,29 @@ interface ImageUploadProps {
 export default function ImageUpload({ onChange, maxFiles = 4 }: ImageUploadProps) {
   const [files, setFiles] = useState<File[]>([])
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (files.length + acceptedFiles.length > maxFiles) {
       alert(`You can only upload up to ${maxFiles} images`)
       return
     }
     
-    const newFiles = [...files, ...acceptedFiles]
-    setFiles(newFiles)
-    onChange(newFiles)
+    try {
+      const compressedFiles = await Promise.all(
+        acceptedFiles.map(file =>
+          imageCompression(file, {
+            maxSizeMB: 0.8,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+          })
+        )
+      )
+      const newFiles = [...files, ...compressedFiles]
+      setFiles(newFiles)
+      onChange(newFiles)
+    } catch (error) {
+      console.error("Error compressing images:", error)
+      alert("Failed to compress some images. Please try again.")
+    }
   }, [files, maxFiles, onChange])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
