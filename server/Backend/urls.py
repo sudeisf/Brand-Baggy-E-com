@@ -1,4 +1,5 @@
 
+from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 from django.http import HttpResponse
@@ -16,8 +17,8 @@ urlpatterns = [
     path('cart/', include('cart.urls', namespace='cart')),
     path('payment/' , include('payment.urls')),
     path('orders/' , include('orders.urls')),
-    path('silk/', include('silk.urls', namespace='silk')),
     path("notifications/", include("notifications.urls")),
-
-
 ]
+
+if 'silk' in settings.INSTALLED_APPS:
+    urlpatterns += [path('silk/', include('silk.urls', namespace='silk'))]
