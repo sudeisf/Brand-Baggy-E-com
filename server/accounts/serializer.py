@@ -7,7 +7,7 @@ from django.core import exceptions
 from django.contrib.auth import authenticate
 from django.core  import signing
 import random 
-from .models import OTP , CustomUser
+from .models import OTP , CustomUser, StoreProfile, NotificationPreferences
 from .services import sendEmail
 from django.utils import timezone
 from datetime import timedelta
@@ -304,9 +304,12 @@ class CustomTokenRefreshSerilizer(TokenRefreshSerializer):
         return data
 
 
-        
-        
-            
+class StoreProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StoreProfile
+        fields = ['store_name', 'store_description', 'default_currency', 'support_email']
 
-
-
+class NotificationPreferencesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NotificationPreferences
+        fields = ['new_orders', 'low_stock_alerts', 'customer_messages']

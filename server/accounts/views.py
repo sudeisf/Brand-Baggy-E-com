@@ -241,3 +241,23 @@ class TokenTestView(APIView):
             'message': 'Token is valid',
             'user': request.user.username
         })
+
+
+from .models import StoreProfile, NotificationPreferences
+from .serializer import StoreProfileSerializer, NotificationPreferencesSerializer
+
+class StoreSettingsView(generics.RetrieveUpdateAPIView):
+    serializer_class = StoreProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        obj, created = StoreProfile.objects.get_or_create(user=self.request.user)
+        return obj
+
+class NotificationSettingsView(generics.RetrieveUpdateAPIView):
+    serializer_class = NotificationPreferencesSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        obj, created = NotificationPreferences.objects.get_or_create(user=self.request.user)
+        return obj

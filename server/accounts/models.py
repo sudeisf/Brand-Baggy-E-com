@@ -84,3 +84,27 @@ class OTP(models.Model):
 
 
 
+
+class StoreProfile(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='store_profile')
+    store_name = models.CharField(max_length=200, blank=True, null=True)
+    store_description = models.TextField(blank=True, null=True)
+    default_currency = models.CharField(max_length=50, default='USD ($)')
+    support_email = models.EmailField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s Store Profile"
+
+
+class NotificationPreferences(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='notification_preferences')
+    new_orders = models.BooleanField(default=True)
+    low_stock_alerts = models.BooleanField(default=True)
+    customer_messages = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s Notification Preferences"
