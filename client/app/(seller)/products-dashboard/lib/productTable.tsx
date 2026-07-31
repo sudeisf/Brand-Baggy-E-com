@@ -60,15 +60,21 @@ export const columns: ColumnDef<Product>[] = [
     accessorKey: "name",
     header: "Product Name",
     cell: ({ row }) => {
+      const imageSrc = row.original.main_image;
       return (
         <div className="flex items-center gap-2 px-2 font-roboto">
-          <Image
-            src={row.original.main_image}
-            alt={row.original.name}
-            width={40}
-            height={40}
-            className="rounded-md shadow-sm border-2 border-gray-300"
-          />
+          {imageSrc ? (
+            <Image
+              src={imageSrc}
+              alt={row.original.name}
+              width={40}
+              height={40}
+              className="rounded-md shadow-sm border-2 border-gray-300 object-cover"
+              unoptimized
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-md border-2 border-gray-300 bg-gray-100" />
+          )}
           <div className="flex flex-col gap-2">
             <p className="">{row.original.name}</p>
             <p className="text-[.8rem] font-roboto font-medium text-gray-400">{row.original.slug}</p>

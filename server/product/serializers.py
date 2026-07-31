@@ -231,7 +231,9 @@ class CreateProductSerializer(serializers.ModelSerializer):
     gender = serializers.ChoiceField(choices=Product.Gender.choices, required=False)
     images = serializers.ListField(
         child=serializers.ImageField(),
-        required=True
+        required=False,
+        allow_empty=True,
+        default=list,
     )
     brand = serializers.CharField(max_length=200, required=False, allow_blank=True)
     model_number = serializers.CharField(max_length=200, required=False, allow_blank=True)
@@ -273,7 +275,9 @@ class CreateProductSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        images_data = validated_data.pop('images', [])
+        import cloudinary.uploader
+
+        images_data = validated_data.pop('images', []) or []
         main_image_file = validated_data.pop('main_image', None)
         variants_data = validated_data.pop('variants', [])
         discount_value = validated_data.pop('discount_value', None)
@@ -289,32 +293,17 @@ class CreateProductSerializer(serializers.ModelSerializer):
             except json.JSONDecodeError:
                 raise serializers.ValidationError("Invalid variants JSON format")
 
-        # Create product immediately (no image upload blocking the request)
+        # Upload images in-request. Celery workers run in a separate container and
+        # cannot read temp files written by the backend process.
+        if main_image_file:
+            main_result = cloudinary.uploader.upload(main_image_file)
+            validated_data['main_image'] = main_result['public_id']
+
         product = Product.objects.create(seller=seller, **validated_data)
 
-        # Save image files to a temp directory so Celery can upload them
-        import tempfile
-        import os
-        temp_dir = tempfile.mkdtemp(prefix='product_upload_')
-
-        main_path = None
-        if main_image_file:
-            main_path = os.path.join(temp_dir, f'main_{main_image_file.name}')
-            with open(main_path, 'wb') as f:
-                for chunk in main_image_file.chunks():
-                    f.write(chunk)
-
-        additional_paths = []
-        for i, img in enumerate(images_data):
-            path = os.path.join(temp_dir, f'img_{i}_{img.name}')
-            with open(path, 'wb') as f:
-                for chunk in img.chunks():
-                    f.write(chunk)
-            additional_paths.append(path)
-
-        # Dispatch background task for parallel Cloudinary upload
-        from product.tasks import upload_product_images
-        upload_product_images.delay(product.id, main_path, additional_paths)
+        for img in images_data:
+            extra = cloudinary.uploader.upload(img)
+            ProductImage.objects.create(product=product, image=extra['public_id'])
 
         for variant_data in variants_data:
             size_data = variant_data.pop('size', {})
