@@ -76,6 +76,7 @@ services:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://brand-baggy.duckdns.org}
         NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-wss://brand-baggy.duckdns.org}
         NEXT_PUBLIC_STRIPE_PUBLIC_KEY: ${NEXT_PUBLIC_STRIPE_PUBLIC_KEY:-}
+        NEXT_PUBLIC_PAYPAL_CLIENT_ID: ${NEXT_PUBLIC_PAYPAL_CLIENT_ID:-}
     container_name: brandbaggy_frontend
     env_file:
       - path: ./.env
@@ -84,6 +85,7 @@ services:
       NODE_ENV: production
       PORT: 3000
       HOSTNAME: 0.0.0.0
+      BACKEND_URL: ${BACKEND_URL:-http://backend:8000}
     expose:
       - "3000"
     ports:

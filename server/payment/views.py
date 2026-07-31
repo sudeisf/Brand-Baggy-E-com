@@ -24,31 +24,40 @@ paypalrestsdk.configure({
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class CODPaymentAPIView(APIView):
-    def post(self , request):
-        serializer = PaymentRequestSerializer(data = request.data)
-        if serializer.is_valid():
-            order_id = serializer.validated_data['order_id']
-            try:
-                order = Order.objects.get(id=order_id)
-                if hasattr(order ,'payment'):
-                    return Response(
-                        {
-                            "error" : "payment already exists"
-                        },
-                        status=400
-                    )
-                payment  = Payment.objects.create(
-                    order = order,
-                    method=Payment.Method.COD,
-                    status=Payment.Status.COMPLETED,
-                    amount=order.total_price
-                )
-                return Response(PaymentSerializer(payment).data, status=201)
-            
-            except Order.DoesNotExist:
-                return Response({'error' : "order not found"} , status=status.HTTP_404_NOT_FOUND)
-            
-        return Response(serializer.errors , status=400)
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = PaymentRequestSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
+        order_id = serializer.validated_data['order_id']
+        try:
+            order = Order.objects.get(id=order_id, user=request.user)
+        except Order.DoesNotExist:
+            return Response({'error': 'order not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            payment = Payment.objects.get(order=order)
+        except Payment.DoesNotExist:
+            payment = Payment.objects.create(
+                order=order,
+                amount=order.total_price,
+                status=Payment.Status.PENDING,
+            )
+
+        if payment.status == Payment.Status.COMPLETED:
+            return Response({'error': 'payment already completed'}, status=400)
+
+        payment.method = Payment.Method.COD
+        payment.status = Payment.Status.COMPLETED
+        payment.amount = order.total_price
+        payment.save()
+
+        order.status = Order.OrderStatus.PROCESSING
+        order.save()
+
+        return Response(PaymentSerializer(payment).data, status=200)
 
 
 class PayPalPaymentAPIView(APIView):
@@ -277,6 +286,8 @@ class StripeCaptureAPIView(APIView):
 from .tasks import send_payment_receipt_email
 
 class StripePayAndCaptureAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def update_failed_payment(self, payment, status_code, error):
         """Update existing payment record with failed status."""
         if payment.status == Payment.Status.FAILED:

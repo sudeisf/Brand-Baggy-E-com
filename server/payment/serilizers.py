@@ -9,7 +9,7 @@ class PaymentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PaymentRequestSerializer(serializers.Serializer):
-    order_id = serializers.UUIDField()
+    order_id = serializers.IntegerField()
 
 class PayPalSuccessSerializer(serializers.Serializer):
     payment_id = serializers.CharField(required=True, source='paymentId')

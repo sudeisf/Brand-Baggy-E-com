@@ -1,21 +1,52 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Clock } from "lucide-react";
+import { CheckCircle, Clock, Loader2Icon } from "lucide-react";
 import { useState } from "react";
+import api from "@/lib/axios";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
-export default function CashOnDelivery() {
+type Props = {
+  orderId: number;
+};
+
+export default function CashOnDelivery({ orderId }: Props) {
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const handleConfirm = async () => {
+    setLoading(true);
+    try {
+      await api.post("/payment/pay/cod/", { order_id: orderId });
+      setIsConfirmed(true);
+      toast.success("Cash on delivery order confirmed");
+      queryClient.invalidateQueries({ queryKey: ["getUserOrders"] });
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      setTimeout(() => router.push("/profile/orders"), 1500);
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        "Failed to confirm cash payment";
+      toast.error(typeof message === "string" ? message : "Failed to confirm cash payment");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (isConfirmed) {
     return (
-      <div className="p-6 w-full max-w-lg mx-auto rounded-xl border-2 border-green-200 bg-green-50 mt-4">
-        <div className="flex items-center gap-3 mb-3">
+      <div className="p-6 w-full rounded-xl border border-green-200 bg-green-50 space-y-3">
+        <div className="flex items-center gap-3">
           <CheckCircle className="w-6 h-6 text-green-500" />
-          <h1 className="text-xl font-semibold text-[#331d67]">Order Confirmed!</h1>
+          <h2 className="text-xl font-semibold text-[#331d67] font-roboto">Order Confirmed!</h2>
         </div>
-        <p className="text-gray-600 mb-4">
-          Your cash on delivery order has been placed. We'll call you within 24 hours to confirm delivery time.
+        <p className="text-gray-600 font-roboto text-sm">
+          Your cash on delivery order has been placed. We&apos;ll call you within 24 hours to confirm delivery time.
         </p>
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <Clock className="w-4 h-4" />
@@ -26,34 +57,33 @@ export default function CashOnDelivery() {
   }
 
   return (
-    <div className="p-6 w-full max-w-lg mx-auto rounded-xl border-2 border-gray-200 bg-gray-50 mt-4 space-y-4">
-      <h1 className="text-xl font-semibold text-[#331d67]">Cash On Delivery</h1>
-      <div className="space-y-2 text-gray-600">
+    <div className="p-6 w-full rounded-xl border border-gray-200 bg-gray-50 space-y-4">
+      <h2 className="text-xl font-semibold text-[#331d67] font-roboto">Cash On Delivery</h2>
+      <div className="space-y-2 text-gray-600 text-sm font-roboto">
         <p>• Pay with cash when your order arrives</p>
         <p>• Please have exact amount ready</p>
         <p>• Delivery agent will provide receipt</p>
       </div>
 
       <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-        <div className="flex">
-          <div className="flex-shrink-0">
-            <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-          </div>
-          <div className="ml-3">
-            <p className="text-sm text-yellow-700">
-              A $2.00 cash handling fee will be added to your order total.
-            </p>
-          </div>
-        </div>
+        <p className="text-sm text-yellow-700 font-roboto">
+          Please keep your phone available so we can confirm the delivery address.
+        </p>
       </div>
 
       <Button
-        onClick={() => setIsConfirmed(true)}
-        className="w-full mt-4 bg-[#331d67] hover:bg-[#4a2d8a]"
+        onClick={handleConfirm}
+        disabled={loading}
+        className="w-full mt-2 py-6 bg-[#331d67] hover:bg-[#331d67]/90"
       >
-        Confirm Cash Payment
+        {loading ? (
+          <>
+            <Loader2Icon className="w-4 h-4 animate-spin mr-2" />
+            Confirming...
+          </>
+        ) : (
+          "Confirm Cash Payment"
+        )}
       </Button>
     </div>
   );

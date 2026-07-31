@@ -1,4 +1,3 @@
-// app/payment/page.tsx
 "use client";
 
 import { ProductCrum } from "@/app/products/components/ProductCrum";
@@ -6,17 +5,49 @@ import { ArrowLeft, Coins, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import CashOnDelivery from "./components/CodMethod";
 import { PaypalReactButton } from "./components/PaypalReactButton";
 import StripeCheckout from "./components/StripeCheckout";
 import { useSearchParams } from "next/navigation";
+
+function PaymentMethodButton({
+  selected,
+  onClick,
+  children,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`w-56 min-h-[120px] px-4 py-5 flex flex-col items-center justify-center gap-2 rounded-xl border-2 bg-white transition-colors ${
+        selected
+          ? "border-[#331d67] bg-gray-50 shadow-sm"
+          : "border-gray-200 hover:border-[#331d67]/40"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
 
 function PaymentContent() {
   const [paymentMethod, setPaymentMethod] = useState<string>("paypal");
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const searchParams = useSearchParams();
   const orderId = searchParams.get("order_id");
+  const parsedOrderId = orderId ? parseInt(orderId, 10) : NaN;
+  const hasOrder = Number.isFinite(parsedOrderId);
 
   const handlePaymentSelect = (method: string) => {
     setPaymentMethod(method);
@@ -24,129 +55,120 @@ function PaymentContent() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-5 mb-10 min-h-screen">
+    <div className="min-h-screen bg-white mb-10">
       <ProductCrum />
 
-      {/* Title */}
-      <div className="flex flex-col w-full max-w-[1250px] mx-auto mb-6 text-center">
-        <h1 className="text-3xl md:text-4xl font-bold text-[#331d67] p-2 mt-2">
-          Payment Method
-        </h1>
-        <p className="text-gray-500 text-md p-2">
-          Please select the payment method you want to use
-        </p>
-      </div>
-
-      {/* Payment Selection */}
-      <div className="w-full max-w-[1250px] mx-auto flex flex-col items-center">
-        {/* Desktop View */}
-        <div className="hidden md:flex justify-center gap-4 mb-8">
-          <Button
-            variant="outline"
-            onClick={() => setPaymentMethod("paypal")}
-            className={`w-60 p-6 flex flex-col h-20 items-center gap-2 rounded-xl border-2 ${
-              paymentMethod === "paypal" ? "border-[#331d67] bg-gray-100" : ""
-            }`}
-          >
-            <img src="/assets/paypal.svg" alt="PayPal" className="w-16 h-16" />
-            <span className="text-[#331d67] font-medium">PayPal</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            onClick={() => setPaymentMethod("stripe")}
-            className={`w-60 p-6 flex flex-col h-20 items-center gap-2 rounded-xl border-2 ${
-              paymentMethod === "stripe" ? "border-[#331d67] bg-gray-100" : ""
-            }`}
-          >
-            <img src="/assets/stripe.svg" alt="Stripe" className="w-16 h-16" />
-            <span className="text-[#331d67] font-medium">Stripe</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            onClick={() => setPaymentMethod("cash")}
-            className={`w-60 p-6 flex flex-col h-20 items-center gap-2 rounded-xl border-2 ${
-              paymentMethod === "cash" ? "border-[#331d67] bg-gray-100" : ""
-            }`}
-          >
-            <Coins className="w-10 h-10 text-[#331d67]" />
-            <span className="text-[#331d67] font-medium">Cash on Delivery</span>
-          </Button>
+      <div className="container mx-auto px-4 py-6 max-w-[1250px]">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold text-[#331d67] font-roboto">
+            Payment Method
+          </h1>
+          <p className="text-gray-500 mt-2 font-roboto">
+            Please select the payment method you want to use
+          </p>
         </div>
 
-        {/* Mobile/Tablet View (Dialog) */}
-        <div className="md:hidden mb-6 w-full text-center">
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="w-full max-w-sm mx-auto text-[#331d67] border-2 border-[#331d67] bg-white">
-                Choose Payment Method <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-              <DialogContent className="flex flex-col gap-4 items-center">
-              <DialogTitle className="text-lg font-semibold text-[#331d67]">
-                Select Payment Method
-              </DialogTitle>
-            <DialogDescription className="text-sm text-gray-500 mb-2">
-              Choose your preferred payment method to complete your order.
-            </DialogDescription>
-              <Button
-                variant="outline"
-                onClick={() => handlePaymentSelect("paypal")}
-                className="w-full flex items-center justify-start gap-3 border-2 -z-10"
-              >
-                <img src="/assets/paypal.svg" alt="PayPal" className="w-10 h-10" />
-                <span className="text-[#331d67] font-medium">PayPal</span>
-              </Button>
+        <div className="flex flex-col items-center">
+          <div className="hidden md:flex justify-center flex-wrap gap-4 mb-8">
+            <PaymentMethodButton
+              selected={paymentMethod === "paypal"}
+              onClick={() => setPaymentMethod("paypal")}
+            >
+              <img src="/assets/paypal.svg" alt="PayPal" className="w-14 h-14 object-contain" />
+              <span className="text-[#331d67] font-medium font-roboto">PayPal</span>
+            </PaymentMethodButton>
 
-              <Button
-                variant="outline"
-                onClick={() => handlePaymentSelect("stripe")}
-                className="w-full flex items-center justify-start gap-3 border-2"
-              >
-                <img src="/assets/stripe.svg" alt="Stripe" className="w-10 h-10" />
-                <span className="text-[#331d67] font-medium">Stripe</span>
-              </Button>
+            <PaymentMethodButton
+              selected={paymentMethod === "stripe"}
+              onClick={() => setPaymentMethod("stripe")}
+            >
+              <img src="/assets/stripe.svg" alt="Stripe" className="w-14 h-14 object-contain" />
+              <span className="text-[#331d67] font-medium font-roboto">Stripe</span>
+            </PaymentMethodButton>
 
-              <Button
-                variant="outline"
-                onClick={() => handlePaymentSelect("cash")}
-                className="w-full flex items-center justify-start gap-3 border-2"
-              >
-                <Coins className="w-6 h-6 text-[#331d67]" />
-                <span className="text-[#331d67] font-medium">Cash on Delivery</span>
-              </Button>
-            </DialogContent>
-          </Dialog>
-        </div>
+            <PaymentMethodButton
+              selected={paymentMethod === "cash"}
+              onClick={() => setPaymentMethod("cash")}
+            >
+              <Coins className="w-10 h-10 text-[#331d67]" />
+              <span className="text-[#331d67] font-medium font-roboto text-center">
+                Cash on Delivery
+              </span>
+            </PaymentMethodButton>
+          </div>
 
-        {/* Payment Form Section */}
-        <div className="w-full max-w-xl">
-          {paymentMethod === "paypal" && orderId ? (
-            <PaypalReactButton orderId={parseInt(orderId)} />
-          ) : paymentMethod === "paypal" ? (
-            <p className="text-red-500">Missing order information</p>
-          ) : null}
+          <div className="md:hidden mb-6 w-full flex justify-center">
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="w-full max-w-sm text-[#331d67] border-2 border-[#331d67] bg-white hover:bg-gray-50">
+                  Choose Payment Method <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="flex flex-col gap-3">
+                <DialogTitle className="text-lg font-semibold text-[#331d67]">
+                  Select Payment Method
+                </DialogTitle>
+                <DialogDescription className="text-sm text-gray-500">
+                  Choose your preferred payment method to complete your order.
+                </DialogDescription>
+                <Button
+                  variant="outline"
+                  onClick={() => handlePaymentSelect("paypal")}
+                  className="w-full flex items-center justify-start gap-3 border-2 h-14"
+                >
+                  <img src="/assets/paypal.svg" alt="PayPal" className="w-8 h-8" />
+                  <span className="text-[#331d67] font-medium">PayPal</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => handlePaymentSelect("stripe")}
+                  className="w-full flex items-center justify-start gap-3 border-2 h-14"
+                >
+                  <img src="/assets/stripe.svg" alt="Stripe" className="w-8 h-8" />
+                  <span className="text-[#331d67] font-medium">Stripe</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => handlePaymentSelect("cash")}
+                  className="w-full flex items-center justify-start gap-3 border-2 h-14"
+                >
+                  <Coins className="w-6 h-6 text-[#331d67]" />
+                  <span className="text-[#331d67] font-medium">Cash on Delivery</span>
+                </Button>
+              </DialogContent>
+            </Dialog>
+          </div>
 
-          {paymentMethod === "stripe" && orderId ? (
-            <div className="w-full max-w-md p-6 bg-white rounded shadow mx-auto">
-              <StripeCheckout orderId={parseInt(orderId)} />
-            </div>
-          ) : paymentMethod === "stripe" ? (
-            <p className="text-red-500">Missing order information</p>
-          ) : null}
+          <div className="w-full max-w-md">
+            {!hasOrder ? (
+              <p className="text-center text-red-500 font-roboto">
+                Missing order information. Please place your order again from shipping.
+              </p>
+            ) : (
+              <>
+                {paymentMethod === "paypal" && (
+                  <PaypalReactButton orderId={parsedOrderId} />
+                )}
+                {paymentMethod === "stripe" && (
+                  <div className="w-full p-5 bg-white rounded-xl border border-gray-200 shadow-sm">
+                    <StripeCheckout orderId={parsedOrderId} />
+                  </div>
+                )}
+                {paymentMethod === "cash" && (
+                  <CashOnDelivery orderId={parsedOrderId} />
+                )}
+              </>
+            )}
+          </div>
 
-          {paymentMethod === "cash" && <CashOnDelivery />}
-        </div>
-
-        {/* Back to Shipping */}
-        <div className="flex justify-start w-full max-w-xl border-t border-gray-200 pt-4 mt-10">
-          <Button className="bg-[#331d67]/40 text-white h-10 rounded-md hover:bg-[#331d67]">
-            <Link href="/shipping" className="flex items-center gap-2">
-              <ArrowLeft className="w-4 h-4" />
-              Edit Shipping Address
-            </Link>
-          </Button>
+          <div className="flex justify-start w-full max-w-md border-t border-gray-200 pt-4 mt-10">
+            <Button asChild className="bg-[#331d67] text-white h-10 rounded-md hover:bg-[#331d67]/90">
+              <Link href="/shipping" className="flex items-center gap-2">
+                <ArrowLeft className="w-4 h-4" />
+                Edit Shipping Address
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
     </div>
@@ -155,7 +177,7 @@ function PaymentContent() {
 
 export default function PaymentPage() {
   return (
-    <Suspense fallback={<div>Loading payment details...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-gray-500">Loading payment details...</div>}>
       <PaymentContent />
     </Suspense>
   );

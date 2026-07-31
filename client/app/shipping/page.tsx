@@ -1,9 +1,7 @@
 "use client";
 
 import { ProductCrum } from "@/app/products/components/ProductCrum"
-import BillingInformation from "./components/InputInformation";
 import ShippingInformation from "./components/ShippingInfrom";
-import PaymentMethod from "./components/PaymentMethod";
 import Summery from "./components/summery";
 import { useAddOrderMutation } from "@/hooks/use-order";
 import { useRouter } from "next/navigation";
@@ -12,14 +10,25 @@ import { useState } from "react";
 import { useOrderStore } from "@/store/orderStore";
 import { useQueryClient } from "@tanstack/react-query";
 
+type ShippingFormData = {
+  full_name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  country: string;
+};
+
 export default function ShippingPage() {
   const router = useRouter();
   const mutuate = useAddOrderMutation();
-  const [shippingData, setShippingData] = useState<any>(null);
+  const [shippingData, setShippingData] = useState<ShippingFormData | null>(null);
   const { setCurrentOrder } = useOrderStore();
   const queryClient = useQueryClient()
   
-  const handleShippingChange = (data: any) => {
+  const handleShippingChange = (data: ShippingFormData) => {
     setShippingData(data);
   };
 
@@ -33,13 +42,11 @@ export default function ShippingPage() {
       shipping_info: shippingData
     };
     
-    console.log("Submitting order data:", orderData);
-    
     mutuate.mutate(
       orderData,
       {
         onSuccess: (data) => {
-       
+          setCurrentOrder(data as any);
           const paymentUrl = `/payment?order_id=${data.id}`;
           toast.success("Order created successfully.");
           router.push(paymentUrl);
@@ -56,21 +63,31 @@ export default function ShippingPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-5 mb-10">
+    <div className="min-h-screen bg-white mb-10">
       <ProductCrum />
-      <h1 className="text-4xl max-w-[450px] md:w-[1250px] mx-auto text-[#331d67] font-roboto py-5 px-2.5 font-bold ">Shipping Details</h1>
-      <div className="max-w-[450px] md:w-[1250px] mx-auto">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="md:w-[60%] md:border-1 md:shadow-xs md:border-gray-200 md:rounded-xl">
+      <div className="container mx-auto px-4 py-6 max-w-[1250px]">
+        <div className="mb-6">
+          <h1 className="text-3xl md:text-4xl text-[#331d67] font-roboto font-bold">
+            Shipping Details
+          </h1>
+          <p className="text-gray-500 font-roboto mt-1 text-sm md:text-base">
+            Enter your delivery address to continue to payment
+          </p>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+          <div className="w-full lg:flex-1 border border-gray-200 rounded-xl bg-white p-4 sm:p-6 shadow-sm">
             <ShippingInformation onChange={handleShippingChange} />
-            {/* <BillingInformation /> */}
           </div>
-          <div className="md:w-[40%]">
-            <Summery onPlaceOrder={handlePlaceOrder} />
+          <div className="w-full lg:w-[380px] lg:sticky lg:top-6">
+            <Summery
+              onPlaceOrder={handlePlaceOrder}
+              isLoading={mutuate.isPending}
+              canPlaceOrder={Boolean(shippingData)}
+            />
           </div>
         </div>
       </div>
     </div>
   )
 }
-    
