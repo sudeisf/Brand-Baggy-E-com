@@ -1,61 +1,52 @@
-"use client"
+"use client";
 
 import { CalendarDaysIcon, Package, Percent, Truck } from "lucide-react";
 
 interface ShippingInfoProps {
-    discount : string;
-    packageType : string;
-    deliveryTime : string;
-    estimatedArrival : string;
+  discount: string;
+  packageType: string;
+  deliveryTime: string;
+  estimatedArrival: string;
 }
 
-export default function ShippingInfo({discount,packageType,deliveryTime,estimatedArrival}:ShippingInfoProps){
-    return (
-        <div className="mt-4 border-2 rounded-lg px-3 sm:px-4 space-y-2 border-gray-200 w-full" >
-        <h1 className="text-lg p-2 text-[#331d67] font-semibold font-sans mt-2">Shipping</h1>
-        <div className="grid p-2 grid-cols-1 sm:grid-cols-2 grid-rows-4 sm:grid-rows-2 gap-2">
+const items = [
+  { key: "discount", label: "Discount", icon: Percent },
+  { key: "packageType", label: "Package", icon: Package },
+  { key: "deliveryTime", label: "Delivery time", icon: CalendarDaysIcon },
+  { key: "estimatedArrival", label: "Estimated arrival", icon: Truck },
+] as const;
 
-            <div className="flex gap-2 h-fit items-center">
-                <div className="rounded-full bg-[#331d67]/10  h-12 w-12 flex justify-center items-center">
-                    <div className=" rounded-full bg-[#331d67]  h-5 w-5 flex justify-center items-center">
-                        <Percent className="w-3 h-3 stroke-white" />
-                    </div>
-                </div>
-                <div className="flex flex-col gap-1 p-2">
-                    <h1 className="text-md font-medium font-sans text-gray-500">Discount</h1>
-                    <h1 className="text-md capitalize text-[#331d67] font-medium font-sans">{discount}</h1>
-                </div>
-            </div>
+export default function ShippingInfo({
+  discount,
+  packageType,
+  deliveryTime,
+  estimatedArrival,
+}: ShippingInfoProps) {
+  const values = {
+    discount,
+    packageType,
+    deliveryTime,
+    estimatedArrival,
+  };
 
-            <div className="flex gap-2 h-fit">
-                <div className="rounded-full bg-[#331d67]/10 p-2 h-12 w-12 flex justify-center items-center">
-                    <Package className="w-7 h-7 stroke-1 stroke-white  fill-[#331d67]" />
-                </div>
-                <div className="flex flex-col gap-1 p-2">
-                    <h1 className="text-md font-medium font-sans text-gray-500">Package</h1>
-                    <h1 className="text-md capitalize text-[#331d67] font-medium font-sans">{packageType}</h1>
-                </div>
+  return (
+    <div className="rounded-xl border border-gray-200 p-5 sm:p-6 bg-white h-full">
+      <h2 className="text-lg text-[#331d67] font-semibold mb-4">Shipping</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {items.map(({ key, label, icon: Icon }) => (
+          <div key={key} className="flex gap-3 items-start">
+            <div className="rounded-full bg-[#331d67]/10 h-11 w-11 flex justify-center items-center shrink-0">
+              <Icon className="w-5 h-5 text-[#331d67]" />
             </div>
-            <div className="flex gap-2 h-fit">
-                <div className="rounded-full bg-[#331d67]/10 p-2 h-12 w-12 flex justify-center items-center">
-                    <CalendarDaysIcon className="w-6 h-6 stroke-1 stroke-white fill-[#331d67]" />
-                </div>
-                <div className="flex flex-col gap-1 p-2">
-                    <h1 className="text-md font-medium font-sans text-gray-500">Delivery-time</h1>
-                    <h1 className="text-md capitalize text-[#331d67] font-medium font-sans">{deliveryTime}</h1>
-                </div>
+            <div className="min-w-0">
+              <p className="text-sm text-gray-500">{label}</p>
+              <p className="text-sm sm:text-base text-[#331d67] font-medium break-words">
+                {values[key]}
+              </p>
             </div>
-            <div className="flex gap-2 h-fit">
-                <div className="rounded-full bg-[#331d67]/10 p-2 h-12 w-12 flex justify-center items-center">
-                    <Truck className="w-7 h-7 stroke-1 stroke-white fill-[#331d67]" />
-                </div>
-                <div className="flex flex-col gap-1 p-2">
-                    <h1 className="text-md font-medium font-sans text-gray-500">Estimation Arrive</h1>
-                    <h1 className="text-md capitalize text-[#331d67] font-medium font-sans">{estimatedArrival}</h1>
-                </div>
-            </div>
-
-        </div>
+          </div>
+        ))}
+      </div>
     </div>
-    );
+  );
 }

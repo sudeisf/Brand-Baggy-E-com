@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 interface SizeSelectorProps {
   selectedSize: string;
@@ -9,47 +9,51 @@ interface SizeSelectorProps {
 export default function SizeSelector({
   selectedSize,
   onSizeChange,
-  availableSizes = [] 
+  availableSizes = [],
 }: SizeSelectorProps) {
- 
   const allSizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
   return (
-    <div className="mt-4 w-full">
-      <h1 className="text-md text-gray-500 font-medium font-sans">Select Size</h1>
-      <div className="flex flex-wrap  sm:justify-start mt-3 gap-2 sm:gap-3 md:gap-4 w-full items-center">
+    <div className="w-full space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-medium text-gray-600">Select size</h2>
+        {selectedSize ? (
+          <span className="text-sm text-[#331d67] font-medium">{selectedSize}</span>
+        ) : (
+          <span className="text-sm text-gray-400">Required</span>
+        )}
+      </div>
+
+      <div className="flex flex-wrap gap-2">
         {allSizes.map((size) => {
           const isAvailable = availableSizes.includes(size);
           const isSelected = selectedSize === size;
-          
+
           return (
             <button
               key={size}
+              type="button"
               disabled={!isAvailable}
-              className={`
-                rounded-lg
-                min-w-[50px] sm:min-w-[55px] md:min-w-[64px]
-                px-2 py-1 sm:px-3 sm:py-1.5 md:px-6 md:py-4
-                w-fit border-2
-                transition-all duration-200 ease-in-out
-                ${isSelected ? "bg-[#331d67] text-white border-[#331d67]" : ""}
-                ${isAvailable ? 
-                  "border-gray-200 hover:border-[#331d67] hover:bg-[#331d6710] cursor-pointer" : 
-                  "border-gray-100 text-gray-400 cursor-not-allowed"}
-                flex items-center justify-center
-              `}
               onClick={() => isAvailable && onSizeChange(size)}
+              className={`
+                min-w-[52px] h-12 px-3 rounded-lg border-2 text-sm font-medium transition-all
+                ${isSelected ? "bg-[#331d67] text-white border-[#331d67]" : ""}
+                ${
+                  isAvailable
+                    ? "border-gray-200 text-gray-800 hover:border-[#331d67]"
+                    : "border-gray-100 text-gray-300 cursor-not-allowed line-through"
+                }
+              `}
             >
-              <span className="text-lg sm:text-sm md:text-base font-medium font-rubik">
-                {size}
-                {!isAvailable && (
-                  <span className="text-[8px] sm:text-[10px] md:text-xs block text-gray-400">(Out of stock)</span>
-                )}
-              </span>
+              {size}
             </button>
           );
         })}
       </div>
+
+      {availableSizes.length === 0 && (
+        <p className="text-sm text-red-500">No sizes currently in stock.</p>
+      )}
     </div>
   );
 }

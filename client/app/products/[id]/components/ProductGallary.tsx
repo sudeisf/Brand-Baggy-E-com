@@ -1,63 +1,104 @@
-"use client"
+"use client";
+
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
 interface ProductGalleryProps {
-    mainImage : string;
-    images : string [];
-    name : string;
+  mainImage: string;
+  images: string[];
+  name: string;
 }
 
+export default function ProductGalary({
+  mainImage,
+  images,
+  name,
+}: ProductGalleryProps) {
+  const galleryImages = useMemo(() => {
+    const list = [mainImage, ...(images || [])].filter(Boolean);
+    return Array.from(new Set(list));
+  }, [mainImage, images]);
 
-export default function ProductGalary({mainImage,images,name} :ProductGalleryProps) {
-    const [selectedImage, setSelectedImage] = useState<string>(mainImage);
+  const [selectedImage, setSelectedImage] = useState<string>(
+    galleryImages[0] || ""
+  );
 
   useEffect(() => {
-    setSelectedImage(mainImage);
-  }, [mainImage]);
+    setSelectedImage(galleryImages[0] || "");
+  }, [galleryImages]);
 
+  if (!selectedImage) {
     return (
-        <div className="relative w-full">
-            <div className="relative flex gap-1 md:gap-2 top-5 bottom-0 left-0 w-full px-1 md:px-2 z-10">
-                <div className={`w-full h-1 rounded-full ${selectedImage === mainImage ? "bg-[#f4f4f4]" : "bg-[#331d6736]"}`}></div>
-                <div className={`w-full h-1 rounded-full ${selectedImage === images[0] ? "bg-[#f4f4f4]" : "bg-[#331d6736]"}`}></div>
-                <div className={`w-full h-1 rounded-full ${selectedImage === images[1] ? "bg-[#f4f4f4]" : "bg-[#331d6736]"}`}></div>
-                <div className={`w-full h-1 rounded-full ${selectedImage === images[2] ? "bg-[#f4f4f4]" : "bg-[#331d6736]"}`}></div>
-            </div>
-            <Image 
-                src={selectedImage} 
-                alt={name}  
-                width={400} // smaller default
-                height={400}
-                className="
-                    rounded-lg object-cover w-full 
-                    max-w-[450px] h-auto 
-                    mx-auto
-                    sm:max-w-[500px] sm:w-[500px] sm:h-[600px]
-                    md:max-w-[400px] md:w-[400px] md:h-[500px]
-                    lg:max-w-[600px] lg:w-[600px] lg:h-[700px]
-                "
-                onClick={()=> setSelectedImage(mainImage)}
-            />
-            <div className="relative -top-20 md:-top-28 justify-center flex flex-row gap-1 md:gap-2 h-16 md:h-20 w-full px-1 md:px-2">
-                {images.map((image) => (
-                    <Image
-                        key={image} 
-                        src={image} 
-                        alt={name} 
-                        width={80} 
-                        height={60}
-                        className={`
-                            rounded-lg object-cover border-[2px] border-white 
-                            w-42 h-32
-                            sm:w-[120px] sm:h-[80px]
-                            md:w-[80px] md:h-[60px]
-                            lg:w-[200px] lg:h-[100px]
-                            ${selectedImage === image ? "border-2 border-black" : ""}
-                        `} 
-                        onClick={() => setSelectedImage(image)}
-                    />
-                ))}
-            </div>
-        </div>
+      <div className="w-full aspect-[4/5] rounded-xl bg-gray-100 flex items-center justify-center text-gray-400">
+        No image available
+      </div>
     );
+  }
+
+  const progressSlots = galleryImages.slice(0, 4);
+
+  return (
+    <div className="relative w-full">
+      {/* Progress indicators over the image */}
+      {progressSlots.length > 1 && (
+        <div className="absolute top-4 left-0 right-0 z-20 flex gap-1.5 px-3 md:px-4">
+          {progressSlots.map((image) => (
+            <button
+              key={`bar-${image}`}
+              type="button"
+              onClick={() => setSelectedImage(image)}
+              className={`h-1 flex-1 rounded-full transition-colors ${
+                selectedImage === image ? "bg-white" : "bg-white/40"
+              }`}
+              aria-label="Select product image"
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Main image */}
+      <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden bg-gray-50">
+        <Image
+          src={selectedImage}
+          alt={name}
+          fill
+          priority
+          sizes="(max-width: 1024px) 100vw, 50vw"
+          className="object-cover"
+          unoptimized
+          onClick={() => mainImage && setSelectedImage(mainImage)}
+        />
+      </div>
+
+      {/* Overlapping thumbnails */}
+      {galleryImages.length > 1 && (
+        <div className="relative -mt-16 md:-mt-24 z-20 flex justify-center gap-2 px-2">
+          {galleryImages.slice(0, 4).map((image) => {
+            const isActive = selectedImage === image;
+            return (
+              <button
+                key={image}
+                type="button"
+                onClick={() => setSelectedImage(image)}
+                className={`
+                  relative overflow-hidden rounded-lg border-2 shadow-md transition-transform
+                  w-20 h-16 sm:w-28 sm:h-20 md:w-24 md:h-16 lg:w-36 lg:h-24
+                  ${isActive ? "border-[#331d67] scale-105" : "border-white hover:scale-105"}
+                `}
+              >
+                <Image
+                  src={image}
+                  alt={`${name} thumbnail`}
+                  fill
+                  sizes="150px"
+                  className="object-cover"
+                  unoptimized
+                />
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 }

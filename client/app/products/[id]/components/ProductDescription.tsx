@@ -1,15 +1,18 @@
-"use client"
+"use client";
 
-
-interface ProductDesciption {
-    description : string;
+interface ProductDescriptionProps {
+  description: string;
 }
 
-export default function ProductDesciption({description} : ProductDesciption){
-    return (
-        <div className="mt-4 border-1 shadow-xs rounded-lg p-4  space-y-2 border-gray-200 pt-5 w-full">
-                <h1 className="text-lg text-[#331d67] font-semibold font-roboto">Description & Fit</h1>
-                <p className="text-md text-gray-500  font-sans">{description}</p>
-        </div>
-    )
+export default function ProductDescription({
+  description,
+}: ProductDescriptionProps) {
+  return (
+    <div className="rounded-xl border border-gray-200 p-5 sm:p-6 space-y-3 bg-white h-full">
+      <h2 className="text-lg text-[#331d67] font-semibold">Description & fit</h2>
+      <p className="text-sm sm:text-base text-gray-600 leading-relaxed whitespace-pre-wrap">
+        {description || "No description available for this product."}
+      </p>
+    </div>
+  );
 }
