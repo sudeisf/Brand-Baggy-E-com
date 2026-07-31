@@ -83,7 +83,8 @@ function CheckoutForm({ orderId }: { orderId: number }) {
               base: {
                 fontSize: "16px",
                 color: "#32325d",
-                fontFamily: "inherit",
+                fontFamily: '"Neue Montreal", Satoshi, sans-serif',
+                letterSpacing: '-0.01em',
                 "::placeholder": {
                   color: "#a0aec0",
                 },
