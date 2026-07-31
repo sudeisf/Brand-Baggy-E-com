@@ -23,4 +23,5 @@ jobs:
             git pull --ff-only origin main
             docker compose up -d --build --remove-orphans
             docker compose exec -T backend python manage.py migrate --noinput
+            docker compose exec -T backend python manage.py seed_categories
             docker image prune -f

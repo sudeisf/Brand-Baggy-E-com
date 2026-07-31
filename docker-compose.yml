@@ -10,6 +10,7 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: Backend.settings
       RUN_MIGRATIONS: "1"
+      RUN_SEED: "1"
       RUN_COLLECTSTATIC: "1"
     expose:
       - "8000"
@@ -36,6 +37,7 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: Backend.settings
       RUN_MIGRATIONS: "0"
+      RUN_SEED: "0"
       RUN_COLLECTSTATIC: "0"
     command: ["celery", "-A", "Backend", "worker", "--loglevel=info"]
     depends_on:
@@ -56,6 +58,7 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: Backend.settings
       RUN_MIGRATIONS: "0"
+      RUN_SEED: "0"
       RUN_COLLECTSTATIC: "0"
     command: ["celery", "-A", "Backend", "beat", "--loglevel=info", "--scheduler", "django_celery_beat.schedulers:DatabaseScheduler"]
     depends_on:
