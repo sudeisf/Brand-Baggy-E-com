@@ -11,6 +11,34 @@ interface ImageUploadProps {
   maxFiles?: number
 }
 
+const MIME_TO_EXT: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/jpg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/gif': 'gif',
+  'image/bmp': 'bmp',
+}
+
+function ensureFileExtension(file: File, originalName?: string): File {
+  const baseName = originalName || file.name || 'image'
+  const hasExt = /\.[a-z0-9]+$/i.test(baseName)
+  if (hasExt && file.name === baseName) {
+    return file
+  }
+
+  const mimeExt = MIME_TO_EXT[file.type] || MIME_TO_EXT[file.type.toLowerCase()]
+  const originalExt = baseName.match(/\.([a-z0-9]+)$/i)?.[1]
+  const ext = originalExt || mimeExt || 'jpg'
+  const nameWithoutExt = baseName.replace(/\.[a-z0-9]+$/i, '') || 'image'
+  const safeName = `${nameWithoutExt}.${ext}`
+
+  return new File([file], safeName, {
+    type: file.type || `image/${ext === 'jpg' ? 'jpeg' : ext}`,
+    lastModified: file.lastModified || Date.now(),
+  })
+}
+
 export default function ImageUpload({ onChange, value, maxFiles = 4 }: ImageUploadProps) {
   const [files, setFiles] = useState<File[]>(value ?? [])
 
@@ -28,13 +56,15 @@ export default function ImageUpload({ onChange, value, maxFiles = 4 }: ImageUplo
     
     try {
       const compressedFiles = await Promise.all(
-        acceptedFiles.map(file =>
-          imageCompression(file, {
+        acceptedFiles.map(async (file) => {
+          const compressed = await imageCompression(file, {
             maxSizeMB: 0.8,
             maxWidthOrHeight: 1920,
             useWebWorker: true,
+            fileType: file.type || 'image/jpeg',
           })
-        )
+          return ensureFileExtension(compressed, file.name)
+        })
       )
       const newFiles = [...files, ...compressedFiles]
       setFiles(newFiles)

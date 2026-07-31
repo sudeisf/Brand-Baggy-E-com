@@ -49,12 +49,53 @@ const productSchema = z.object({
 
 type ProductFormData = z.infer<typeof productSchema>;
 
+function withImageExtension(file: File, index = 0): File {
+    if (/\.[a-z0-9]+$/i.test(file.name)) {
+        return file;
+    }
+    const extByMime: Record<string, string> = {
+        'image/jpeg': 'jpg',
+        'image/jpg': 'jpg',
+        'image/png': 'png',
+        'image/webp': 'webp',
+        'image/gif': 'gif',
+    };
+    const ext = extByMime[file.type] || 'jpg';
+    return new File([file], `product-image-${index + 1}.${ext}`, {
+        type: file.type || 'image/jpeg',
+        lastModified: file.lastModified || Date.now(),
+    });
+}
+
+const EMPTY_FORM_VALUES: ProductFormData = {
+    name: '',
+    description: '',
+    brand: '',
+    productNumber: '',
+    modelNumber: '',
+    sizes: [],
+    gender: 'men',
+    basePrice: 0,
+    stock: 0,
+    discount: undefined,
+    discountType: undefined,
+    discountStartDate: undefined,
+    discountEndDate: undefined,
+    storeLocation: '',
+    category: '',
+    subCategory: '',
+    images: [],
+    cost_price: 0,
+};
+
 export default function CreateProduct() {
     const { mutate : createProductFn, isPending : isLoading, error } = useCreateProductMutation();
     const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
     const router = useRouter();    
     const [images, setImages] = useState<File[]>([]);
+    const [imageUploadKey, setImageUploadKey] = useState(0);
     const [draftReady, setDraftReady] = useState(false);
+    const skipDraftSave = useRef(false);
     const previousCategory = useRef<string>("");
     const [parentCategory, setParentCategory] = useState<Array<{
         id: number;
@@ -80,19 +121,7 @@ export default function CreateProduct() {
         watch,
     } = useForm<ProductFormData>({
         resolver: zodResolver(productSchema),
-        defaultValues: {
-            name: '',
-            description: '',
-            sizes: [],
-            gender: 'men',
-            basePrice: 0,
-            stock: 0,
-            storeLocation: '',
-            category: '',
-            subCategory: '',
-            images: [],
-            cost_price: 0,
-        }
+        defaultValues: EMPTY_FORM_VALUES,
     });
 
     const watchedCategory = watch('category');
@@ -177,7 +206,7 @@ export default function CreateProduct() {
     }, [watchedCategory, draftReady, setValue]);
 
     useEffect(() => {
-        if (!draftReady) return;
+        if (!draftReady || skipDraftSave.current) return;
 
         const {
             images: _images,
@@ -192,6 +221,17 @@ export default function CreateProduct() {
             discountEndDate: discountEndDate?.toISOString() ?? null,
         });
     }, [formValues, draftReady]);
+
+    const clearCreateProductForm = async () => {
+        skipDraftSave.current = true;
+        setDraftReady(false);
+        await clearProductDraft();
+        reset(EMPTY_FORM_VALUES);
+        setSelectedSizes([]);
+        setImages([]);
+        setImageUploadKey((key) => key + 1);
+        previousCategory.current = '';
+    };
 
     const handleSizeClick = (size: string) => {
         setSelectedSizes(prev => {
@@ -235,8 +275,9 @@ export default function CreateProduct() {
             submitData.append('cost_price', String(data.cost_price));
 
             if (data.images.length > 0) {
-                submitData.append('main_image', data.images[0]);
-                data.images.slice(1).forEach((file) => {
+                const namedImages = data.images.map((file, index) => withImageExtension(file, index));
+                submitData.append('main_image', namedImages[0]);
+                namedImages.slice(1).forEach((file) => {
                     submitData.append(`images`, file);
                 });
             }
@@ -248,10 +289,7 @@ export default function CreateProduct() {
             createProductFn(submitData,{
                 onSuccess: async (data)=> {
                     toast.success(data.message);
-                    await clearProductDraft();
-                    reset();
-                    setSelectedSizes([]);
-                    setImages([]);
+                    await clearCreateProductForm();
                     router.push('/products-dashboard');
                 },
                 onError : ()=>{
@@ -514,7 +552,7 @@ export default function CreateProduct() {
                         </div>
                     </div>
                     <div id="right-side-block" className="w-full">
-                        <ImageUpload value={images} onChange={handleImageChange} />
+                        <ImageUpload key={imageUploadKey} value={images} onChange={handleImageChange} />
                         <div>
                             <div className="flex flex-col gap-2 p-4">
                                 <label htmlFor="category" className="capitalize font-roboto text-sm">Category</label>

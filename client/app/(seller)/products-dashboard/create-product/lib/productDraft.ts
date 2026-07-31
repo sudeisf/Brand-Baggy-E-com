@@ -60,7 +60,21 @@ function dataUrlToFile(stored: StoredImage): File {
   for (let i = 0; i < binary.length; i++) {
     bytes[i] = binary.charCodeAt(i);
   }
-  return new File([bytes], stored.name, {
+
+  const mimeToExt: Record<string, string> = {
+    "image/jpeg": "jpg",
+    "image/jpg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/gif": "gif",
+  };
+  const hasExt = /\.[a-z0-9]+$/i.test(stored.name || "");
+  const ext = mimeToExt[mime] || "jpg";
+  const safeName = hasExt
+    ? stored.name
+    : `${(stored.name || "image").replace(/\.[a-z0-9]+$/i, "") || "image"}.${ext}`;
+
+  return new File([bytes], safeName, {
     type: mime,
     lastModified: stored.lastModified,
   });
