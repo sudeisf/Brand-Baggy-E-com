@@ -1,5 +1,5 @@
 "use client"
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import Image from 'next/image'
 import { X } from 'lucide-react'
@@ -7,11 +7,18 @@ import imageCompression from 'browser-image-compression'
 
 interface ImageUploadProps {
   onChange: (files: File[]) => void
+  value?: File[]
   maxFiles?: number
 }
 
-export default function ImageUpload({ onChange, maxFiles = 4 }: ImageUploadProps) {
-  const [files, setFiles] = useState<File[]>([])
+export default function ImageUpload({ onChange, value, maxFiles = 4 }: ImageUploadProps) {
+  const [files, setFiles] = useState<File[]>(value ?? [])
+
+  useEffect(() => {
+    if (value) {
+      setFiles(value)
+    }
+  }, [value])
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (files.length + acceptedFiles.length > maxFiles) {
@@ -56,8 +63,6 @@ export default function ImageUpload({ onChange, maxFiles = 4 }: ImageUploadProps
     <div className="space-y-4  shadow-xs  rounded-md ">
         <h1 className='p-4 font-roboto text-md font-medium text-gray-500'>Upload Product Images</h1>
        
-
-
 
     <div className=''>
         {/* First image slot */}
@@ -183,4 +188,4 @@ export default function ImageUpload({ onChange, maxFiles = 4 }: ImageUploadProps
       
     </div>
   )
-} 
+}

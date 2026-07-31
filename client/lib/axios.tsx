@@ -4,29 +4,31 @@ import { useAuthStore } from "@/store/authStore";
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000",
   headers: { "Content-Type": "application/json" },
-  withCredentials: true, // Include cookies for CSRF
-  timeout: 30000, // 30-second timeout
+  withCredentials: true,
+  timeout: 30000,
 });
 
-// // Fetch CSRF token
-// async function getCsrfToken() {
-//   try {
-//     const response = await api.get("/accounts/login/", { headers: {}, params: {}, skipCsrf: true } as any);
-//     const csrfToken = document.cookie
-//       .split("; ")
-//       .find((row) => row.startsWith("csrftoken"))
-//       ?.split("=")[1];
-//     if (csrfToken) {
-//       api.defaults.headers["X-CSRFToken"] = csrfToken;
-//       return csrfToken;
-//     }
-//   } catch (error) {
-//     console.error("Failed to fetch CSRF token:", error);
-//   }
-//   return null;
-// }
+let refreshPromise: Promise<string | null> | null = null;
 
-// Request Interceptor
+function isRefreshRequest(config?: { url?: string }) {
+  return Boolean(config?.url?.includes("accounts/token/refresh"));
+}
+
+function forceLogout() {
+  useAuthStore.setState({
+    accessToken: null,
+    refreshToken: null,
+    isAuthenticated: false,
+    user: null,
+  });
+  if (typeof window !== "undefined") {
+    document.cookie = "accessToken=; Max-Age=0; path=/";
+    if (!window.location.pathname.startsWith("/login")) {
+      window.location.href = "/login";
+    }
+  }
+}
+
 api.interceptors.request.use(
   async (config) => {
     if ((config as any).skipAuth) return config;
@@ -40,59 +42,56 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
 
-    // // Fetch CSRF token for POST requests
-    // if (config.method?.toLowerCase() === "post" && !(config as any).skipCsrf) {
-    //   await getCsrfToken();
-    // }
-
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    originalRequest._retryCount = originalRequest._retryCount || 0;
 
-    if (error.response?.status === 401 && originalRequest._retryCount < 2) {
-      originalRequest._retryCount += 1;
-      const refreshToken = useAuthStore.getState().refreshToken;
-
-      if (!refreshToken) {
-        console.warn("No refresh token available, logging out...");
-        useAuthStore.getState().logout();
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
-        }
-        return Promise.reject(error);
-      }
-
-      try {
-        console.log("Attempting to refresh token...");
-        await useAuthStore.getState().refreshAccessToken();
-        const newAccessToken = useAuthStore.getState().accessToken;
-
-        if (!newAccessToken) {
-          throw new Error("Failed to get new access token");
-        }
-
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        return api(originalRequest);
-      } catch (refreshError) {
-        console.error("Token refresh failed:", refreshError);
-        useAuthStore.getState().logout();
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
-        }
-        return Promise.reject(refreshError);
-      }
+    if (!originalRequest || error.response?.status !== 401) {
+      return Promise.reject(error);
     }
 
-    console.error("Request failed:", error.response?.status, error.message);
-    return Promise.reject(error);
+    // Never try to refresh while refreshing — stops the 401 flood
+    if (isRefreshRequest(originalRequest) || (originalRequest as any)._retry) {
+      forceLogout();
+      return Promise.reject(error);
+    }
+
+    const refreshToken = useAuthStore.getState().refreshToken;
+    if (!refreshToken) {
+      forceLogout();
+      return Promise.reject(error);
+    }
+
+    (originalRequest as any)._retry = true;
+
+    try {
+      if (!refreshPromise) {
+        refreshPromise = useAuthStore
+          .getState()
+          .refreshAccessToken()
+          .then(() => useAuthStore.getState().accessToken)
+          .finally(() => {
+            refreshPromise = null;
+          });
+      }
+
+      const newAccessToken = await refreshPromise;
+      if (!newAccessToken) {
+        throw new Error("Failed to get new access token");
+      }
+
+      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+      return api(originalRequest);
+    } catch (refreshError) {
+      forceLogout();
+      return Promise.reject(refreshError);
+    }
   }
 );
 

@@ -379,16 +379,32 @@ export const useAuthStore = create<AuthState>()(
                     }
                 ,refreshAccessToken : async () => {
                     const { refreshToken } = get();
+                    if (!refreshToken) {
+                        set({ error: 'Failed to refresh token', isAuthenticated: false });
+                        throw new Error('No refresh token');
+                    }
                     try {
-                        const response = await api.post('accounts/token/refresh/', { refresh: refreshToken });
+                        const response = await api.post(
+                            'accounts/token/refresh/',
+                            { refresh: refreshToken },
+                            { skipAuth: true } as any
+                        );
                         const { access } = response.data;
                         setCookie('accessToken', access, {
                             maxAge: 60 * 60,
                             path: '/',
                           });
-                        set({ accessToken: access });
+                        set({ accessToken: access, isAuthenticated: true, error: null });
+                        return access;
                     } catch (err: any) {
-                        set({ error: 'Failed to refresh token', isAuthenticated: false });
+                        set({
+                            error: 'Failed to refresh token',
+                            isAuthenticated: false,
+                            accessToken: null,
+                            refreshToken: null,
+                            user: null,
+                        });
+                        throw err;
                     }
                 },
                 checkAuth : async () => {

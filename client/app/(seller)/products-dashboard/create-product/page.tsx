@@ -7,20 +7,24 @@ import { useCreateProductMutation } from "../lib/mutation/productmutation";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Check, Loader2Icon, Plus } from "lucide-react"
+import { ArrowLeft, Check, Loader2Icon } from "lucide-react"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import ImageUpload from "./components/ImageUpload"
 import { DatePicker } from "./components/DateTimePicker"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import axios from "axios"
 import api from "@/lib/axios"
-import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
-import { useProductStore } from "@/store/prouctStore";
 import { useRouter } from "next/navigation";
+import {
+    clearProductDraft,
+    loadDraftFields,
+    loadDraftImages,
+    saveDraftFields,
+    saveDraftImages,
+} from "./lib/productDraft";
 
 const productSchema = z.object({
     name: z.string().min(1, "Product name is required"),
@@ -50,6 +54,8 @@ export default function CreateProduct() {
     const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
     const router = useRouter();    
     const [images, setImages] = useState<File[]>([]);
+    const [draftReady, setDraftReady] = useState(false);
+    const previousCategory = useRef<string>("");
     const [parentCategory, setParentCategory] = useState<Array<{
         id: number;
         name: string;
@@ -71,7 +77,7 @@ export default function CreateProduct() {
         handleSubmit,
         formState: { errors },
         setValue,
-        watch
+        watch,
     } = useForm<ProductFormData>({
         resolver: zodResolver(productSchema),
         defaultValues: {
@@ -88,6 +94,9 @@ export default function CreateProduct() {
             cost_price: 0,
         }
     });
+
+    const watchedCategory = watch('category');
+    const formValues = watch();
 
     useEffect(() => {
         async function fetchData() {
@@ -106,8 +115,83 @@ export default function CreateProduct() {
     }, []);
 
     useEffect(() => {
-        setValue('subCategory', '');
-    }, [watch('category')]);
+        let cancelled = false;
+
+        async function restoreDraft() {
+            const draft = loadDraftFields();
+            const draftImages = await loadDraftImages();
+            if (cancelled) return;
+
+            if (draft) {
+                const sizes = draft.sizes ?? [];
+                setSelectedSizes(sizes);
+                previousCategory.current = draft.category ?? "";
+
+                reset({
+                    name: draft.name ?? '',
+                    description: draft.description ?? '',
+                    brand: draft.brand,
+                    productNumber: draft.productNumber,
+                    modelNumber: draft.modelNumber,
+                    sizes,
+                    gender: draft.gender ?? 'men',
+                    basePrice: draft.basePrice ?? 0,
+                    stock: draft.stock ?? 0,
+                    discount: draft.discount,
+                    discountType: draft.discountType,
+                    discountStartDate: draft.discountStartDate
+                        ? new Date(draft.discountStartDate)
+                        : undefined,
+                    discountEndDate: draft.discountEndDate
+                        ? new Date(draft.discountEndDate)
+                        : undefined,
+                    storeLocation: draft.storeLocation ?? '',
+                    category: draft.category ?? '',
+                    subCategory: draft.subCategory ?? '',
+                    images: draftImages,
+                    cost_price: draft.cost_price ?? 0,
+                });
+            }
+
+            if (draftImages.length > 0) {
+                setImages(draftImages);
+                setValue('images', draftImages);
+            }
+
+            setDraftReady(true);
+        }
+
+        restoreDraft();
+        return () => {
+            cancelled = true;
+        };
+    }, [reset, setValue]);
+
+    useEffect(() => {
+        if (!draftReady) return;
+
+        if (previousCategory.current && previousCategory.current !== watchedCategory) {
+            setValue('subCategory', '');
+        }
+        previousCategory.current = watchedCategory ?? '';
+    }, [watchedCategory, draftReady, setValue]);
+
+    useEffect(() => {
+        if (!draftReady) return;
+
+        const {
+            images: _images,
+            discountStartDate,
+            discountEndDate,
+            ...rest
+        } = formValues;
+
+        saveDraftFields({
+            ...rest,
+            discountStartDate: discountStartDate?.toISOString() ?? null,
+            discountEndDate: discountEndDate?.toISOString() ?? null,
+        });
+    }, [formValues, draftReady]);
 
     const handleSizeClick = (size: string) => {
         setSelectedSizes(prev => {
@@ -118,9 +202,11 @@ export default function CreateProduct() {
             return newSizes;
         });
     };
+
     const handleImageChange = (files: File[]) => {
         setImages(files);
         setValue('images', files);
+        void saveDraftImages(files);
     };
 
     const onSubmit = async (data: ProductFormData) => {
@@ -150,7 +236,7 @@ export default function CreateProduct() {
 
             if (data.images.length > 0) {
                 submitData.append('main_image', data.images[0]);
-                data.images.slice(1).forEach((file, index) => {
+                data.images.slice(1).forEach((file) => {
                     submitData.append(`images`, file);
                 });
             }
@@ -160,14 +246,15 @@ export default function CreateProduct() {
             }));
             submitData.append('variants', JSON.stringify(variants));
             createProductFn(submitData,{
-                onSuccess: (data)=> {
+                onSuccess: async (data)=> {
                     toast.success(data.message);
-                    router.push('/products-dashboard');
+                    await clearProductDraft();
                     reset();
                     setSelectedSizes([]);
                     setImages([]);
+                    router.push('/products-dashboard');
                 },
-                onError : (err)=>{
+                onError : ()=>{
                     toast.error(error?.message)
                 }
             })
@@ -306,8 +393,8 @@ export default function CreateProduct() {
                                     <p className="font-roboto font-medium text-gray-500 text-sm">pick available gender</p>
                                     <RadioGroup
                                         className="flex gap-6 mt-4"
-                                        defaultValue="men"
-                                        onValueChange={(val) => setValue("gender", val as "men" | "women")}
+                                        value={watch("gender") ?? "men"}
+                                        onValueChange={(val) => setValue("gender", val as "men" | "women" | "kids")}
                                     >
                                         <div className="flex items-center gap-2">
                                             <RadioGroupItem value="men" id="men" />
@@ -371,7 +458,10 @@ export default function CreateProduct() {
                                     </div>
                                     <div className="flex flex-col gap-2">
                                         <label htmlFor="discount-type" className="capitalize font-roboto text-sm">discount type</label>
-                                        <Select onValueChange={(val) => setValue('discountType', val as "percentage" | "fixed_amount" | undefined)}>
+                                        <Select
+                                            value={watch('discountType') ?? undefined}
+                                            onValueChange={(val) => setValue('discountType', val as "percentage" | "fixed_amount" | undefined)}
+                                        >
                                             <SelectTrigger className="w-full bg-white py-6">
                                                 <SelectValue placeholder="Select discount type" />
                                             </SelectTrigger>
@@ -424,13 +514,16 @@ export default function CreateProduct() {
                         </div>
                     </div>
                     <div id="right-side-block" className="w-full">
-                        <ImageUpload onChange={handleImageChange} />
+                        <ImageUpload value={images} onChange={handleImageChange} />
                         <div>
                             <div className="flex flex-col gap-2 p-4">
                                 <label htmlFor="category" className="capitalize font-roboto text-sm">Category</label>
                                 <p className="font-roboto capitalize text-xs font-semibold text-gray-500">product category</p>
-                                <Select onValueChange={(val) => setValue('category', val)}>
-                                    <SelectTrigger className="w-full bg-gray-100 py-6" value={watch("category")}>
+                                <Select
+                                    value={watch("category") || undefined}
+                                    onValueChange={(val) => setValue('category', val)}
+                                >
+                                    <SelectTrigger className="w-full bg-gray-100 py-6">
                                         <SelectValue placeholder="Select category" className="capitalize placeholder:capitalize font-roboto" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -447,10 +540,11 @@ export default function CreateProduct() {
                                 <label htmlFor="subCategory" className="capitalize font-roboto text-sm">Sub-Category</label>
                                 <p className="font-roboto capitalize text-xs font-semibold text-gray-500">product sub category</p>
                                 <Select 
+                                    value={watch('subCategory') || undefined}
                                     onValueChange={(val) => setValue('subCategory', val)}
                                     disabled={!watch('category')}
                                 >
-                                    <SelectTrigger className="w-full bg-gray-100 py-6" value={watch('subCategory')}>
+                                    <SelectTrigger className="w-full bg-gray-100 py-6">
                                         <SelectValue 
                                             placeholder={watch('category') ? "Select sub-category" : "Select a category first"} 
                                             className="capitalize placeholder:capitalize font-roboto" 
