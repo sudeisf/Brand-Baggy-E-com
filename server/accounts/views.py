@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework import generics , status 
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated , AllowAny
+from accounts.permisions import IsSeller
 from .serializer import (
     Email_varify_OTP_generate_serializer,
     OTP_verify_serializer,
@@ -248,7 +249,7 @@ from .serializer import StoreProfileSerializer, NotificationPreferencesSerialize
 
 class StoreSettingsView(generics.RetrieveUpdateAPIView):
     serializer_class = StoreProfileSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSeller]
 
     def get_object(self):
         obj, created = StoreProfile.objects.get_or_create(user=self.request.user)
@@ -256,7 +257,7 @@ class StoreSettingsView(generics.RetrieveUpdateAPIView):
 
 class NotificationSettingsView(generics.RetrieveUpdateAPIView):
     serializer_class = NotificationPreferencesSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSeller]
 
     def get_object(self):
         obj, created = NotificationPreferences.objects.get_or_create(user=self.request.user)

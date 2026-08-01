@@ -131,6 +131,15 @@ export default function ProductPage({ initialProduct }: ProductPageProps) {
           </div>
         </div>
 
+        <div className="text-center mt-12 mb-4">
+          <p className="text-2xl md:text-3xl text-[#331d67]" style={{ fontFamily: "'Great Vibes', cursive" }}>
+            Style of the Generation
+          </p>
+          <p className="text-sm md:text-base font-bold text-gray-800 mt-2 tracking-wide">
+            A Style without this items is not complete
+          </p>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-10">
           <ProductDescription description={decodeHtml(product.description ?? "")} />
           <ShippingInfo

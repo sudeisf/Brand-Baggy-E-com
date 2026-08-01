@@ -1,3 +1,4 @@
+"use client"
 
 import { SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
 import AppSidbar from "./components/SideBar";
@@ -5,14 +6,12 @@ import { ArrowRightFromLine, Search , ChevronDown } from "lucide-react";
 import { Notification } from "@/app/(seller)/components/Notficationsheet"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Profile from "./components/ProfileHeader";
-export const metadata = {
-    title: 'Dashboard',
-    description: 'Dashboard',
-  };
+import ProtectedRoute from "@/components/protectedRoute";
 
 export default function SellerLayotut({children}: {children:React.ReactNode}){
     
         return(
+            <ProtectedRoute allowedRoles={["seller"]}>
             <SidebarProvider>
                 <AppSidbar/>
                 <main className="w-full ">
@@ -36,5 +35,6 @@ export default function SellerLayotut({children}: {children:React.ReactNode}){
                     </div>
                 </main>
             </SidebarProvider>
+            </ProtectedRoute>
         )
 }

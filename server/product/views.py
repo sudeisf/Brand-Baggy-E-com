@@ -138,7 +138,7 @@ class ProductReviewListCreateView(generics.ListAPIView):
 class ProductCreateAPIView(generics.CreateAPIView):
     queryset = Product.objects.all()
     serializer_class = CreateProductSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSeller]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, context={'request': request})
@@ -319,7 +319,7 @@ class SearchProductAPIView(generics.ListAPIView):
 
         
 class SellerProductList(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSeller]
     def get(self,request):
         user = request.user
         try:

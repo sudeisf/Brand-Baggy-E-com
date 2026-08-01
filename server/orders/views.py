@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from accounts.permisions import IsSeller
 from cart.models import Cart
 from django.db import transaction
 from orders.serializers import (OrderSerializer ,PaymentAndOrderStatusSerializer, ShippingInfoSerializer,OrderDetailSerializer,OrderTableSerializer,
@@ -151,21 +152,15 @@ class GetOrderItemAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class AdminOrderTableAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSeller]
     def get(self, request):
-        # Only allow sellers
-        if not hasattr(request.user, "user_role") or request.user.user_role != "seller":
-            return Response({"detail": "Forbidden"}, status=403)
         orders = Order.objects.filter(items__product__seller=request.user).distinct()
         serializer = OrderTableSerializer(orders, many=True)
         return Response(serializer.data)
 
 class ExportSellerOrdersCSVAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSeller]
     def get(self, request):
-        # Only allow sellers
-        if not hasattr(request.user, "user_role") or request.user.user_role != "seller":
-            return Response({"detail": "Forbidden"}, status=403)
         orders = Order.objects.filter(items__product__seller=request.user).distinct()
         try:
             import csv
@@ -206,7 +201,7 @@ class ExportSellerOrdersCSVAPIView(APIView):
 
 
 class PaymentAndOrderStatusUpdate(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSeller]
 
     def patch(self, request):
         serializer = PaymentAndOrderStatusSerializer(data=request.data)
@@ -261,7 +256,7 @@ class PaymentAndOrderStatusUpdate(APIView):
 
 from django.db.models import Avg   
 class SellerOrdersDashboard(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSeller]
     def get(self, request):
         user  = request.user
         try:
@@ -284,7 +279,7 @@ class SellerOrdersDashboard(APIView):
             return Response({"error" : "Order does not exist for this seller"}, status=status.HTTP_200_OK)
         
 class SellerOrderDetailAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSeller]
 
     def get(self, request, order_id):
         user = request.user
@@ -366,7 +361,7 @@ from accounts.models import CustomUser
 from django.db.models import Sum, Q, Count
 
 class CustomerListAPIView(APIView):
-    permission_classes = [IsAuthenticated]  # or IsAuthenticated
+    permission_classes = [IsAuthenticated, IsSeller]
 
     def get(self, request):
         # Subquery for latest registered user's order
@@ -433,7 +428,7 @@ class CustomerListAPIView(APIView):
         return paginator.get_paginated_response(serializer.data)
 
 class CustomerDetailAPIView(APIView):
-    permission_classes = [IsAuthenticated]  # seller auth
+    permission_classes = [IsAuthenticated, IsSeller]
 
     def get(self, request, email):
         seller = request.user
@@ -498,7 +493,7 @@ class CustomerDetailAPIView(APIView):
 
 
 class SellerRecentOrdersAPIView(APIView):
-    permission_classes = [IsAuthenticated]  # The authenticated user must be the seller
+    permission_classes = [IsAuthenticated, IsSeller]
 
     def get(self, request):
         seller = request.user
@@ -518,7 +513,7 @@ import humanize
 import pytz
 from django.utils.timezone import now
 class SellerRecentOrderActivityAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSeller]
 
     def get(self, request):
         seller = request.user
@@ -550,7 +545,7 @@ class SellerRecentOrderActivityAPIView(APIView):
 from django.db.models import DecimalField, F, Sum
 from datetime import datetime, timedelta
 class SellerAnalyticsAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSeller]
 
     def get(self, request):
         seller = request.user
@@ -639,12 +634,10 @@ from django.db.models import Sum, F, ExpressionWrapper, DateTimeField
 import pytz
 
 class SellerRevenueAnalyticsAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSeller]
 
     def get(self, request):
         user = request.user
-        if user.user_role != 'seller':
-            return Response({'detail': 'Forbidden'}, status=403)
 
         tz = pytz.timezone('Africa/Nairobi')
         now = timezone.now().astimezone(tz) 
