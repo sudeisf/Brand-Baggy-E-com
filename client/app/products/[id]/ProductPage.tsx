@@ -131,14 +131,23 @@ export default function ProductPage({ initialProduct }: ProductPageProps) {
           </div>
         </div>
 
-        <div className="text-center mt-12 mb-4">
-          <p className="text-2xl md:text-3xl text-[#331d67]" style={{ fontFamily: "'Great Vibes', cursive" }}>
+      </div>
+
+      <div className="w-full bg-[#e8e0f0] py-8 px-4 sm:px-8 mt-10">
+        <div className="max-w-[1250px] mx-auto">
+          <p className="text-4xl md:text-5xl text-[#2a1a5e] mb-6" style={{ fontFamily: "'Great Vibes', cursive" }}>
             Style of the Generation
           </p>
-          <p className="text-sm md:text-base font-bold text-gray-800 mt-2 tracking-wide">
-            A Style without this items is not complete
-          </p>
+          <div className="bg-white rounded-md shadow-sm p-6 inline-block">
+            <p className="text-[#6b4fa0] text-xs font-medium tracking-wider uppercase mb-2">Style Items</p>
+            <p className="text-xl md:text-2xl font-bold text-gray-900 leading-snug">
+              A Style with out this items is not<br />complete
+            </p>
+          </div>
         </div>
+      </div>
+
+      <div className="max-w-[1250px] mx-auto px-4 sm:px-6">
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-10">
           <ProductDescription description={decodeHtml(product.description ?? "")} />
