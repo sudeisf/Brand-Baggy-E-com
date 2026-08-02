@@ -8,9 +8,9 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand Section */}
           <div className="space-y-4">
-            <h3 className="text-white text-lg font-semibold">Your Brand</h3>
+            <h3 className="text-white text-lg font-semibold">Brand Baggy</h3>
             <p className="text-sm text-gray-400">
-              Building modern web solutions
+              Your favorite destination for fashion and premium clothing.
             </p>
           </div>
 
@@ -21,8 +21,8 @@ const Footer = () => {
               <Link href="/" className="hover:text-white transition-colors">
                 Home
               </Link>
-              <Link href="/about" className="hover:text-white transition-colors">
-                About
+              <Link href="/products" className="hover:text-white transition-colors">
+                Shop
               </Link>
               <Link href="/contact" className="hover:text-white transition-colors">
                 Contact
@@ -65,7 +65,7 @@ const Footer = () => {
         {/* Copyright */}
         <div className="border-t border-gray-800 mt-8 pt-6 text-center">
           <p className="text-sm text-gray-400">
-            © {new Date().getFullYear()} Your Brand. All rights reserved.
+            © {new Date().getFullYear()} Brand Baggy. All rights reserved.
           </p>
         </div>
       </div>

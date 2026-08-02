@@ -25,6 +25,8 @@ type AuthState = {
     isLoading: boolean;
     error: string | Record<string, string[]> | null;
     otpEmail : string | null;
+    _hasHydrated: boolean;
+    setHasHydrated: (state: boolean) => void;
     login: (email: string, password: string) => Promise<{ error?: string ,  success? : boolean , user?:User } | void>;
     register: (
         email: string,
@@ -83,6 +85,8 @@ export const useAuthStore = create<AuthState>()(
                 isLoading : false,
                 error :null,
                 otpEmail:null,
+                _hasHydrated: false,
+                setHasHydrated: (state) => set({ _hasHydrated: state }),
                 login: async (email , password) => {
                     try{
                         set({isLoading:true , error:null});
@@ -524,6 +528,9 @@ export const useAuthStore = create<AuthState>()(
     }),
        {
         name : "auth-storage",
+        onRehydrateStorage: () => (state) => {
+            state?.setHasHydrated(true);
+        },
         partialize: (state) => ({
             accessToken: state.accessToken,
             refreshToken: state.refreshToken,

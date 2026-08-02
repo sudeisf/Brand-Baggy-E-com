@@ -6,7 +6,7 @@ import { useFavoritesStore } from "@/store/favStore";
 import { Heart, Loader2Icon } from "lucide-react";
 import { useAddCartMutation } from "@/hooks/useCart";
 import { useAuthStore } from "@/store/authStore";
-import { useAddFavoriteItemMutation } from "@/hooks/useFav";
+import { useAddFavoriteItemMutation, useRemoveFavorite } from "@/hooks/useFav";
 import { toast } from "sonner";
 
 interface CartItem {
@@ -42,6 +42,7 @@ export default function AddToCartButton({
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const mutation = useAddCartMutation();
   const favMutation = useAddFavoriteItemMutation();
+  const removeFavMutation = useRemoveFavorite();
   const { isFavorite, toggleFavorite } = useFavoritesStore();
 
   const payload = {
@@ -85,8 +86,13 @@ export default function AddToCartButton({
   };
 
   const handleToggleFavorite = () => {
+    const favorited = isFavorite(cartItem.id);
     if (isAuthenticated) {
-      favMutation.mutate({ product_id });
+      if (favorited) {
+        removeFavMutation.mutate({ product_id });
+      } else {
+        favMutation.mutate({ product_id });
+      }
     } else {
       toggleFavorite({
         id: cartItem.id,

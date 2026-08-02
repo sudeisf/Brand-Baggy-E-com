@@ -2,6 +2,7 @@
 
 import { useAuthStore } from "@/store/authStore";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Search, ShoppingCart, User, ChevronDown, ChevronUp, Heart } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -79,9 +80,15 @@ export default function Header() {
       </div>
 
       {/* Logo */}
-      <div className="flex items-center">
-        <h1 className="text-[#331d67]  text-lg sm:text-xl font-sans font-semibold">Baggy-Brand</h1>
-      </div>
+      <Link href="/" className="flex items-center gap-2">
+        <Image src="/logo.png" alt="Brand Baggy Logo" width={36} height={36} className="rounded-md" />
+        <h1 
+          className="text-[#331d67] text-xl sm:text-2xl tracking-wide capitalize" 
+          style={{ fontFamily: 'Neue Montreal, sans-serif', fontWeight: 450 }}
+        >
+          Brand Baggy
+        </h1>
+      </Link>
 
       {/* Desktop Navigation */}
       <div className="hidden lg:flex items-center gap-10">

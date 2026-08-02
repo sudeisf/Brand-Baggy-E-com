@@ -15,6 +15,7 @@ export default function ProtectedRoute({children , allowedRoles} : ProtectedRout
     const checkAuth = useAuthStore((state) => state.checkAuth);
     const isLoading = useAuthStore((state) => state.isLoading);
     const user = useAuthStore((state) => state.user);
+    const hasHydrated = useAuthStore((state) => state._hasHydrated);
     const router = useRouter();
 
     useEffect(() => {
@@ -22,6 +23,7 @@ export default function ProtectedRoute({children , allowedRoles} : ProtectedRout
         }, [checkAuth]);
 
     useEffect(() => {
+        if (!hasHydrated) return;
         if (isLoading) return;
 
         if (!isAuthenticated) {
@@ -38,9 +40,9 @@ export default function ProtectedRoute({children , allowedRoles} : ProtectedRout
             : "/admin";
         router.push(redirectPath);
         }
-    }, [isAuthenticated, isLoading, user, router, allowedRoles]);
+    }, [isAuthenticated, isLoading, user, router, allowedRoles, hasHydrated]);
 
-    if (isLoading) {
+    if (!hasHydrated || isLoading) {
         return <Loading />;
       }
       if (!isAuthenticated || (allowedRoles && user && !allowedRoles.includes(user.user_role))) {
