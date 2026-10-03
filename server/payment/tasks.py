@@ -17,9 +17,21 @@ def send_payment_receipt_email(self, order_id, payment_id):
             order = Order.objects.get(id=order_id)
             payment = Payment.objects.get(id=payment_id)
             
+            # Determine recipient info — support guest orders
+            user = order.user
+            if user:
+                recipient_email = user.email
+                user_name = user.get_full_name() or user.email.split('@')[0]
+            elif order.guest_email:
+                recipient_email = order.guest_email
+                user_name = order.guest_full_name or recipient_email.split('@')[0]
+            else:
+                logger.warning(f"No email available for order {order_id}, skipping payment receipt.")
+                return
+
             context = {
                   'payment_amount': payment.amount,
-                  'user_name': order.user.get_full_name() or order.user.email.split('@')[0],
+                  'user_name': user_name,
                   'payment_date': payment.created_at.strftime("%B %d, %Y"),
                   'payment_method': payment.get_method_display(),
                   'confirmation_code': payment.transaction_id,
@@ -33,7 +45,7 @@ def send_payment_receipt_email(self, order_id, payment_id):
                   subject=f"Payment Confirmation #{order.id}",
                   body=text_content,
                   from_email=settings.DEFAULT_FROM_EMAIL,
-                  to=[order.user.email],
+                  to=[recipient_email],
                   reply_to=[settings.CONTACT_EMAIL],
             )
             email.attach_alternative(html_content, "text/html")

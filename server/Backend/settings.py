@@ -193,10 +193,13 @@ CSRF_TRUSTED_ORIGINS = [
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL', "postgresql://postgres:BMB8DB4L9RQ@localhost:5432/first_django_db"),
+        default=os.getenv('DATABASE_URL'),
         conn_max_age=600,
     )
 }
+
+if not DATABASES['default']:
+    raise ValueError("DATABASE_URL environment variable is required.")
 
 CACHES = {
     'default': {

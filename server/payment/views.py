@@ -2,7 +2,7 @@ import requests
 from rest_framework import status 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serilizers import PaymentSerializer, PaymentRequestSerializer
+from .serializers import PaymentSerializer, PaymentRequestSerializer
 from orders.models import Order
 from .models import Payment
 import stripe

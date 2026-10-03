@@ -91,7 +91,7 @@ class Product(models.Model):
     def discounted_price(self):
         discount = self.active_discount
         if discount:
-            return self.price - discount.calculateDiscount(self.price)
+            return self.price - discount.calculate_discount(self.price)
         return self.price
     
     def __str__(self):
@@ -210,15 +210,22 @@ class Discount(models.Model):
             self.start_date <= now < self.end_date
         )
 
-    def calcualteDiscount(self, orignial_price):
-        if not self.is_valid():
-            return 0
-        if self.discount_type == "percentage":
-            discount_amount = (orignial_price * self.value)/ 100
+    def calculate_discount(self, original_price):
+        if not self.is_valid() or original_price is None:
+            return Decimal("0.00")
+        if self.discount_type == self.DiscountType.PERCENTAGE:
+            discount_amount = (Decimal(str(original_price)) * Decimal(str(self.value))) / Decimal("100")
         else:
-            discount_amount = self.value
+            discount_amount = Decimal(str(self.value))
             
         return discount_amount
+
+    # Backwards compatibility aliases for typo methods
+    def calcualteDiscount(self, original_price):
+        return self.calculate_discount(original_price)
+
+    def calculateDiscount(self, original_price):
+        return self.calculate_discount(original_price)
     
 class ProductDiscount(models.Model):
     product = models.ForeignKey(Product ,on_delete=models.CASCADE, related_name='product_discounts')

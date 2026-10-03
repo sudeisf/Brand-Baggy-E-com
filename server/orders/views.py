@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from accounts.permisions import IsSeller
+from accounts.permissions import IsSeller
 from cart.models import Cart
 from django.db import transaction
 from orders.serializers import (OrderSerializer ,PaymentAndOrderStatusSerializer, ShippingInfoSerializer,OrderDetailSerializer,OrderTableSerializer,
@@ -308,55 +308,93 @@ class SellerOrderDetailAPIView(APIView):
 class GuestOrderCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]  
 
+    @transaction.atomic
     def post(self, request):
         data = request.data
 
-        shipping_data = data["shipping_info"]
+        shipping_data = data.get("shipping_info", {})
+        if not shipping_data:
+            return Response({"error": "shipping_info is required"}, status=status.HTTP_400_BAD_REQUEST)
+
         shipping = ShippingInfo.objects.create(
-            full_name=shipping_data["full_name"],
-            address=shipping_data["address"],
-            city=shipping_data["city"],
-            state=shipping_data["state"],
-            zip_code=shipping_data["zip_code"],
-            country=shipping_data["country"],
-            phone=shipping_data["phone"],
-            email=shipping_data["email"],
+            user=request.user if request.user.is_authenticated else None,
+            full_name=shipping_data.get("full_name", ""),
+            address=shipping_data.get("address", ""),
+            city=shipping_data.get("city", ""),
+            state=shipping_data.get("state", ""),
+            zip_code=shipping_data.get("zip_code", ""),
+            country=shipping_data.get("country", ""),
+            phone=shipping_data.get("phone", ""),
+            email=shipping_data.get("email", ""),
         )
 
-        guest_data = data["guest_user"]
+        guest_data = data.get("guest_user", {})
         order = Order.objects.create(
-            guest_full_name=guest_data["full_name"],
-            guest_email=guest_data["email"],
-            guest_phone=guest_data["phone"],
-            total_price=data["total_price"],
+            user=request.user if request.user.is_authenticated else None,
+            guest_full_name=guest_data.get("full_name", shipping.full_name),
+            guest_email=guest_data.get("email", shipping.email),
+            guest_phone=guest_data.get("phone", shipping.phone),
+            total_price=Decimal("0.00"),
             shipping_info=shipping
         )
 
-        
-        for item in data["items"]:
-            product = Product.objects.get(id=item["product_id"])
+        calculated_total = Decimal("0.00")
+        items_data = data.get("items", [])
+        if not items_data:
+            return Response({"error": "No items provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        for item in items_data:
+            product_id = item.get("product_id")
+            quantity = int(item.get("quantity", 1))
+            if quantity <= 0:
+                return Response({"error": "Quantity must be greater than 0"}, status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                product = Product.objects.get(id=product_id)
+            except Product.DoesNotExist:
+                return Response({"error": f"Product with ID {product_id} not found"}, status=status.HTTP_404_NOT_FOUND)
+
             variant = None
             if item.get("variant_id"):
-                variant = ProductVariants.objects.get(id=item["variant_id"])
+                try:
+                    variant = ProductVariants.objects.select_for_update().get(id=item["variant_id"], product=product)
+                    if variant.stock < quantity:
+                        raise ValidationError(f"Insufficient stock for {product.name} (variant: {variant.size.name if variant.size else ''}). Available: {variant.stock}")
+                    variant.stock -= quantity
+                    variant.save()
+                except ProductVariants.DoesNotExist:
+                    pass
+
+            base_price = product.price
+            discount = product.active_discount
+            discount_amount = discount.calculate_discount(base_price) if discount else Decimal("0.00")
+            final_price = base_price - discount_amount
+            subtotal = final_price * quantity
 
             OrderItem.objects.create(
                 order=order,
                 product=product,
                 variants=variant,
-                price=item["price"],
-                quantity=item["quantity"],
-                subtotal=item["price"] * item["quantity"]
+                price=base_price,
+                discount_amount=discount_amount,
+                final_price=final_price,
+                quantity=quantity,
+                subtotal=subtotal
             )
+            calculated_total += subtotal
 
-        
+        order.total_price = calculated_total
+        order.save()
+
+        payment_method = data.get("payment_method", Payment.Method.COD)
         Payment.objects.create(
             order=order,
-            method=data["payment_method"],
+            method=payment_method,
             status=Payment.Status.PENDING,
-            amount=data["total_price"]
+            amount=calculated_total
         )
 
-        return Response({"order_id": order.id}, status=status.HTTP_201_CREATED)
+        return Response({"order_id": order.id, "total_price": str(calculated_total)}, status=status.HTTP_201_CREATED)
 
 
 

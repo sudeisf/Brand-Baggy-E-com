@@ -6,13 +6,14 @@ from decimal import Decimal
 
 class Cart(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='carts' , null=True , blank=True)
+    session_id = models.CharField(max_length=40, null=True, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         if self.user:
             return f"Cart of {self.user.username}"
-    
+        return f"Guest Cart #{self.id}"
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart ,on_delete=models.CASCADE, related_name='items')

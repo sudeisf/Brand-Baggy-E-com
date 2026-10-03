@@ -2,8 +2,8 @@ from rest_framework.views import APIView
 from rest_framework import generics , status 
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated , AllowAny
-from accounts.permisions import IsSeller
-from .serializer import (
+from accounts.permissions import IsSeller
+from .serializers import (
     Email_varify_OTP_generate_serializer,
     OTP_verify_serializer,
     UserCreateSerializer, 
@@ -245,7 +245,7 @@ class TokenTestView(APIView):
 
 
 from .models import StoreProfile, NotificationPreferences
-from .serializer import StoreProfileSerializer, NotificationPreferencesSerializer
+from .serializers import StoreProfileSerializer, NotificationPreferencesSerializer
 
 class StoreSettingsView(generics.RetrieveUpdateAPIView):
     serializer_class = StoreProfileSerializer

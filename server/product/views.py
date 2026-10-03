@@ -1,3 +1,4 @@
+import random
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework import generics , status , filters
@@ -19,7 +20,7 @@ from rest_framework.pagination import PageNumberPagination
 
 from .models import Product , FavoriteProduct , ProductReview
 from rest_framework.permissions import IsAuthenticated , AllowAny 
-from accounts.permisions import IsSeller 
+from accounts.permissions import IsSeller 
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 import cloudinary
@@ -468,29 +469,33 @@ class ProductSuggestionAPIVIew(APIView):
         try:
       
             product = Product.objects.select_related('category').get(id=product_id)
-            suggestions = Product.objects.filter(
-                category=product.category
-            ).exclude(
-                id=product_id 
-            ).select_related('category').order_by('?')[:4]
             
-            if len(suggestions) < 4 and product.category and product.category.parent:
-                parent_suggestions = Product.objects.filter(
-                    category=product.category.parent
-                ).exclude(
-                    id=product_id  
-                ).select_related('category').order_by('?')[:4-len(suggestions)]
-                suggestions = list(suggestions) + list(parent_suggestions)
+            # Efficient random selection — avoid ORDER BY RANDOM()
+            candidate_ids = list(
+                Product.objects.filter(category=product.category)
+                .exclude(id=product_id)
+                .values_list('id', flat=True)
+            )
             
-            if len(suggestions) < 4:
-                remaining_count = 4 - len(suggestions)
-                random_suggestions = Product.objects.exclude(
-                    id=product_id  
-                ).exclude(
-                    id__in=[s.id for s in suggestions]  
-                ).order_by('?')[:remaining_count]
-
-                suggestions = list(suggestions) + list(random_suggestions)
+            if len(candidate_ids) < 4 and product.category and product.category.parent:
+                parent_ids = list(
+                    Product.objects.filter(category=product.category.parent)
+                    .exclude(id=product_id)
+                    .exclude(id__in=candidate_ids)
+                    .values_list('id', flat=True)
+                )
+                candidate_ids.extend(parent_ids)
+            
+            if len(candidate_ids) < 4:
+                fallback_ids = list(
+                    Product.objects.exclude(id=product_id)
+                    .exclude(id__in=candidate_ids)
+                    .values_list('id', flat=True)
+                )
+                candidate_ids.extend(fallback_ids)
+            
+            selected_ids = random.sample(candidate_ids, min(4, len(candidate_ids)))
+            suggestions = Product.objects.filter(id__in=selected_ids).select_related('category')
             
             serializer = SuggestedProductsSerilaizer(suggestions, many=True)
             

@@ -156,7 +156,7 @@ class MergeCartItemsView(APIView):
                 # Calculate pricing
                 discount = product.active_discount
                 if discount:
-                    discount_amount = discount.calcualteDiscount(product.price)
+                    discount_amount = discount.calculate_discount(product.price)
                 else:
                     discount_amount = Decimal('0.00')
                 final_price = product.price - discount_amount

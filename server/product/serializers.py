@@ -3,7 +3,7 @@ from .models import Discount, Product, ProductDiscount ,ProductImage, ProductLoc
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from cloudinary import CloudinaryImage
-from accounts.serializer import UserSerializer
+from accounts.serializers import UserSerializer
 from django.utils import timezone
 
 
