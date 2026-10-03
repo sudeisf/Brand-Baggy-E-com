@@ -17,15 +17,12 @@ export default function FavTable() {
     const removeall_mutuate = useRemoveAllFavorites()
     const {isLoading,error} = useFav()
 
-    type param ={
-        id : string;
-    }
-    const handleRemoveItem = (value : param)=>{
-        if (isAuthenticated){
-             remove_mutation.mutate({product_id:Number(value)})
-        } else{
-            removeItem(value.id);
+    const handleRemoveItem = (value: string | number | { id: string | number }) => {
+        const id = typeof value === 'object' && value !== null ? value.id : value;
+        if (isAuthenticated) {
+            remove_mutation.mutate({ product_id: Number(id) });
         }
+        removeItem(String(id));
     }
     const handleRemoveAllItem = ()=>{
         if (isAuthenticated){

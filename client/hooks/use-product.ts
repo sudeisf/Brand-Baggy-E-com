@@ -9,15 +9,16 @@ interface APIResponse{
       size : string[];
 }
 
-export const useListProducts = () =>{
-      const token = useAuthStore(s=> s.accessToken)
+export const useListProducts = () => {
+      const token = useAuthStore(s => s.accessToken);
       return useQuery({
-            queryKey : ["sellerProductsLoop"],
-            queryFn: async ()=>{
-                  const response = await api.get<APIResponse>('/product/seller/product-select-list/',{headers:{Authorization:`Bearer ${token}`}})
-                  return response.data
-            }
-      })
+            queryKey: ["sellerProductsLoop"],
+            queryFn: async () => {
+                  const response = await api.get<APIResponse[]>('/product/seller/product-select-list/');
+                  return response.data;
+            },
+            enabled: Boolean(token),
+      });
 }
 
 
@@ -37,17 +38,18 @@ export interface ProductReview {
     }
 
 export const useProductReviewRating = (product_id: number) => {
-  const token = useAuthStore(s => s.accessToken)
   return useQuery({
     queryKey: ["ReviewAndRating", product_id],
     queryFn: async () => {
       const response = await api.get<ProductReviewResponse>(
         `/product/product-rating-reviews/${product_id}/`
-      )
-      return response.data
-    }
-  })
-}
+      );
+      return response.data;
+    },
+    enabled: !!product_id,
+  });
+};
+
 export type SuggestedProduct = {
   id: number;
   name: string;
@@ -60,14 +62,17 @@ export type SuggestedProductsResponse = {
   data: SuggestedProduct[];
 };
 
-export const useProuductSuggestion = (product_id: number) => {
+export const useProductSuggestion = (product_id: number) => {
   return useQuery({
     queryKey: ["suggestionProducts", product_id],
     queryFn: async () => {
       const response = await api.get<SuggestedProductsResponse>(
         `/product/suggested-products/${product_id}/`
-      )
-      return response.data
-    }
-  })
-}
+      );
+      return response.data;
+    },
+    enabled: !!product_id,
+  });
+};
+
+export const useProuductSuggestion = useProductSuggestion;

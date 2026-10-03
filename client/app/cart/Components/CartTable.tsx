@@ -42,9 +42,17 @@ export default function CartTable() {
             });
         }
     };
-    
-    
-   
+
+    const handleQuantityChange = (item: CartItem, newQty: number) => {
+        updateItemQuantity(item.id, newQty, item.size);
+        if (isAuthenticated) {
+            update.mutate({
+                id: Number(item.id),
+                quantity: newQty,
+                size: item.size,
+            });
+        }
+    };
 
     return (
         <div className=" *:font-roboto w-full sm:w-[70%] md:w-full lg:w-[80%] ">
@@ -81,7 +89,7 @@ export default function CartTable() {
                     </div>
                     <div className="col-span-2 text-center items-center font-roboto">
                         <QuantityButton id={item.id} quantity={item.quantity} size={item.size} onQuantityChange={(newQty) => {
-                            updateItemQuantity(item.id, newQty , item.size)
+                            handleQuantityChange(item, newQty);
                         }} />
                     </div>
                     <div className="col-span-2 text-[#331d67] text-center font-medium font-roboto">
@@ -126,7 +134,7 @@ export default function CartTable() {
 
                             <div className=" text-center items-center font-roboto">
                                 <QuantityButton id={item.id} quantity={item.quantity} size={item.size} onQuantityChange={(newQty) => {
-                                    updateItemQuantity(item.id, newQty , item.size)
+                                    handleQuantityChange(item, newQty);
                                 }} />
                             </div>
                         </div>

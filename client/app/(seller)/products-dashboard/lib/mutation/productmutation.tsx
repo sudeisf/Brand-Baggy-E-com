@@ -37,14 +37,7 @@ export const  useCreateProductMutation =  () =>{
             {     
                   mutationKey: ['createProduct'],
                   mutationFn : async (submitedData:FormData) => {
-                        const result = await api.post('/product/seller/create-product/',
-                              submitedData,{
-                                    headers : {
-                                          "Content-Type" : 'multipart/form-data',
-                                          'Authorization': `Bearer ${accessToken}`,
-                                    }
-                              }
-                        );
+                        const result = await api.post('/product/seller/create-product/', submitedData);
                         if(result?.status !== 201){
                               throw Error("couldn't create the product")
                         }

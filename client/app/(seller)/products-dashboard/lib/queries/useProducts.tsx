@@ -2,7 +2,7 @@
 import { useAuthStore } from '@/store/authStore';
 import { useProductStore } from '@/store/prouctStore';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import api from '@/lib/axios';
 import { useEffect } from 'react';
 
 interface Category {
@@ -33,17 +33,11 @@ export interface PaginatedResponse<T> {
   results: T[];
 }
 export const fetchProducts = async (
-  token: string,
   page = 1
 ): Promise<PaginatedResponse<Product>> => {
   try {
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/product/seller/dashboard/?page=${page}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+    const response = await api.get<PaginatedResponse<Product>>(
+      `/product/seller/dashboard/?page=${page}`
     );
 
     return response.data;
@@ -64,8 +58,8 @@ export const useProducts = (page: number) => {
 
   const query = useQuery({
     queryKey: ["products", page],
-    queryFn: () => fetchProducts(token as string, page),
-    enabled: !!token,
+    queryFn: () => fetchProducts(page),
+    enabled: Boolean(token),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 

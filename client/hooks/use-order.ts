@@ -27,13 +27,7 @@ export const useAddOrderMutation = () => {
             {
                   mutationKey : ["addOrder"],
                   mutationFn: async (payload : Payload ) => {
-                        const response = await api.post("orders/order/create/",
-                              payload,
-                              {headers : {
-                                          "Authorization" : `Bearer ${token} `
-                                    }
-                              }
-                        );
+                        const response = await api.post("/orders/order/create/", payload);
                         return response.data
                   },
                   onSuccess: (data) => {
@@ -94,13 +88,10 @@ export const useAdminOrderTable = () => {
       return useQuery({
             queryKey: ["adminOrderTable"],
             queryFn: async () => {
-                  const response = await api.get<OrderTableResponse>("/orders/order/admin-table/", {
-                        headers: {
-                              Authorization: `Bearer ${token}`,
-                        },
-                  });
+                  const response = await api.get<OrderTableResponse[]>("/orders/order/admin-table/");
                   return response.data;
             },
+            enabled: Boolean(token),
       });
 }
 

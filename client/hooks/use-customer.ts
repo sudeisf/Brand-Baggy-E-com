@@ -54,37 +54,31 @@ export interface CustomerListResponse {
   results: CustomerListItem[];
 }
 
-export const useFeatchCustomerLsit = ()=>{
-      const token = useAuthStore(s=> s.accessToken)
-      return useQuery({
-            queryKey : ["customerListFetch"],
-            queryFn: async ()=>{
-                  const response = await api.get<CustomerListResponse>("/orders/order/customers/",{
-                        headers:{
-                              Authorization : `Beare ${token}`
-                        }
-                  })
-                  return response.data
-            }
-      })
-}
+export const useFetchCustomerList = () => {
+  const token = useAuthStore(s => s.accessToken);
+  return useQuery({
+    queryKey: ["customerListFetch"],
+    queryFn: async () => {
+      const response = await api.get<CustomerListResponse>("/orders/order/customers/");
+      return response.data;
+    },
+    enabled: Boolean(token),
+  });
+};
+
+export const useFeatchCustomerLsit = useFetchCustomerList;
 
 export const useFetchCustomerDetails = (email: string) => {
-      const token = useAuthStore(s => s.accessToken);
-      return useQuery({
-        queryKey: ["customerListFetch", email],
-        queryFn: async ({ queryKey }) => {
-          const [_key, email] = queryKey;
-          const response = await api.get<CustomerDetailResponse>(
-            `/orders/customers/${email}/`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          return response.data;
-        },
-        enabled: !!email && !!token, // Only run query if email and token are valid
-      });
-    };
+  const token = useAuthStore(s => s.accessToken);
+  return useQuery({
+    queryKey: ["customerDetailFetch", email],
+    queryFn: async ({ queryKey }) => {
+      const [_key, emailParam] = queryKey;
+      const response = await api.get<CustomerDetailResponse>(
+        `/orders/customers/${emailParam}/`
+      );
+      return response.data;
+    },
+    enabled: !!email && !!token,
+  });
+};

@@ -12,21 +12,21 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 const paymentStatus: string[] = [
-  "paid",
   "pending",
-  "refunded",
+  "completed",
   "failed",
-  "no payment",
-  "completed"
+  "refunded",
+  "expired",
 ]
 
 const paymentStatusStyles: Record<string, string> = {
-  "PAID": "bg-green-500/10 text-green-600 w-fit",
   "PENDING": "bg-yellow-500/10 text-yellow-600 w-fit",
+  "COMPLETED": "bg-green-500/10 text-green-600 w-fit",
+  "PAID": "bg-green-500/10 text-green-600 w-fit",
   "REFUNDED": "bg-purple-500/10 text-purple-600 w-fit",
   "FAILED": "bg-red-500/10 text-red-600 w-fit",
+  "EXPIRED": "bg-gray-500/10 text-gray-600 w-fit",
   "NO PAYMENT": "bg-gray-300/10 text-gray-700 w-fit",
-  "COMPLETED" :  "bg-yellow-500/10 text-yellow-700 w-fit",
 }
 
 interface Props {

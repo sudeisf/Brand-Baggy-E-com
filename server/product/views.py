@@ -52,7 +52,11 @@ class ProductListView(generics.ListAPIView):
             queryset = queryset.filter(category__parent__slug=parent_category)
 
         if child_category:
-            queryset = queryset.filter(category__slug=child_category)
+            slugs = [s.strip() for s in child_category.split(',') if s.strip()]
+            if len(slugs) == 1:
+                queryset = queryset.filter(category__slug=slugs[0])
+            elif len(slugs) > 1:
+                queryset = queryset.filter(category__slug__in=slugs)
 
         return queryset
 
