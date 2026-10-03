@@ -14,8 +14,8 @@ class Notification(models.Model):
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
     type = models.CharField(max_length=20, choices=NotificationType.choices, default=NotificationType.SYSTEM)
     message = models.TextField()
-    is_read = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
 #     # Optional: Related object IDs for linking
 #     related_order = models.ForeignKey("orders.Order", null=True, blank=True, on_delete=models.SET_NULL)
@@ -23,6 +23,9 @@ class Notification(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['recipient', 'is_read', '-created_at']),
+        ]
 
     def __str__(self):
         return f"{self.recipient.username} - {self.type} - {self.message[:40]}"

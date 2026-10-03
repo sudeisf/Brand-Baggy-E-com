@@ -52,4 +52,4 @@ def send_payment_receipt_email(self, order_id, payment_id):
             email.send()
                   
       except Exception as e:
-        self.retry(exc=e, countdown=60 * self.request.retries)
+        self.retry(exc=e, countdown=60 * (self.request.retries + 1))

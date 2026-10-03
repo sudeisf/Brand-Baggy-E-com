@@ -42,18 +42,22 @@ class Order(models.Model):
         blank=True  
     )
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=200, choices=OrderStatus.choices, default=OrderStatus.PENDING)
+    status = models.CharField(max_length=200, choices=OrderStatus.choices, default=OrderStatus.PENDING, db_index=True)
     order_date = models.DateTimeField(auto_now_add=True)
     shipping_info = models.ForeignKey(ShippingInfo, on_delete=models.SET_NULL, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     guest_full_name = models.CharField(max_length=100, blank=True, null=True)
-    guest_email = models.EmailField(blank=True, null=True)
+    guest_email = models.EmailField(blank=True, null=True, db_index=True)
     guest_phone = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['status', '-created_at']),
+        ]
     
     def __str__(self):
         user = self.user.username if self.user else "Guest"
@@ -70,7 +74,7 @@ class OrderItem(models.Model):
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     final_price = models.DecimalField(max_digits=10, decimal_places=2 ,null=True , blank=True) 
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

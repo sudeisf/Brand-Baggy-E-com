@@ -8,6 +8,7 @@ from django.db.models import Sum, F, DecimalField
 from django.db.models.functions import TruncDate
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 import asyncio
 
 logger = logging.getLogger(__name__)
@@ -64,7 +65,12 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
         # Optionally: cancel any running tasks here if you store them
         logger.info(f"Seller {getattr(self, 'seller', 'unknown')} disconnected.")
 
-    async def send_metrics(self):
+    def _compute_metrics(self, seller):
+        cache_key = f"seller_ws_metrics_{seller.id}"
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return cached
+
         today = timezone.now()
         start_this_week = today - timedelta(days=today.weekday())
         end_this_week = start_this_week + timedelta(days=6, hours=23, minutes=59, seconds=59)
@@ -74,25 +80,31 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
         metrics = []
 
         # Total Expenses (lifetime)
-        curr_exp = await database_sync_to_async(self.get_total_expenses)(self.seller)
-        this_week_exp = await database_sync_to_async(self.get_expenses)(self.seller, start_this_week, end_this_week)
-        prev_exp = await database_sync_to_async(self.get_expenses)(self.seller, start_last_week, end_last_week)
-        chart_exp = await database_sync_to_async(self.get_daywise)(self.seller, start_this_week, end_this_week, metric="expenses")
+        curr_exp = self.get_total_expenses(seller)
+        this_week_exp = self.get_expenses(seller, start_this_week, end_this_week)
+        prev_exp = self.get_expenses(seller, start_last_week, end_last_week)
+        chart_exp = self.get_daywise(seller, start_this_week, end_this_week, metric="expenses")
         metrics.append(self.build_block("Total Expenses", curr_exp, prev_exp, chart_exp, percent_base=this_week_exp))
 
         # Total Income (lifetime)
-        curr_inc = await database_sync_to_async(self.get_total_income)(self.seller)
-        this_week_inc = await database_sync_to_async(self.get_income)(self.seller, start_this_week, end_this_week)
-        prev_inc = await database_sync_to_async(self.get_income)(self.seller, start_last_week, end_last_week)
-        chart_inc = await database_sync_to_async(self.get_daywise)(self.seller, start_this_week, end_this_week, metric="income")
+        curr_inc = self.get_total_income(seller)
+        this_week_inc = self.get_income(seller, start_this_week, end_this_week)
+        prev_inc = self.get_income(seller, start_last_week, end_last_week)
+        chart_inc = self.get_daywise(seller, start_this_week, end_this_week, metric="income")
         metrics.append(self.build_block("Total Income", curr_inc, prev_inc, chart_inc, percent_base=this_week_inc))
+
         # Total Orders (lifetime)
-        curr_ord = await database_sync_to_async(self.get_total_orders_value)(self.seller)
-        this_week_ord = await database_sync_to_async(self.get_orders_value)(self.seller, start_this_week, end_this_week)
-        prev_ord = await database_sync_to_async(self.get_orders_value)(self.seller, start_last_week, end_last_week)
-        chart_ord = await database_sync_to_async(self.get_daywise)(self.seller, start_this_week, end_this_week, metric="orders")
+        curr_ord = self.get_total_orders_value(seller)
+        this_week_ord = self.get_orders_value(seller, start_this_week, end_this_week)
+        prev_ord = self.get_orders_value(seller, start_last_week, end_last_week)
+        chart_ord = self.get_daywise(seller, start_this_week, end_this_week, metric="orders")
         metrics.append(self.build_block("Total Orders", curr_ord, prev_ord, chart_ord, percent_base=this_week_ord))
 
+        cache.set(cache_key, metrics, timeout=60)
+        return metrics
+
+    async def send_metrics(self):
+        metrics = await database_sync_to_async(self._compute_metrics)(self.seller)
         await self.send(text_data=json.dumps(metrics))
 
     def get_expenses(self, seller, start, end):
@@ -196,4 +208,4 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
     async def periodic_send(self):
         while self.keep_sending:
             await self.send_metrics()
-            await asyncio.sleep(10)  # send every 10 seconds
+            await asyncio.sleep(30)  # send every 30 seconds

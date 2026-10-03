@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny , IsAuthenticated
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
+from django.db.models import Prefetch
 from decimal import Decimal
 
 from product.models import Product
@@ -46,7 +47,16 @@ class GetCartView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        cart = Cart.objects.filter(user=request.user).first()
+        cart = (
+            Cart.objects.filter(user=request.user)
+            .prefetch_related(
+                Prefetch(
+                    'items',
+                    queryset=CartItem.objects.select_related('product', 'discount')
+                )
+            )
+            .first()
+        )
         if not cart:
             return Response({
                 "items": [],

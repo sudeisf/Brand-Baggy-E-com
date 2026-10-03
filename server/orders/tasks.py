@@ -55,4 +55,4 @@ def send_review_rating_email(self, order_id):
 
     except Exception as e:
         logger.error(f"❌ Failed to send review request email for order {order_id}: {str(e)}", exc_info=True)
-        self.retry(exc=e, countdown=60 * self.request.retries)
+        self.retry(exc=e, countdown=60 * (self.request.retries + 1))

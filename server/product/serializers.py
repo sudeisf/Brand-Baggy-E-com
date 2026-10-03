@@ -69,17 +69,9 @@ class FavoriteProductSerializer(serializers.ModelSerializer):
         ]
 
 class ProductSizeSerializer(serializers.ModelSerializer):
-    is_favourited  = serializers.SerializerMethodField()
-
-    def get_is_favourited(self ,obj):
-        request = self.context.get('request')
-        if request and request.user.is_authenticated:
-             return FavoriteProduct.objects.filter(user=request.user, product=obj).exists()
-        return False
-    
     class Meta:
         model = ProductSize
-        fields = ['id' , 'name' ,'code' , 'is_favourited']
+        fields = ['id', 'name', 'code']
 
 
 

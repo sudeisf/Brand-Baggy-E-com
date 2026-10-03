@@ -15,7 +15,7 @@ from decimal import Decimal
 from notifications.utils import send_notifications
 from product.models import Product, ProductVariants
 from rest_framework.pagination import PageNumberPagination
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, Subquery, Count, Avg, Q, Prefetch
 from .tasks import send_review_rating_email
 
 
@@ -130,7 +130,12 @@ class UserOrderListAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        orders = Order.objects.filter(user=request.user).order_by('-created_at')
+        orders = (
+            Order.objects.filter(user=request.user)
+            .select_related('shipping_info')
+            .prefetch_related('items__product')
+            .order_by('-created_at')
+        )
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
      
@@ -144,7 +149,11 @@ class GetOrderItemAPIView(APIView):
             return Response({"detail": "Order ID missing."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            order = Order.objects.get(id=pk, user=request.user)  
+            order = (
+                Order.objects.filter(user=request.user)
+                .prefetch_related('items__product')
+                .get(id=pk)
+            )  
         except Order.DoesNotExist:
             return Response({"detail": "Order not found for this user."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -154,7 +163,12 @@ class GetOrderItemAPIView(APIView):
 class AdminOrderTableAPIView(APIView):
     permission_classes = [IsAuthenticated, IsSeller]
     def get(self, request):
-        orders = Order.objects.filter(items__product__seller=request.user).distinct()
+        orders = (
+            Order.objects.filter(items__product__seller=request.user)
+            .distinct()
+            .select_related('user', 'payment')
+            .annotate(items_count=Count('items'))
+        )
         serializer = OrderTableSerializer(orders, many=True)
         return Response(serializer.data)
 
@@ -262,17 +276,22 @@ class PaymentAndOrderStatusUpdate(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-from django.db.models import Avg   
 class SellerOrdersDashboard(APIView):
     permission_classes = [IsAuthenticated, IsSeller]
     def get(self, request):
-        user  = request.user
         try:
-            number_of_orders = Order.objects.filter(items__product__seller = request.user).distinct().count()
-            order_value = Order.objects.filter(items__product__seller = request.user).aggregate(avg = Avg("total_price"))["avg"] or 0
-            pending_orders = Order.objects.filter(items__product__seller = request.user , status=Order.OrderStatus.PENDING).count()
-            Deliverd_orders = Order.objects.filter(items__product__seller = request.user , status=Order.OrderStatus.DELIVERED).count()
-            returned_orders = Order.objects.filter(items__product__seller = request.user, status=Order.OrderStatus.RETURNED).count()
+            stats = Order.objects.filter(items__product__seller=request.user).aggregate(
+                number_of_orders=Count('id', distinct=True),
+                order_value=Avg('total_price'),
+                pending_orders=Count('id', distinct=True, filter=Q(status=Order.OrderStatus.PENDING)),
+                deliverd_orders=Count('id', distinct=True, filter=Q(status=Order.OrderStatus.DELIVERED)),
+                returned_orders=Count('id', distinct=True, filter=Q(status=Order.OrderStatus.RETURNED)),
+            )
+            number_of_orders = stats["number_of_orders"] or 0
+            order_value = stats["order_value"] or 0
+            pending_orders = stats["pending_orders"] or 0
+            Deliverd_orders = stats["deliverd_orders"] or 0
+            returned_orders = stats["returned_orders"] or 0
             return_rate = (returned_orders / number_of_orders * 100) if number_of_orders > 0 else 0
 
             return Response({
@@ -409,6 +428,7 @@ from django.db.models import Sum, Q, Count
 class CustomerListAPIView(APIView):
     permission_classes = [IsAuthenticated, IsSeller]
 
+    def get(self, request):
         seller = request.user
         # Subquery for latest registered user's order with this seller
         latest_order = Order.objects.filter(user=OuterRef('pk'), items__product__seller=seller).order_by('-created_at')
@@ -547,7 +567,7 @@ class SellerRecentOrdersAPIView(APIView):
         seller = request.user
 
         # Get all order items where product.seller = seller
-        order_items = OrderItem.objects.filter(product__seller=seller).select_related('product', 'order', 'order__payment')
+        order_items = OrderItem.objects.filter(product__seller=seller).select_related('product', 'order__payment', 'order__user')
 
         paginator = PageNumberPagination()
         paginator.page_size = 10  # Default page size

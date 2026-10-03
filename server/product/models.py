@@ -46,16 +46,16 @@ class Product(models.Model):
     name = models.CharField(max_length=200)
     product_location = models.ForeignKey(ProductLocation,on_delete=models.CASCADE,related_name="product_location" , null=True,blank=True)
     description = models.TextField()
-    in_stock = models.BooleanField(default=True)
+    in_stock = models.BooleanField(default=True, db_index=True)
     main_image = CloudinaryField('image', blank=True, null=True)
     seller  = models.ForeignKey(CustomUser,on_delete=models.CASCADE, related_name='product_role' , limit_choices_to={'user_role': CustomUser.Role.SELLER} , null=True , blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    brand = models.CharField(max_length=200 , null=True , blank=True)
+    brand = models.CharField(max_length=200 , null=True , blank=True, db_index=True)
     model_number = models.CharField(max_length=200 , null=True , blank=True)
     product_code = models.CharField(max_length=200 , null=True , blank=True)
     quantity = models.PositiveBigIntegerField()
     gender = models.CharField(max_length=20,choices=Gender.choices,null=True,blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
     cost_price = models.DecimalField(
     max_digits=10,
@@ -70,6 +70,9 @@ class Product(models.Model):
         indexes = [
             models.Index(fields=['category']),
             models.Index(fields=['price']),
+            models.Index(fields=['brand']),
+            models.Index(fields=['seller', 'in_stock']),
+            models.Index(fields=['-created_at']),
         ]
 
     @property

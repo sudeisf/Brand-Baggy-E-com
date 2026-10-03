@@ -70,6 +70,8 @@ class OrderTableSerializer(serializers.ModelSerializer):
             return "no payment"
 
     def get_items(self, obj):
+        if hasattr(obj, 'items_count'):
+            return obj.items_count
         return obj.items.count()
 
 class SellerRecentOrderItemSerializer(serializers.ModelSerializer):

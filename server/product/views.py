@@ -59,7 +59,15 @@ class ProductListView(generics.ListAPIView):
 
 class ProductDetailView(generics.RetrieveAPIView):
     serializer_class = ProductDetailSerializer
-    queryset = Product.objects.prefetch_related('images').all()
+    queryset = (
+        Product.objects.select_related('category__parent', 'seller', 'product_location')
+        .prefetch_related(
+            'images',
+            'variants__size',
+            'reviews__user',
+            'product_discounts__discount',
+        )
+    )
     permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend,filters.SearchFilter]
     filterset_fields = ['category', 'brand']
@@ -157,7 +165,7 @@ class SellerProductDashboardView(generics.ListAPIView):
     def get_queryset(self):
         return Product.objects.filter(
             seller=self.request.user
-        ).select_related('category').prefetch_related('variants')
+        ).select_related('category__parent', 'product_location')
 
 class UpdateSellerProductAPIView(APIView):
     permission_classes = [IsAuthenticated,IsSeller]
@@ -225,12 +233,12 @@ class CategoryFilterView(APIView):
     permission_classes = [AllowAny]
     
     def get(self, request):
-        parent_categories = Category.objects.filter(parent=None)
+        parent_categories = Category.objects.filter(parent=None).prefetch_related('subcategories')
         result = []
         for parent in parent_categories:
             parent_data = CatagorySerializer(parent).data
             parent_data['children'] = CatagorySerializer(
-                Category.objects.filter(parent=parent),
+                parent.subcategories.all(),
                 many=True
             ).data
             result.append(parent_data)
@@ -296,7 +304,7 @@ class MergeFavProductView(APIView):
 class GetFavProductView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
-        fav_products = FavoriteProduct.objects.filter(user=request.user)
+        fav_products = FavoriteProduct.objects.filter(user=request.user).select_related('product')
         serializer = FavoriteProductSerializer(fav_products, many=True)
         return Response(serializer.data)
         

@@ -61,12 +61,17 @@ class CustomUser(AbstractUser):
 
 
 class OTP(models.Model):
-    email = models.EmailField()
+    email = models.EmailField(db_index=True)
     otp = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
     is_expired = models.BooleanField(default=False)
     is_used = models.BooleanField(default=False)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['email', '-created_at']),
+        ]
 
     def __str__(self):
         return f"{self.email} - {self.otp}"
