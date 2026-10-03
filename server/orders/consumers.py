@@ -16,13 +16,20 @@ class SellerAnalyticsConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         try:
             from rest_framework_simplejwt.tokens import AccessToken
+            from urllib.parse import parse_qs
 
             raw_query_string = self.scope["query_string"].decode()
-            token = raw_query_string.split("token=")[-1]
+            query_params = parse_qs(raw_query_string)
+            token_list = query_params.get("token", [])
+            if not token_list:
+                await self.close()
+                return
+
+            token = token_list[0]
             access_token = AccessToken(token)
             user = await self.get_user(access_token["user_id"])
 
-            if user is None or user.user_role != "seller":
+            if user is None or getattr(user, "user_role", None) != "seller":
                 await self.close()
                 return
 

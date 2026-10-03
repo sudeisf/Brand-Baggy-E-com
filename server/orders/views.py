@@ -1,4 +1,4 @@
-from jsonschema import ValidationError
+from rest_framework.exceptions import ValidationError
 
 from payment.models import Payment
 from  . models import Order , OrderItem, ShippingInfo
@@ -60,7 +60,7 @@ class CreateOrderAPIView(APIView):
             variant = None
             if item.size:
                 try:
-                    variant = ProductVariants.objects.get(product=product, size__name=item.size)
+                    variant = ProductVariants.objects.select_for_update().get(product=product, size__name=item.size)
                     # Verify stock
                     if variant.stock < item.quantity:
                         raise ValidationError(
@@ -214,6 +214,14 @@ class PaymentAndOrderStatusUpdate(APIView):
 
         try:
             order = Order.objects.get(id=order_id)
+
+            # Ensure the order contains products belonging to the requesting seller
+            if not order.items.filter(product__seller=request.user).exists():
+                return Response(
+                    {"detail": "Unauthorized: Order does not contain products from your store."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
             updates = {}
 
             with transaction.atomic():
@@ -363,34 +371,36 @@ from django.db.models import Sum, Q, Count
 class CustomerListAPIView(APIView):
     permission_classes = [IsAuthenticated, IsSeller]
 
-    def get(self, request):
-        # Subquery for latest registered user's order
-        latest_order = Order.objects.filter(user=OuterRef('pk')).order_by('-created_at')
-        country_subquery = Order.objects.filter(user=OuterRef('pk')).order_by('-created_at').values('shipping_info__country')[:1]
-        city_subquery = Order.objects.filter(user=OuterRef('pk')).order_by('-created_at').values('shipping_info__city')[:1]
+        seller = request.user
+        # Subquery for latest registered user's order with this seller
+        latest_order = Order.objects.filter(user=OuterRef('pk'), items__product__seller=seller).order_by('-created_at')
+        country_subquery = latest_order.values('shipping_info__country')[:1]
+        city_subquery = latest_order.values('shipping_info__city')[:1]
 
-        # Registered customers
+        # Registered customers of this seller
         registered_customers = (
         CustomUser.objects
-            .filter(orders__isnull=False)
+            .filter(orders__items__product__seller=seller)
+            .distinct()
             .annotate(
                 name=Coalesce(F("first_name"), V("")),
                 annotated_email=F("email"),
                 is_registered=V(True, output_field=BooleanField()),
-                order_count=Count("orders"),
-                total_spent=Sum("orders__total_price"),
-                last_order_date=Max("orders__created_at"),
+                order_count=Count("orders", filter=Q(orders__items__product__seller=seller), distinct=True),
+                total_spent=Sum("orders__total_price", filter=Q(orders__items__product__seller=seller)),
+                last_order_date=Max("orders__created_at", filter=Q(orders__items__product__seller=seller)),
                 country=Subquery(country_subquery),
                 city=Subquery(city_subquery),
                 main_image=F("profile_url"),
             )
             .values("name", "annotated_email", "is_registered", "order_count", "total_spent", "last_order_date", "country", "city", "main_image")
         )
-        # Guest customers (grouped by guest_email)
+        # Guest customers (grouped by guest_email) for this seller
         guest_orders = (
             Order.objects
-            .filter(user__isnull=True)
+            .filter(user__isnull=True, items__product__seller=seller)
             .exclude(guest_email__isnull=True)
+            .distinct()
             .order_by('-created_at')
         )
 
@@ -564,7 +574,7 @@ class SellerAnalyticsAPIView(APIView):
             ).select_related('product', 'order')
 
             total_income = Order.objects.filter(
-                items__pruoduct__seller=seller,
+                items__product__seller=seller,
                 created_at__gte=start_date,
                 created_at__lte=end_date,
             ).distinct().aggregate(total_income=Sum('total_price'))['total_income'] or Decimal('0')

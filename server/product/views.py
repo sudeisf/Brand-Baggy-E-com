@@ -128,12 +128,8 @@ class ProductReviewListCreateView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        product = self.kwargs['product_id']
-        return ProductReview.objects.get_or_create(user = self.request.user , product=product)
-    
-    def perform_create(self ,serializer):
-        product = get_object_or_404(Product , id=self.kwargs['product_id'])
-        serializer.save(user=self.request.user , product= Product)
+        product_id = self.kwargs['product_id']
+        return ProductReview.objects.filter(product_id=product_id).select_related('user')
 
 class ProductCreateAPIView(generics.CreateAPIView):
     queryset = Product.objects.all()

@@ -25,6 +25,7 @@ type AuthState = {
     isLoading: boolean;
     error: string | Record<string, string[]> | null;
     otpEmail : string | null;
+    resetToken: string | null;
     _hasHydrated: boolean;
     setHasHydrated: (state: boolean) => void;
     login: (email: string, password: string) => Promise<{ error?: string ,  success? : boolean , user?:User } | void>;
@@ -85,6 +86,7 @@ export const useAuthStore = create<AuthState>()(
                 isLoading : false,
                 error :null,
                 otpEmail:null,
+                resetToken: null,
                 _hasHydrated: false,
                 setHasHydrated: (state) => set({ _hasHydrated: state }),
                 login: async (email , password) => {
@@ -270,7 +272,8 @@ export const useAuthStore = create<AuthState>()(
                         set({
                             isLoading: false,
                             error: null,
-                            otpEmail: otpEmail
+                            otpEmail: otpEmail,
+                            resetToken: response.data.reset_token || null
                         });
                         return {
                             success: true,
@@ -313,19 +316,22 @@ export const useAuthStore = create<AuthState>()(
                     }
                 },
                 newPassword : async (password , confirm_password) => {
-                    const {otpEmail} = get();
-                    if (!otpEmail) {
+                    const {otpEmail, resetToken} = get();
+                    if (!otpEmail || !resetToken) {
                         set({ 
                             isLoading: false,
-                            error: "No email associated with this OTP request" 
+                            error: "No verified session found. Please verify your OTP again." 
                         });
-                        console.log("No email associated with this OTP request");
+                        return {
+                            error: "No verified session found. Please verify your OTP again."
+                        };
                     }
                     
                     try{
                         set({isLoading: true, error: null});
                         const response = await api.post('accounts/reset-password/', {
                             email: otpEmail,
+                            reset_token: resetToken,
                             new_password: password,
                             confirm_password: confirm_password
                             },
@@ -335,7 +341,8 @@ export const useAuthStore = create<AuthState>()(
                         set({
                             isLoading: false,
                             error: null,
-                            otpEmail: null
+                            otpEmail: null,
+                            resetToken: null
                         });
                         return {
                             success: true,  

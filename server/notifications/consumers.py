@@ -10,20 +10,22 @@ class SellerNotificationConsumer(AsyncJsonWebsocketConsumer):
       
       async def connect(self):
             from rest_framework_simplejwt.tokens import AccessToken
+            from urllib.parse import parse_qs
 
             try:
                   raw_query_string = self.scope["query_string"].decode()
-                  logger.info(f"Query string: {raw_query_string}")
-                  token = raw_query_string.split("token=")[-1]
+                  query_params = parse_qs(raw_query_string)
+                  token_list = query_params.get("token", [])
+                  if not token_list:
+                        await self.close()
+                        return
 
+                  token = token_list[0]
                   access_token = AccessToken(token)
-                  logger.info(f"Decoded token: {access_token}")
 
                   user = await self.get_user(access_token["user_id"])
-                  logger.info(f"User fetched: {user}")
-
-                  if user.user_role != "seller":
-                        logger.warning("REJECTING - Not a seller")
+                  if user is None or getattr(user, "user_role", None) != "seller":
+                        logger.warning("REJECTING - Not an authenticated seller")
                         await self.close()
                         return
 

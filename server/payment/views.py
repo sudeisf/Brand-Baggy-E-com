@@ -68,7 +68,7 @@ class PayPalPaymentAPIView(APIView):
         if serializer.is_valid():
             order_id = serializer.validated_data['order_id']
             try:
-                order = Order.objects.get(id=order_id)
+                order = Order.objects.get(id=order_id, user=request.user)
 
                 try:
                     payment = Payment.objects.get(order=order)
@@ -163,7 +163,7 @@ class PayPalCaptureAPIView(APIView):
                 capture_data = capture_response.json()
 
                 try:
-                    db_payment = Payment.objects.get(transaction_id=paypal_payment_id)
+                    db_payment = Payment.objects.get(transaction_id=paypal_payment_id, order__user=request.user)
                     db_payment.status = Payment.Status.COMPLETED
                     db_payment.provider_status = capture_data
                     db_payment.save()
@@ -206,7 +206,19 @@ def stripe_webhook_view(request):
         return HttpResponse(status=400)
 
     if event["type"] == "payment_intent.succeeded":
-        print(" Payment received!")
+        payment_intent = event["data"]["object"]
+        intent_id = payment_intent.get("id")
+        try:
+            payment = Payment.objects.get(transaction_id=intent_id)
+            payment.status = Payment.Status.COMPLETED
+            payment.provider_status = payment_intent
+            payment.save()
+
+            order = payment.order
+            order.status = Order.OrderStatus.PAID
+            order.save()
+        except Payment.DoesNotExist:
+            pass
 
     return HttpResponse(status=200)
 
@@ -218,7 +230,7 @@ class StripeCreateOrderAPIView(APIView):
         if serializer.is_valid():
             order_id = serializer.validated_data['order_id']
             try:
-                order = Order.objects.get(id=order_id)
+                order = Order.objects.get(id=order_id, user=request.user)
 
                 if hasattr(order, "payment"):
                     return Response({'error': 'Payment already exists'}, status=400)
@@ -261,7 +273,7 @@ class StripeCaptureAPIView(APIView):
             payment_intent = stripe.PaymentIntent.capture(payment_intent_id)
 
             try:
-                db_payment = Payment.objects.get(transaction_id=payment_intent_id)
+                db_payment = Payment.objects.get(transaction_id=payment_intent_id, order__user=request.user)
                 db_payment.status = Payment.Status.COMPLETED
                 db_payment.provider_status = payment_intent
                 db_payment.save()
@@ -291,10 +303,8 @@ class StripePayAndCaptureAPIView(APIView):
     def update_failed_payment(self, payment, status_code, error):
         """Update existing payment record with failed status."""
         if payment.status == Payment.Status.FAILED:
-            print(f"[DEBUG] Payment already marked as failed for order {payment.order.id}")
             return
 
-        print(f"[DEBUG] Updating failed payment for order {payment.order.id} | reason: {error}")
         payment.method = Payment.Method.STRIPE
         payment.status = Payment.Status.FAILED
         payment.provider_status = status_code
@@ -304,14 +314,12 @@ class StripePayAndCaptureAPIView(APIView):
     def post(self, request):
         serializer = PaymentRequestSerializer(data=request.data)
         if not serializer.is_valid():
-            print("[DEBUG] Invalid serializer:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         order_id = serializer.validated_data['order_id']
-        print(f"[DEBUG] Processing payment for order ID: {order_id}")
 
         try:
-            order = Order.objects.get(id=order_id)
+            order = Order.objects.get(id=order_id, user=request.user)
             print(f"[DEBUG] Found order: {order.id}, total price: {order.total_price}")
 
             try:

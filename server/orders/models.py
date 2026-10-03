@@ -78,7 +78,9 @@ class OrderItem(models.Model):
 
     
     def __str__(self):
-        return f"{self.order.user.username} - {self.product.name}"
+        user = self.order.user.username if self.order and self.order.user else "Guest"
+        product_name = self.product.name if self.product else "Deleted Product"
+        return f"{user} - {product_name}"
 
 
 

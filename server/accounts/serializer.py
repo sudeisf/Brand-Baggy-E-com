@@ -176,8 +176,7 @@ class Email_varify_OTP_generate_serializer(serializers.Serializer):
     
     
 class OTP_verify_serializer(serializers.Serializer):
-
-    email= serializers.EmailField()
+    email = serializers.EmailField()
     otp = serializers.CharField()
 
     def validate_email(self, email):
@@ -190,15 +189,11 @@ class OTP_verify_serializer(serializers.Serializer):
         received_email = data['email'].lower() 
 
         try:
-            # Get the most recent OTP for this email
+            # Get the most recent valid OTP for this email
             otp_obj = OTP.objects.filter(email__iexact=received_email).order_by('-created_at').first()
             
             if not otp_obj:
                 raise serializers.ValidationError("OTP not found")
-
-            # Debug prints
-            print(f'Stored OTP: {otp_obj.otp}')
-            print(f'Received OTP: {received_otp}')
 
             # Compare OTPs
             if str(otp_obj.otp) != str(received_otp):
@@ -215,40 +210,42 @@ class OTP_verify_serializer(serializers.Serializer):
             raise serializers.ValidationError("Invalid OTP signature")
         
     def create(self, validated_data):
-            email = validated_data['email']
+        email = validated_data['email']
 
-            #remove the old ones 
-            OTP.objects.filter(
-                email__iexact = email,
-                expires_at__lt = timezone.now()
-            ).delete()
-            
-            try:
-                user = User.objects.get(email=email)
-                otp_obj = OTP.objects.get(email=email)
-
+        # Remove expired OTPs
+        OTP.objects.filter(
+            email__iexact=email,
+            expires_at__lt=timezone.now()
+        ).delete()
+        
+        try:
+            user = User.objects.get(email=email)
+            otp_obj = OTP.objects.filter(email=email, is_used=False).order_by('-created_at').first()
+            if otp_obj:
                 otp_obj.is_used = True
-                user.is_verified = True
-
-                user.save()
                 otp_obj.save()
 
-            except User.DoesNotExist:
-                raise serializers.ValidationError("User not found")
-            
-            except OTP.DoesNotExist:
-                raise serializers.ValidationError("OTP not found")
-            
-            
+            user.is_verified = True
+            user.save()
+
+            # Generate a cryptographically signed reset token valid for 15 minutes
+            signer = signing.TimestampSigner(salt='password-reset')
+            reset_token = signer.sign(email)
+
             return {
                 'message': 'OTP verified successfully',
                 'email': email,
+                'reset_token': reset_token,
                 'success': True
             }
-            
+
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User not found")
+
 
 class reset_password_serializer(serializers.Serializer):
     email = serializers.EmailField()
+    reset_token = serializers.CharField(required=True)
     new_password = serializers.CharField()
     confirm_password = serializers.CharField()
 
@@ -267,6 +264,19 @@ class reset_password_serializer(serializers.Serializer):
     def validate(self, attrs):
         if attrs['new_password'] != attrs['confirm_password']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
+        
+        email = attrs.get('email')
+        reset_token = attrs.get('reset_token')
+        try:
+            signer = signing.TimestampSigner(salt='password-reset')
+            signed_email = signer.unsign(reset_token, max_age=900)  # 15 minutes
+            if signed_email.lower() != email.lower():
+                raise serializers.ValidationError({"reset_token": "Reset token does not match email."})
+        except signing.SignatureExpired:
+            raise serializers.ValidationError({"reset_token": "Reset token has expired. Please request a new OTP."})
+        except signing.BadSignature:
+            raise serializers.ValidationError({"reset_token": "Invalid reset token."})
+
         return attrs
     
     def create(self, validated_data):

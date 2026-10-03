@@ -21,19 +21,23 @@ export const useNotificationWs = (token : string | null ) =>{
                 }
       )
       useEffect(() => {
-            if (lastMessage) {
-              const wsData = JSON.parse(lastMessage.data);
-              if (wsData.type === "notification") {
-                const data = wsData.data;
-                addNotification({
-                  id: data.id,
-                  title: data.title || "",
-                  message: data.message,
-                  timestamp: data.created_at,
-                  is_read: data.is_read,
-                  type: data.type
-                });
-              }
+        if (lastMessage?.data) {
+          try {
+            const wsData = JSON.parse(lastMessage.data);
+            if (wsData.type === "notification" && wsData.data) {
+              const data = wsData.data;
+              addNotification({
+                id: data.id,
+                title: data.title || "",
+                message: data.message,
+                timestamp: data.created_at,
+                is_read: data.is_read,
+                type: data.type
+              });
             }
-          }, [lastMessage])
+          } catch (err) {
+            console.error("Failed to parse notification WebSocket message:", err);
+          }
+        }
+      }, [lastMessage, addNotification]);
 } 

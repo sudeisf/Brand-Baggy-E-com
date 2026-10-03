@@ -9,8 +9,13 @@ export function middleware(request:NextRequest){
             '/orders',
             '/profile',
             '/dashboard',
+            '/products-dashboard',
+            '/customer',
+            '/settings',
+            '/profile-detail',
             '/cart/checkout',
-            '/(seller)/orders'
+            '/payment',
+            '/shipping'
           ];
 
       const isProtected = protectedRoutes.some(path =>
@@ -29,9 +34,14 @@ export const config = {
       matcher: [
         '/checkout/:path*',
         '/orders/:path*',
-        '/profile',
         '/profile/:path*',
         '/dashboard/:path*',
+        '/products-dashboard/:path*',
+        '/customer/:path*',
+        '/settings/:path*',
+        '/profile-detail/:path*',
         '/cart/checkout',
+        '/payment/:path*',
+        '/shipping/:path*',
       ],
     };

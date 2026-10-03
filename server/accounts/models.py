@@ -78,7 +78,7 @@ class OTP(models.Model):
 
     @property
     def is_valid(self):
-        return not self.is_used and self.expires_at < timezone.now()
+        return not self.is_used and self.expires_at >= timezone.now()
 
 
 

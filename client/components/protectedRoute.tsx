@@ -34,9 +34,9 @@ export default function ProtectedRoute({children , allowedRoles} : ProtectedRout
         if (allowedRoles && user && !allowedRoles.includes(user.user_role)) {
         // Role-based redirection
         const redirectPath = user.user_role === "buyer" 
-            ? "/home" 
+            ? "/" 
             : user.user_role === "seller" 
-            ? "/seller-dashboard" 
+            ? "/dashboard" 
             : "/admin";
         router.push(redirectPath);
         }

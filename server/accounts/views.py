@@ -28,8 +28,8 @@ class RegisterView(generics.CreateAPIView):
      def create(self, request, *args, **kwargs):
 
           role = request.data.get('role', CustomUser.Role.BUYER)  
-          if role not in [CustomUser.Role.SELLER, CustomUser.Role.BUYER, CustomUser.Role.ADMIN]:
-               return Response({"error": "Invalid role specified."}, status=status.HTTP_400_BAD_REQUEST)
+          if role not in [CustomUser.Role.SELLER, CustomUser.Role.BUYER]:
+               return Response({"error": "Invalid role specified. Only Buyer and Seller accounts can be created."}, status=status.HTTP_400_BAD_REQUEST)
           
           # Create a mutable copy of request.data
           data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
