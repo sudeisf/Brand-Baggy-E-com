@@ -35,7 +35,7 @@ export default function Orders(){
       window.URL.revokeObjectURL(url);
     }; 
     return (
-        <div className="w-[1250px] mx-auto min-h-svh my-scrollable" style={{overflow: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+        <div className="w-full max-w-[1250px] mx-auto min-h-svh px-2 sm:px-4 my-scrollable" style={{overflow: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
             <style>{`
                 .my-scrollable::-webkit-scrollbar {
                     display: none;

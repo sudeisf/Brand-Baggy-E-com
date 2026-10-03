@@ -118,7 +118,7 @@ export default function ProductListPage({initialProducts}:props) {
 
   return (
     <HydrationBoundary state={{ queries: [{ queryKey: ['products'], state: { data: initialProducts } }] }} >
-    <div className="w-[1250px] bg-white rounded-md mb-4 mx-auto min-h-[87vh]">
+    <div className="w-full max-w-[1250px] px-2 sm:px-4 bg-white rounded-md mb-4 mx-auto min-h-[87vh]">
       <div className="p-4 rounded-t-md border-b-0 mb-4">
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold font-roboto text-[#331d67]/90">Products</h1>

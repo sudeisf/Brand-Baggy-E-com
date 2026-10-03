@@ -126,12 +126,12 @@ export default function Header() {
 
         <div className="flex items-center gap-2 sm:gap-4">
           <div className="bg-white rounded-full border border-gray-300 w-10 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
-            {mounted && isAuthenticated && user?.user_role === "buyer" ? (
-              <Link href="/profile" className="flex items-center justify-center w-full h-full">
+            {mounted && isAuthenticated ? (
+              <Link href={user?.user_role === "seller" ? "/dashboard" : "/profile"} className="flex items-center justify-center w-full h-full">
                 <Avatar className="w-10 h-10">
                   <AvatarImage src={user?.profile_url || undefined} className="object-center object-cover" />
                   <AvatarFallback>
-                    <p className="font-roboto capitalize font-semibold text-gray-700"> {user?.username[0]}</p>
+                    <p className="font-roboto capitalize font-semibold text-gray-700"> {user?.username ? user.username[0] : "U"}</p>
                   </AvatarFallback>
                 </Avatar>
               </Link>
@@ -175,14 +175,10 @@ export default function Header() {
               </div>
             </div>
             <div className="sm:hidden px-4 py-2">
-              <div className="flex items-center gap-2 bg-gray-100 rounded-md px-3 py-1.5">
-                <Search className="text-black w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  className="outline-none bg-transparent w-full text-sm"
-                />
-              </div>
+              <SearchBar
+                className="flex w-full"
+                onSelectProduct={() => setMobileMenuOpen(false)}
+              />
             </div>
           </div>
         </div>

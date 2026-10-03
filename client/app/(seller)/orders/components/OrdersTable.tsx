@@ -88,7 +88,7 @@ export default function OrdersTable() {
   };
 
     return (
-        <div className="w-[1250px] bg-white  rounded-md mb-4  mt-4 mx-auto">
+        <div className="w-full max-w-[1250px] bg-white rounded-md mb-4 mt-4 mx-auto">
           <div className="p-4  rounded-t-md border-b-0">
             <div className="flex justify-between items-center py-4  rounded-md">
                     <div className="hidden sm:flex w-[10rem] md:w-[20rem] bg-white items-center justify-start gap-2 rounded-sm px-3 py-1.5 border-1">

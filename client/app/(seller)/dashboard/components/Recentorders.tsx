@@ -289,7 +289,7 @@ export default function RecentOrdersTable() {
   }
 
     return (
-        <div className="w-[1250px] bg-white  rounded-md mb-4  mt-8 mx-auto">
+        <div className="w-full max-w-[1250px] bg-white rounded-md mb-4 mt-8 mx-auto">
           <div className=" p-4 rounded-t-md border-b-0 mb-4">
             <div>
                 <h1 className="font-roboto font-medium text-2xl text-[#331d67]">Recent Orders</h1>

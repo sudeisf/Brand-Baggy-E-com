@@ -77,7 +77,7 @@ export default function Customers() {
   };
 
   return (
-    <div className="w-[1250px] bg-white rounded-md mb-4 mx-auto">
+    <div className="w-full max-w-[1250px] bg-white rounded-md mb-4 mx-auto px-2 sm:px-4">
       <div className="p-4 rounded-t-md border-b mb-4">
         <div className="flex justify-between items-center">
           <div>

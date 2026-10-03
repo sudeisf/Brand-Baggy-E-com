@@ -1,9 +1,9 @@
 "use client"
 
 import api from "@/lib/axios";
-import { Search } from "lucide-react"
+import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface ProductSearchResult {
   id: number;
@@ -20,96 +20,112 @@ interface PaginatedSearchResponse {
   results: ProductSearchResult[];
 }
 
-type ApiError = {
-  message: string;
-  [key: string]: any;
-};
+interface SearchBarProps {
+  className?: string;
+  onSelectProduct?: () => void;
+}
 
-export default function SearchBar() {
+export default function SearchBar({ className, onSelectProduct }: SearchBarProps) {
   const [query, setQuery] = useState<string>('');
   const [results, setResults] = useState<ProductSearchResult[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  const debounce = <T extends (...args: any[]) => void>(func: T, delay: number) => {
-    let timer: NodeJS.Timeout;
-    const debounced = (...args: Parameters<T>) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => func(...args), delay);
-    };
-    debounced.cancel = () => clearTimeout(timer);
-    return debounced;
-  };
-
-  const searchProducts = async (searchQuery: string): Promise<void> => {
-    if (!searchQuery.trim()) {
-      setResults([]);
-      return;
-    }
-    
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const response = await api.get<PaginatedSearchResponse>('/product/search-product/', {
-        params: { search: searchQuery } 
-      });
-      setResults(response.data.results);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('An unknown error occurred');
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
       }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const debouncedSearch = debounce(searchProducts, 300);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
-    debouncedSearch(query);
-    // Cleanup function to cancel debounce on unmount
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setResults([]);
+      setIsLoading(false);
+      setError(null);
+      setIsOpen(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    setIsOpen(true);
+
+    const timer = setTimeout(async () => {
+      try {
+        const response = await api.get<PaginatedSearchResponse>('/product/search-product/', {
+          params: { search: trimmed }
+        });
+        setResults(response.data.results || []);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }, 300);
+
     return () => {
-      debouncedSearch.cancel?.();
+      clearTimeout(timer);
     };
   }, [query]);
 
   const handleProductClick = (productId: number) => {
+    setIsOpen(false);
+    onSelectProduct?.();
     router.push(`/products/${productId}`);
   };
 
   return (
-    <div className="relative hidden sm:flex w-[10rem] md:w-[15rem] lg:w-[20rem] bg-white items-center justify-start gap-2 rounded-sm px-3 py-1.5 border-1">
-      <Search className="text-black w-4 h-4 md:w-5 md:h-5" />
+    <div
+      ref={containerRef}
+      className={`relative bg-white items-center justify-start gap-2 rounded-sm px-3 py-1.5 border ${
+        className ?? "hidden sm:flex w-[10rem] md:w-[15rem] lg:w-[20rem]"
+      }`}
+    >
+      <Search className="text-[#331d67] w-4 h-4 md:w-5 md:h-5 shrink-0" />
       <input 
         type="text" 
         value={query}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+        onFocus={() => {
+          if (results.length > 0 || isLoading) setIsOpen(true);
+        }}
         placeholder="Search..." 
-        className="rounded-md outline-none bg-white w-full text-sm md:text-base" 
+        className="rounded-md outline-none bg-white w-full text-sm md:text-base text-[#331d67]" 
       />
 
-      {isLoading && (
-        <div className="absolute top-full left-0 right-0 bg-white shadow-md py-2 px-4 text-sm">
+      {isOpen && isLoading && (
+        <div className="absolute top-full left-0 right-0 bg-white shadow-md py-2 px-4 text-sm z-50 text-gray-500 rounded-b-md">
           Searching...
         </div>
       )}
       
-      {error && (
-        <div className="absolute top-full left-0 right-0 bg-red-50 text-red-600 shadow-md py-2 px-4 text-sm">
+      {isOpen && !isLoading && error && (
+        <div className="absolute top-full left-0 right-0 bg-red-50 text-red-600 shadow-md py-2 px-4 text-sm z-50 rounded-b-md">
           {error}
         </div>
       )}
       
-      {results.length > 0 && (
-        <div className="absolute top-full left-0 right-0 bg-white shadow-md z-50 max-h-80 overflow-y-auto">
+      {isOpen && !isLoading && !error && results.length > 0 && (
+        <div className="absolute top-full left-0 right-0 bg-white shadow-md z-50 max-h-80 overflow-y-auto rounded-b-md border-t">
           {results.map((product: ProductSearchResult) => (
             <div 
               key={product.id} 
-              className="p-3 hover:bg-gray-50 cursor-pointer flex items-center gap-3 border-b"
+              className="p-3 hover:bg-gray-50 cursor-pointer flex items-center gap-3 border-b last:border-b-0"
               onClick={() => handleProductClick(product.id)}
             >
               {product.main_image && (
@@ -120,11 +136,17 @@ export default function SearchBar() {
                 />
               )}
               <div>
-                <h3 className="font-medium">{product.name}</h3>
-                <p className="text-gray-600">${product.price}</p>
+                <h3 className="font-medium text-sm text-[#331d67]">{product.name}</h3>
+                <p className="text-gray-600 text-xs">${product.price}</p>
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {isOpen && !isLoading && !error && query.trim() && results.length === 0 && (
+        <div className="absolute top-full left-0 right-0 bg-white shadow-md py-3 px-4 text-sm text-gray-500 z-50 rounded-b-md">
+          No products found for "{query.trim()}"
         </div>
       )}
     </div>

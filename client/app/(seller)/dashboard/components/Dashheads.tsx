@@ -13,8 +13,19 @@ import { useAnalystics } from "@/hooks/useAnalaytics";
     const data = useAnalyticsStore(s=>s.metrics)
     return (
       <div className="flex flex-col gap-8 bg-white ">
-      <div className="flex gap-4 px-4">
-        {data.length === 0 ? <div>No analytics data</div> : data.map((item, index) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4">
+        {data.length === 0 ? (
+          [1, 2, 3].map((_, i) => (
+            <div
+              key={i}
+              className="bg-white rounded-lg h-[200px] p-5 border relative animate-pulse flex flex-col justify-between"
+            >
+              <div className="h-4 bg-gray-200 rounded w-1/3" />
+              <div className="h-8 bg-gray-200 rounded w-1/2" />
+              <div className="h-4 bg-gray-200 rounded w-2/3" />
+            </div>
+          ))
+        ) : data.map((item, index) => (
           <div 
             key={index}
             className="bg-white rounded-lg h-[200px] flex-1 flex justify-between p-5 items-baseline  border relative"
@@ -48,7 +59,7 @@ import { useAnalystics } from "@/hooks/useAnalaytics";
           </div>
         ))}
       </div>
-        <div className="flex w-full px-4 gap-4">
+        <div className="flex flex-col lg:flex-row w-full px-4 gap-4">
           <RevenueChart />
           <Recentactivity/>
         </div>
